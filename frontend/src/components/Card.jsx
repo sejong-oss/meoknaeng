@@ -3,8 +3,8 @@ import { Chip } from "./Chip.jsx";
 
 const cardVariants = {
     default: "bg-white border-gray-200",
-    hero:    "bg-primary-100 border-transparent",
-    muted:   "bg-gray-50 border-transparent",
+    hero: "bg-primary-100 border-transparent",
+    muted: "bg-gray-50 border-transparent",
 };
 
 const PhotoPlaceholder = ({ className = "" }) => (

@@ -1,12 +1,12 @@
 const variants = {
-    brand:        "bg-primary-500 text-white",
+    brand: "bg-primary-500 text-white",
     "brand-soft": "bg-primary-100 text-primary-800",
-    neutral:      "bg-gray-100 text-gray-700",
-    outline:      "bg-white text-gray-600 border border-gray-200",
-    dashed:       "bg-white text-gray-400 border border-dashed border-gray-300",
-    ink:          "bg-gray-900 text-white",
-    success:      "bg-green-100 text-green-600",
-    error:        "bg-red-100 text-red-600",
+    neutral: "bg-gray-100 text-gray-700",
+    outline: "bg-white text-gray-600 border border-gray-200",
+    dashed: "bg-white text-gray-400 border border-dashed border-gray-300",
+    ink: "bg-gray-900 text-white",
+    success: "bg-green-100 text-green-600",
+    error: "bg-red-100 text-red-600",
 };
 
 export function Chip({ children, variant = "neutral", onRemove, onClick, className = "" }) {

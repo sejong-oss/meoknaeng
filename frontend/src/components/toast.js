@@ -4,8 +4,8 @@ export const toast = Object.assign(
     (msg, opts) => sonner(msg, opts),
     {
         success: (msg, opts) => sonner.success(msg, opts),
-        error:   (msg, opts) => sonner.error(msg, opts),
-        info:    (msg, opts) => sonner.info(msg, opts),
+        error: (msg, opts) => sonner.error(msg, opts),
+        info: (msg, opts) => sonner.info(msg, opts),
         warning: (msg, opts) => sonner.warning(msg, opts),
         loading: (msg, opts) => sonner.loading(msg, opts),
         dismiss: (id) => sonner.dismiss(id),

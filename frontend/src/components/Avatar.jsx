@@ -6,7 +6,7 @@ const sizes = {
 
 const colors = {
     primary: "bg-primary-100 text-primary-700",
-    neutral:  "bg-gray-100 text-gray-600",
+    neutral: "bg-gray-100 text-gray-600",
 };
 
 export function Avatar({ src, name, size = "md", color = "primary", badge, className = "" }) {
