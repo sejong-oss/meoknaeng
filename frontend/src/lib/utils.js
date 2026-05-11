@@ -1,4 +1,4 @@
-export const EMPTY_EDGE = { d: "", clipY: 0, clipH: 0, x1: 0, y1: 0, x2: 0, y2: 0 };
+export const EMPTY_EDGE = { d: "", x1: 0, y1: 0, x2: 0, y2: 0 };
 
 export function computeSvgPaths(containerRef, stepRefs) {
     const cRect = containerRef.current?.getBoundingClientRect();
@@ -20,7 +20,7 @@ export function computeSvgPaths(containerRef, stepRefs) {
 
     const INTO = 66;
     return {
-        edge1: { d: curve(s1.cx, s1.bottom, s2.cx, s2.top + INTO), clipY: s1.bottom, clipH: s2.top + INTO - s1.bottom, x1: s1.cx, y1: s1.bottom, x2: s2.cx, y2: s2.top + INTO },
-        edge2: { d: curve(s2.cx, s2.bottom, s3.cx, s3.top + INTO), clipY: s2.bottom, clipH: s3.top + INTO - s2.bottom, x1: s2.cx, y1: s2.bottom, x2: s3.cx, y2: s3.top + INTO },
+        edge1: { d: curve(s1.cx, s1.bottom, s2.cx, s2.top + INTO), x1: s1.cx, y1: s1.bottom, x2: s2.cx, y2: s2.top + INTO },
+        edge2: { d: curve(s2.cx, s2.bottom, s3.cx, s3.top + INTO), x1: s2.cx, y1: s2.bottom, x2: s3.cx, y2: s3.top + INTO },
     };
 }

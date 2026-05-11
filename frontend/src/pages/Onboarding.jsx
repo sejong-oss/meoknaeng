@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Button, Chip, Container } from "@/components/index.js";
 import { SITE_NAME } from "@/lib/constants.js";
@@ -77,6 +77,10 @@ const StepBadge = ({ n, label }) => (
 );
 
 const FlowPreview = () => {
+    const uid = useId();
+    const g1 = `${uid}-e1`;
+    const g2 = `${uid}-e2`;
+
     const containerRef = useRef(null);
     const step1Ref = useRef(null);
     const step2Ref = useRef(null);
@@ -100,30 +104,14 @@ const FlowPreview = () => {
 
             <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: "visible" }}>
                 <defs>
-                    <clipPath id="edge1-clip">
-                        <motion.rect
-                            x={-1000} y={paths.edge1.clipY} width={2000}
-                            initial={{ height: 0 }}
-                            animate={{ height: on(2) ? paths.edge1.clipH : 0 }}
-                            transition={on(2) ? { duration: 0.6, ease: "easeInOut" } : FADE_OUT}
-                        />
-                    </clipPath>
-                    <clipPath id="edge2-clip">
-                        <motion.rect
-                            x={-1000} y={paths.edge2.clipY} width={2000}
-                            initial={{ height: 0 }}
-                            animate={{ height: on(4) ? paths.edge2.clipH : 0 }}
-                            transition={on(4) ? { duration: 0.6, ease: "easeInOut" } : FADE_OUT}
-                        />
-                    </clipPath>
-                    <linearGradient id="edge1-fade" gradientUnits="userSpaceOnUse"
+                    <linearGradient id={g1} gradientUnits="userSpaceOnUse"
                         x1={paths.edge1.x1} y1={paths.edge1.y1}
                         x2={paths.edge1.x2} y2={paths.edge1.y2}>
                         <stop offset="0%" stopColor="#D1D5DB" />
                         <stop offset="72%" stopColor="#D1D5DB" />
                         <stop offset="100%" stopColor="#D1D5DB" stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="edge2-fade" gradientUnits="userSpaceOnUse"
+                    <linearGradient id={g2} gradientUnits="userSpaceOnUse"
                         x1={paths.edge2.x1} y1={paths.edge2.y1}
                         x2={paths.edge2.x2} y2={paths.edge2.y2}>
                         <stop offset="0%" stopColor="#D1D5DB" />
@@ -131,13 +119,19 @@ const FlowPreview = () => {
                         <stop offset="100%" stopColor="#D1D5DB" stopOpacity={0} />
                     </linearGradient>
                 </defs>
-                <path
-                    stroke="url(#edge1-fade)" strokeWidth={1.5} strokeDasharray="5 4" strokeLinecap="butt" fill="none"
-                    d={paths.edge1.d || "M 0,0"} clipPath="url(#edge1-clip)"
+                <motion.path
+                    stroke={`url(#${g1})`} strokeWidth={1.5} strokeDasharray="5 4" strokeLinecap="butt" fill="none"
+                    d={paths.edge1.d || "M 0,0"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: on(2) ? 1 : 0 }}
+                    transition={on(2) ? { duration: 0.6, ease: "easeInOut" } : FADE_OUT}
                 />
-                <path
-                    stroke="url(#edge2-fade)" strokeWidth={1.5} strokeDasharray="5 4" strokeLinecap="butt" fill="none"
-                    d={paths.edge2.d || "M 0,0"} clipPath="url(#edge2-clip)"
+                <motion.path
+                    stroke={`url(#${g2})`} strokeWidth={1.5} strokeDasharray="5 4" strokeLinecap="butt" fill="none"
+                    d={paths.edge2.d || "M 0,0"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: on(4) ? 1 : 0 }}
+                    transition={on(4) ? { duration: 0.6, ease: "easeInOut" } : FADE_OUT}
                 />
             </svg>
 
