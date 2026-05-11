@@ -33,8 +33,8 @@ export const WithContent = () => (
             </TabsList>
             <TabsContent value="recipe">
                 <div className="grid grid-cols-2 gap-4">
-                    <RecipeCard title="두부 간장조림" match={98} ingredients="양파 · 두부 · 간장" time="20분" difficulty="쉬움" />
-                    <RecipeCard title="된장찌개" match={76} ingredients="두부 · 대파 · 된장" time="30분" difficulty="보통" />
+                    <RecipeCard title="두부 계란말이" description="계란과 두부로 부드럽게 말아내는 반찬" time="15분" difficulty="쉬움" servings="1인분" />
+                    <RecipeCard title="두부김치" description="매콤한 김치에 담백한 두부를 곁들인 조합" time="12분" difficulty="쉬움" servings="2인분" />
                 </div>
             </TabsContent>
             <TabsContent value="feed">
@@ -60,8 +60,8 @@ export const LineVariant = () => (
             </TabsList>
             <TabsContent value="recipe">
                 <div className="grid grid-cols-2 gap-4">
-                    <RecipeCard title="두부 간장조림" match={98} ingredients="양파 · 두부 · 간장" time="20분" difficulty="쉬움" />
-                    <RecipeCard title="된장찌개" match={76} ingredients="두부 · 대파 · 된장" time="30분" difficulty="보통" />
+                    <RecipeCard title="두부 계란말이" description="계란과 두부로 부드럽게 말아내는 반찬" time="15분" difficulty="쉬움" servings="1인분" />
+                    <RecipeCard title="두부김치" description="매콤한 김치에 담백한 두부를 곁들인 조합" time="12분" difficulty="쉬움" servings="2인분" />
                 </div>
             </TabsContent>
             <TabsContent value="feed">

@@ -1,4 +1,4 @@
-import { Favorite, Chat } from "@carbon/icons-react";
+import { Favorite, Chat, SkillLevelBasic, Time, UserMultiple } from "@carbon/icons-react";
 import { Chip } from "@/components/Chip.jsx";
 
 const cardVariants = {
@@ -18,7 +18,7 @@ export function Card({ children, variant = "default", onClick, className = "" })
             className={[
                 "p-4 border rounded-card flex flex-col gap-2.5",
                 cardVariants[variant],
-                onClick ? "cursor-pointer hover:opacity-90 transition-opacity" : "",
+                onClick ? "cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-md" : "",
                 className,
             ].join(" ")}
         >
@@ -29,10 +29,10 @@ export function Card({ children, variant = "default", onClick, className = "" })
 
 export function RecipeCard({
     title,
-    match,
     time,
     difficulty,
     servings,
+    description,
     variant = "default",
     image,
     onClick,
@@ -45,17 +45,32 @@ export function RecipeCard({
                 : <PhotoPlaceholder className={variant === "hero" ? "h-40 from-primary-200 to-primary-300" : "h-32"} />
             }
             <div className="flex flex-col gap-1.5 items-start">
-                {variant === "hero"
-                    ? <Chip variant="brand">최선 조합</Chip>
-                    : match != null && <Chip variant="brand-soft">{match}% MATCH</Chip>
-                }
+                {variant === "hero" && <Chip variant="brand">최선 조합</Chip>}
                 <p className="text-base font-semibold text-gray-900">{title}</p>
+                {description && (
+                    <p className="line-clamp-2 text-sm leading-relaxed text-gray-600">{description}</p>
+                )}
             </div>
             {(time || difficulty || servings) && (
                 <div className="flex gap-1.5 flex-wrap">
-                    {time && <Chip variant="neutral">{time}</Chip>}
-                    {difficulty && <Chip variant="neutral">{difficulty}</Chip>}
-                    {servings && <Chip variant="neutral">{servings}</Chip>}
+                    {time && (
+                        <Chip variant="neutral">
+                            <Time size={12} />
+                            {time}
+                        </Chip>
+                    )}
+                    {difficulty && (
+                        <Chip variant="neutral">
+                            <SkillLevelBasic size={12} />
+                            {difficulty}
+                        </Chip>
+                    )}
+                    {servings && (
+                        <Chip variant="neutral">
+                            <UserMultiple size={12} />
+                            {servings}
+                        </Chip>
+                    )}
                 </div>
             )}
         </Card>
