@@ -61,13 +61,15 @@ export default function Recipes() {
         <div className="flex flex-col gap-6 py-4 md:py-6">
 
             <div className="flex items-center justify-between md:hidden">
-                <button
+                <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => navigate("/home")}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-700"
+                    className="-ml-3 text-gray-500 hover:text-gray-700"
                 >
                     <ArrowLeft size={16} />
                     재료 다시 입력
-                </button>
+                </Button>
                 <Button variant="ghost" size="sm">
                     <Renew size={14} />
                     다시 추천
