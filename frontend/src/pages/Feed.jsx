@@ -4,12 +4,12 @@ import { Search, Add, Close, Favorite, FavoriteFilled, Filter, Time, SkillLevelB
 import { Button, Chip, EmptyState, Avatar } from "@/components/index.js";
 
 const FEED_ITEMS = [
-    { id: 1, title: "된장찌개 황금레시피", time: "20분", category: "한식", difficulty: "쉬움", author: "집밥하는모카", likes: 312, tone: "soft" },
+    { id: 1, title: "된장찌개", time: "20분", category: "한식", difficulty: "쉬움", author: "집밥하는모카", likes: 312, tone: "soft" },
     { id: 2, title: "두부 스테이크", time: "20분", category: "한식", difficulty: "쉬움", author: "오늘의키친", likes: 187, tone: "dim" },
     { id: 3, title: "김치볶음밥", time: "20분", category: "한식", difficulty: "쉬움", author: "자취요리", likes: 94, tone: "soft" },
-    { id: 4, title: "계란말이 마스터", time: "20분", category: "한식", difficulty: "쉬움", author: "고동그라미", likes: 428, tone: "dim" },
-    { id: 5, title: "파스타 알리오", time: "25분", category: "양식", difficulty: "보통", author: "파스타러버", likes: 221, tone: "soft" },
-    { id: 6, title: "떡볶이 즉석", time: "15분", category: "한식", difficulty: "쉬움", author: "맵부심", likes: 156, tone: "dim" },
+    { id: 4, title: "계란말이", time: "20분", category: "한식", difficulty: "쉬움", author: "고동그라미", likes: 428, tone: "dim" },
+    { id: 5, title: "알리오올리오", time: "25분", category: "양식", difficulty: "보통", author: "파스타러버", likes: 221, tone: "soft" },
+    { id: 6, title: "떡볶이", time: "15분", category: "한식", difficulty: "쉬움", author: "맵부심", likes: 156, tone: "dim" },
     { id: 7, title: "오믈렛 브런치", time: "12분", category: "양식", difficulty: "쉬움", author: "브런치킹", likes: 98, tone: "soft" },
     { id: 8, title: "비빔국수", time: "10분", category: "한식", difficulty: "쉬움", author: "쿨하게쿡", likes: 267, tone: "dim" },
 ];
@@ -145,21 +145,26 @@ export default function Feed() {
         <div className="flex flex-col gap-4 pb-2">
 
             {/* 상단 타이틀 + 공유 버튼 (데스크탑) */}
-            <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold tracking-tight text-gray-900">공유 피드</h1>
-                <Button
-                    variant="primary"
-                    size="sm"
-                    className="hidden md:inline-flex"
-                    onClick={() => navigate("/feed/write")}
-                >
-                    <Add size={14} />
-                    레시피 공유
-                </Button>
+            <div className="flex items-end justify-between">
+                <div className="flex flex-col gap-1">
+<h1 className="text-3xl md:text-[42px] font-extrabold tracking-tight md:tracking-[-0.025em] text-gray-900 leading-tight md:leading-[1.05]">
+                        오늘의 <span className="text-primary-500">한 그릇</span>
+                    </h1>
+                </div>
+                <div className="hidden md:block">
+                    <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => navigate("/feed/write")}
+                    >
+                        <Add size={16} />
+                        레시피 공유
+                    </Button>
+                </div>
             </div>
 
             {/* 검색바 + 필터 버튼 */}
-            <div className="flex gap-2 items-start" ref={filterRef}>
+            <div className="flex gap-2 items-start max-w-3xl" ref={filterRef}>
                 <div className="relative flex-1">
                     <div className="flex items-center gap-2 px-3.5 py-3 rounded-input text-sm bg-gray-50 border border-gray-200 focus-within:border-primary-500 focus-within:bg-white transition-colors">
                         <Search size={16} className="text-gray-400 shrink-0" />
@@ -167,7 +172,7 @@ export default function Feed() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="레시피, 재료, 작성자 검색..."
-                            className="bg-transparent outline-none w-full text-gray-900 placeholder:text-gray-400 text-sm"
+                            className="bg-transparent outline-none w-full text-gray-900 placeholder:text-gray-500 text-sm"
                         />
                         {searchQuery && (
                             <button
@@ -270,6 +275,16 @@ export default function Feed() {
                     ))}
                 </div>
             )}
+
+            <Button
+                variant="primary"
+                size="md"
+                onClick={() => navigate("/feed/write")}
+                className="md:hidden fixed bottom-[5.625rem] right-4 rounded-full shadow-lg z-10"
+            >
+                <Add size={16} />
+                레시피 공유
+            </Button>
 
         </div>
     );
