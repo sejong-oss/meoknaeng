@@ -16,7 +16,7 @@ import {
     UserFollow,
     UserMultiple,
 } from "@carbon/icons-react";
-import { Avatar, Breadcrumb, Button, Card, Chip, EmptyState, Input, PhotoPlaceholder, RecipeCard } from "@/components/index.js";
+import { Avatar, Breadcrumb, Button, Card, Chip, EmptyState, Input, PhotoPlaceholder } from "@/components/index.js";
 
 const FEED_RECIPES = {
     "1": {
@@ -210,6 +210,51 @@ const CommentRow = ({ comment }) => (
     </div>
 );
 
+const RelatedRecipeRow = ({ recipe, onClick }) => {
+    const metaItems = [
+        { Icon: Time, value: recipe.time },
+        { Icon: Growth, value: recipe.difficulty },
+        { Icon: UserMultiple, value: recipe.servings },
+    ];
+
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className="group grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-stretch gap-3 border-b border-gray-200 p-3 text-left transition-colors last:border-b-0 hover:bg-gray-50"
+        >
+            <PhotoPlaceholder
+                label={recipe.title}
+                tone="soft"
+                showLabel={false}
+                className="aspect-square h-full rounded-btn"
+            />
+            <span className="flex min-w-0 flex-col">
+                <span className="block truncate text-sm font-extrabold text-gray-900 md:text-base">
+                    {recipe.title}
+                </span>
+                <span className="mt-0.5 line-clamp-1 text-xs leading-snug text-gray-500 md:text-sm">
+                    {recipe.description}
+                </span>
+                <span className="mt-1 flex min-w-0 items-center gap-1 text-xs font-semibold text-gray-500">
+                    {metaItems.map(({ Icon, value }, index) => (
+                        <span key={value} className="contents">
+                            {index > 0 && <span className="text-gray-300">·</span>}
+                            <span className="inline-flex min-w-0 items-center gap-1 truncate">
+                                <Icon size={11} className="shrink-0 text-primary-500" />
+                                {value}
+                            </span>
+                        </span>
+                    ))}
+                </span>
+            </span>
+            <span className="flex items-center">
+                <ChevronRight size={16} className="text-gray-300 transition-colors group-hover:text-primary-500" />
+            </span>
+        </button>
+    );
+};
+
 function buildRecipe(id) {
     const fallback = FALLBACK_RECIPES[id];
 
@@ -352,23 +397,17 @@ export default function FeedDetail() {
                             action={(
                                 <Button variant="ghost" size="sm" onClick={() => navigate("/feed")}>
                                     더보기
-                                    <ChevronRight size={14} />
                                 </Button>
                             )}
                         >
                             같은 작성자의 다른 레시피
                         </SectionTitle>
-                        <div className="grid gap-2.5 rounded-card bg-gray-50 p-2.5 md:grid-cols-2 md:p-3">
+                        <div className="flex flex-col overflow-hidden rounded-card border border-gray-200 bg-white">
                             {recipe.related.map((item) => (
-                                <RecipeCard
+                                <RelatedRecipeRow
                                     key={item.id}
-                                    title={item.title}
-                                    time={item.time}
-                                    difficulty={item.difficulty}
-                                    servings={item.servings}
-                                    description={item.description}
+                                    recipe={item}
                                     onClick={() => navigate(`/feed/${item.id}`)}
-                                    className="min-w-0"
                                 />
                             ))}
                         </div>
