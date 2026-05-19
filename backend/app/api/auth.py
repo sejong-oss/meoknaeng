@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from app.api.auth_schemas import (
     LoginRequest,
     LoginResponse,
-    SessionRefreshResponse,
     SignupRequest,
     SignupResponse,
 )
+from app.models.schemas import ApiResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -39,15 +39,18 @@ async def login(payload: LoginRequest, request: Request) -> LoginResponse:
     )
 
 
-@router.post(
-    "/refresh",
-    response_model=SessionRefreshResponse,
-    summary="세션 상태 확인 및 갱신",
+@router.delete(
+    "/logout",
+    response_model=ApiResponse[None],
+    summary="로그아웃",
 )
-async def refresh_session(request: Request) -> SessionRefreshResponse:
-    session_active = "user_id" in request.session
+async def logout(request: Request) -> ApiResponse[None]:
+    if "user_id" not in request.session:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
 
-    return SessionRefreshResponse(
-        session_active=session_active,
-        expires_at="2026-05-13T00:00:00Z" if session_active else None,
-    )
+    request.session.clear()
+
+    return ApiResponse(success=True, data=None)
