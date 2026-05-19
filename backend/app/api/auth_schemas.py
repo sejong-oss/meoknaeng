@@ -27,12 +27,3 @@ class LoginResponse(AuthBaseModel):
     session_active: bool = Field(
         ..., alias="sessionActive", description="세션 활성화 여부"
     )
-
-
-class SessionRefreshResponse(AuthBaseModel):
-    session_active: bool = Field(
-        ..., alias="sessionActive", description="세션 활성화 여부"
-    )
-    expires_at: str | None = Field(
-        None, alias="expiresAt", description="세션 만료 예정 시각"
-    )
