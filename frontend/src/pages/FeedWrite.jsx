@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     ArrowLeft,
-    Category,
     Checkmark,
     ChevronDown,
     Growth,
+    Restaurant,
     Time,
     UserMultiple,
 } from "@carbon/icons-react";
@@ -103,7 +103,7 @@ function SourceRecipeHeader({ label }) {
 
             <div className="flex flex-wrap gap-1.5">
                 <Chip variant="neutral">
-                    <Category size={11} />
+                    <Restaurant size={11} />
                     {SOURCE_RECIPE.category}
                 </Chip>
                 <Chip variant="neutral">
