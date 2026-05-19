@@ -28,6 +28,7 @@ class RecipeStep(BaseModel):
 
 
 class Recipe(BaseModel):
+    recipe_id: str | None = Field(None, description="저장된 레시피 ID")
     name: str = Field(..., description="요리 이름")
     summary: str = Field(..., description="요리 한줄 설명")
     cook_time_minutes: int = Field(..., ge=1, description="조리 시간(분)")

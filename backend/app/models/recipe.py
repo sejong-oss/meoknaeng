@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Integer, String, Text, TIMESTAMP
+from sqlalchemy import ForeignKey, Integer, String, Text, TIMESTAMP, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -46,10 +46,11 @@ class RecipeIngredient(Base):
 
 class RecipeStep(Base):
     __tablename__ = "recipe_step"
+    __table_args__ = (UniqueConstraint("recipe_id", "order"),)
 
     step_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     recipe_id: Mapped[str] = mapped_column(String(36), ForeignKey("recipe.recipe_id"))
-    step_order: Mapped[int] = mapped_column("order", Integer, nullable=False, unique=True)
+    step_order: Mapped[int] = mapped_column("order", Integer, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
 
     recipe: Mapped[Recipe] = relationship(back_populates="steps")
