@@ -1,9 +1,13 @@
+import { useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { UserAvatar } from "@carbon/icons-react";
 import { EmptyState } from "@/components/index.js";
+import { SITE_NAME } from "@/lib/constants.js";
 
 export default function My() {
     const { openLoginModal } = useOutletContext();
+
+    useEffect(() => { document.title = `${SITE_NAME} | 마이페이지`; }, []);
 
     return (
         <div className="min-h-[calc(100dvh-10rem)] flex items-center justify-center">

@@ -1,5 +1,6 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { SITE_NAME } from "@/lib/constants.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -156,6 +157,10 @@ export default function RecipeDetail() {
     const navigate = useNavigate();
     const stepsRef = useRef(null);
     const recipe = useMemo(() => RECIPES[id] ?? buildRecipe(id), [id]);
+
+    useEffect(() => {
+        document.title = recipe ? `${recipe.title} - ${SITE_NAME} | 추천 레시피` : `${SITE_NAME} | 추천 레시피`;
+    }, [recipe]);
 
     if (!recipe) {
         return (

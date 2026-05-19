@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Favorite, Renew, Share, Star, Time, Video } from "@carbon/icons-react";
 import { Button, Card, Chip, EmptyState, PhotoPlaceholder, RecipeCard } from "@/components/index.js";
+import { SITE_NAME } from "@/lib/constants.js";
 
 const INGREDIENTS = ["양파", "계란", "두부", "대파", "간장"];
 
@@ -28,6 +30,8 @@ const hasResults = true; // TODO: 실제 추천 결과 상태로 교체
 
 export default function Recipes() {
     const navigate = useNavigate();
+
+    useEffect(() => { document.title = `${SITE_NAME} | 추천 레시피`; }, []);
 
     if (!hasResults) {
         return (

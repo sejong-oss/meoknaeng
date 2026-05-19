@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { SITE_NAME } from "@/lib/constants.js";
 import { useNavigate } from "react-router-dom";
 import { Search, Add, Filter } from "@carbon/icons-react";
 import { Button, Chip, EmptyState, FeedCard, Input, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/index.js";
@@ -84,6 +85,8 @@ export default function Feed() {
             return true;
         });
     }, [searchQuery, activeFilters]);
+
+    useEffect(() => { document.title = `${SITE_NAME} | 공유 레시피`; }, []);
 
     return (
         <div className="flex flex-col gap-6 py-4 md:py-6">

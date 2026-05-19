@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Chip } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
+import { SITE_NAME } from "@/lib/constants.js";
 
 const COMMON_INGREDIENTS = [
     "마늘", "양파", "계란", "대파", "감자", "당근", "두부", "간장", "김치", "우유", "치즈", "쌀",
@@ -81,6 +82,8 @@ export default function Home() {
     }
 
     const highlightIdx = activeIdx === -1 && suggestions.length > 0 ? 0 : activeIdx;
+
+    useEffect(() => { document.title = `${SITE_NAME} | 재료 입력`; }, []);
 
     return (
         <div className="-mx-4 -my-6 md:mx-0 md:my-0 flex flex-col min-h-[calc(100dvh-4.5rem)] md:min-h-[calc(100dvh-5.5rem)]">
