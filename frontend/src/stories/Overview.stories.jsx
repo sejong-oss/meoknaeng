@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Search, Settings, User, Logout, TrashCan, Share } from "@carbon/icons-react";
 import {
-    Button, Chip, Input, TagInput,
+    Button, Chip, Input,
     Card, RecipeCard, FeedCard,
     Avatar, CardSkeleton, FeedSkeleton,
     Toast, ProgressBar, TopNav, BottomTabBar, Breadcrumb, EmptyState,
@@ -31,7 +31,6 @@ const Swatch = ({ label, hex, className }) => (
 );
 
 export const DesignSystem = () => {
-    const [tags, setTags] = useState(["양파", "계란"]);
     const [difficulty, setDifficulty] = useState("");
     const [sort, setSort] = useState("popular");
 
@@ -135,14 +134,6 @@ export const DesignSystem = () => {
                     <div className="grid grid-cols-2 gap-4 max-w-xl">
                         <Input placeholder="재료를 입력하세요" icon={<Search size={16} />} />
                         <Input placeholder="오류 상태" error errorMessage="올바른 재료명을 입력해주세요." />
-                        <div className="col-span-2">
-                            <TagInput
-                                tags={tags}
-                                onAdd={(t) => setTags([...tags, t])}
-                                onRemove={(t) => setTags(tags.filter((x) => x !== t))}
-                                placeholder="재료를 입력하세요"
-                            />
-                        </div>
                     </div>
                 </Section>
 

@@ -3,7 +3,7 @@ export { FloatingActionButton } from "@/components/FloatingActionButton.jsx";
 export { Breadcrumb } from "@/components/Breadcrumb.jsx";
 export { Container } from "@/components/Container.jsx";
 export { Chip } from "@/components/Chip.jsx";
-export { Input, TagInput } from "@/components/Input.jsx";
+export { FormField, Input, Textarea } from "@/components/Input.jsx";
 export { Card, ContentCard, RecipeCard, FeedCard } from "@/components/Card.jsx";
 export { PhotoPlaceholder } from "@/components/PhotoPlaceholder.jsx";
 export { RecipeSectionTitle, RecipeStat, RecipeStepRow } from "@/components/RecipeDetailParts.jsx";
