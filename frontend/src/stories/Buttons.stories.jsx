@@ -1,4 +1,5 @@
-import { Button } from "@/components/index.js";
+import { Add } from "@carbon/icons-react";
+import { Button, FloatingActionButton } from "@/components/index.js";
 
 export default { title: "Design System/Buttons", component: Button };
 
@@ -32,5 +33,14 @@ export const FullWidth = () => (
     <div className="p-8 bg-white font-sans flex flex-col gap-2 max-w-sm">
         <Button variant="primary" size="lg" fullWidth>재료부터 시작하기 →</Button>
         <Button variant="outline" size="lg" fullWidth>로그인 / 가입</Button>
+    </div>
+);
+
+export const FloatingAction = () => (
+    <div className="relative h-64 max-w-sm bg-gray-50 p-8 font-sans">
+        <FloatingActionButton position="absolute">
+            <Add size={16} />
+            레시피 공유
+        </FloatingActionButton>
     </div>
 );

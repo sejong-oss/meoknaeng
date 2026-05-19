@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { SITE_NAME } from "@/lib/constants.js";
 import { useNavigate } from "react-router-dom";
 import { Search, Add, Filter } from "@carbon/icons-react";
-import { Button, Chip, EmptyState, FeedCard, Input, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/index.js";
+import { Button, Chip, EmptyState, FeedCard, FloatingActionButton, Input, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/index.js";
 
 const FEED_ITEMS = [
     { id: 1, title: "된장찌개", time: "20분", category: "한식", difficulty: "쉬움", author: "집밥하는모카", likes: 312 },
@@ -210,15 +210,10 @@ export default function Feed() {
                     </div>
                 )}
 
-                <Button
-                    variant="primary"
-                    size="md"
-                    onClick={() => navigate("/feed/write")}
-                    className="md:hidden fixed bottom-[5.625rem] right-4 rounded-full shadow-lg z-10"
-                >
-                    <Add size={16} />
+            <FloatingActionButton onClick={() => navigate("/feed/write")}>
+                <Add size={16} />
                 레시피 공유
-                </Button>
+            </FloatingActionButton>
 
             </div>
         </>

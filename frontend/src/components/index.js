@@ -1,4 +1,5 @@
 export { Button } from "@/components/Button.jsx";
+export { FloatingActionButton } from "@/components/FloatingActionButton.jsx";
 export { Breadcrumb } from "@/components/Breadcrumb.jsx";
 export { Container } from "@/components/Container.jsx";
 export { Chip } from "@/components/Chip.jsx";
