@@ -12,6 +12,7 @@ import {
 import {
     Breadcrumb,
     Button,
+    Card,
     Chip,
     FloatingActionButton,
     FormField,
@@ -140,12 +141,10 @@ function SourceRecipeSummary() {
 
 function SourceRecipeAside() {
     return (
-        <section className="rounded-card border border-gray-200 bg-white p-4 shadow-md">
-            <div className="flex flex-col gap-5">
-                <SourceRecipeHeader label="공유할 레시피" />
-                <SourceRecipeTabs variant="line" />
-            </div>
-        </section>
+        <Card className="gap-5 p-5 shadow-md">
+            <SourceRecipeHeader label="공유할 레시피" />
+            <SourceRecipeTabs variant="line" />
+        </Card>
     );
 }
 
@@ -190,7 +189,7 @@ export default function FeedWrite() {
                         ]}
                     />
 
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-3">
                             <Button
                                 variant="ghost"
@@ -201,20 +200,14 @@ export default function FeedWrite() {
                                 <ArrowLeft size={16} />
                                 피드로 돌아가기
                             </Button>
-                            <div>
+                            <div className="flex flex-col gap-3">
                                 <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-5xl">
                                     레시피 공유
                                 </h1>
-                                <p className="mt-2 text-sm font-medium text-gray-500 md:text-base">
+                                <p className="text-sm font-medium text-gray-500 md:text-base">
                                     추천받은 레시피에 직접 만들어 본 경험을 더해 공유해보세요.
                                 </p>
                             </div>
-                        </div>
-                        <div className="hidden md:flex">
-                            <Button variant="primary" size="md" type="submit">
-                                <Checkmark size={16} />
-                                등록하기
-                            </Button>
                         </div>
                     </div>
 
@@ -254,6 +247,10 @@ export default function FeedWrite() {
 
                         <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
                             <SourceRecipeAside />
+                            <Button variant="primary" size="lg" type="submit" fullWidth>
+                                <Checkmark size={16} />
+                                등록하기
+                            </Button>
                         </aside>
                     </div>
                 </div>
