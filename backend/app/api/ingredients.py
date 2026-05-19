@@ -4,6 +4,7 @@ from app.api.ingredients_schemas import (
     IngredientAutocompleteItem,
     IngredientAutocompleteResponse,
 )
+from app.models.schemas import ApiResponse
 
 router = APIRouter(prefix="/ingredients", tags=["ingredients"])
 
@@ -28,16 +29,19 @@ _INGREDIENT_SEEDS = [
 
 @router.get(
     "/autocomplete",
-    response_model=IngredientAutocompleteResponse,
+    response_model=ApiResponse[IngredientAutocompleteResponse],
     summary="재료 자동완성",
 )
 async def autocomplete_ingredients(
     q: str = Query("", description="검색 키워드"),
     limit: int = Query(10, ge=1, le=20, description="반환 제한 개수"),
-) -> IngredientAutocompleteResponse:
+) -> ApiResponse[IngredientAutocompleteResponse]:
     query = q.strip()
     if not query:
-        return IngredientAutocompleteResponse(query=query, limit=limit, items=[])
+        return ApiResponse(
+            success=True,
+            data=IngredientAutocompleteResponse(query=query, limit=limit, items=[]),
+        )
 
     normalized_query = query.casefold()
     matched_items = [
@@ -46,8 +50,11 @@ async def autocomplete_ingredients(
         if normalized_query in ingredient["name"].casefold()
     ][:limit]
 
-    return IngredientAutocompleteResponse(
-        query=query,
-        limit=limit,
-        items=matched_items,
+    return ApiResponse(
+        success=True,
+        data=IngredientAutocompleteResponse(
+            query=query,
+            limit=limit,
+            items=matched_items,
+        ),
     )
