@@ -17,3 +17,6 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 SESSION_SECRET_KEY = os.getenv(
     "SESSION_SECRET_KEY", "placeholder-session-secret-key"
 )
+
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
+ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]
