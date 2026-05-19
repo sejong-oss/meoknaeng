@@ -14,6 +14,14 @@ export const DetailParts = () => (
             </div>
         </section>
 
+        <section className="flex max-w-sm flex-col gap-3 rounded-card border border-gray-200 p-4">
+            <RecipeSectionTitle meta="COMPACT">카드 안 조리법</RecipeSectionTitle>
+            <div className="flex flex-col">
+                <RecipeStepRow index={1} size="compact">두부는 키친타월로 물기를 빼고 도톰하게 썰어주세요.</RecipeStepRow>
+                <RecipeStepRow index={2} size="compact">팬에 들기름을 두르고 앞뒤로 노릇하게 구워주세요.</RecipeStepRow>
+            </div>
+        </section>
+
         <div className="flex gap-2">
             <RecipeStat label="시간" value="20분" Icon={Time} />
             <RecipeStat label="난이도" value="쉬움" Icon={Growth} />

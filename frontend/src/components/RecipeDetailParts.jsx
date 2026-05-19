@@ -16,11 +16,28 @@ export const RecipeStat = ({ label, value, Icon }) => (
     </div>
 );
 
-export const RecipeStepRow = ({ index, children }) => (
-    <div className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-3 border-b border-gray-200 py-4 last:border-b-0">
-        <span className="inline-flex h-6 w-12 shrink-0 items-center justify-center rounded-btn bg-gray-900 text-xs font-extrabold text-white">
-            {String(index).padStart(2, "0")}
-        </span>
-        <p className="min-w-0 text-sm leading-6 text-gray-700 md:text-base">{children}</p>
-    </div>
-);
+const stepRowSizes = {
+    default: {
+        row: "grid-cols-[3rem_minmax(0,1fr)] gap-3 py-4",
+        badge: "h-6 w-12 text-xs",
+        text: "text-sm leading-6 md:text-base",
+    },
+    compact: {
+        row: "grid-cols-[2.5rem_minmax(0,1fr)] gap-2.5 py-3",
+        badge: "h-5 w-10 text-[0.6875rem]",
+        text: "text-sm leading-5",
+    },
+};
+
+export const RecipeStepRow = ({ index, children, size = "default" }) => {
+    const styles = stepRowSizes[size] ?? stepRowSizes.default;
+
+    return (
+        <div className={["grid items-start border-b border-gray-200 last:border-b-0", styles.row].join(" ")}>
+            <span className={["inline-flex shrink-0 items-center justify-center rounded-btn bg-gray-900 font-extrabold text-white", styles.badge].join(" ")}>
+                {String(index).padStart(2, "0")}
+            </span>
+            <p className={["min-w-0 text-gray-700", styles.text].join(" ")}>{children}</p>
+        </div>
+    );
+};
