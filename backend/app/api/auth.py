@@ -1,4 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request, status
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth_schemas import (
     LoginRequest,
@@ -6,36 +11,91 @@ from app.api.auth_schemas import (
     SignupRequest,
     SignupResponse,
 )
+from app.db import get_db
 from app.models.schemas import ApiResponse
+from app.models.user import User
+from app.service.auth import hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+def _utc_now() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
 @router.post(
     "/signup",
-    response_model=SignupResponse,
+    response_model=ApiResponse[SignupResponse],
     status_code=status.HTTP_201_CREATED,
     summary="회원가입",
 )
-async def signup(payload: SignupRequest) -> SignupResponse:
-    return SignupResponse(user_id="placeholder-user-id", nickname=payload.nickname)
+async def signup(
+    payload: SignupRequest,
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[SignupResponse]:
+    existing_user = await db.scalar(
+        select(User).where(
+            or_(User.email == payload.email, User.nickname == payload.nickname)
+        )
+    )
+    if existing_user is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email or nickname already exists",
+        )
+
+    user = User(
+        email=payload.email,
+        password=hash_password(payload.password),
+        nickname=payload.nickname,
+        created_at=_utc_now(),
+    )
+    db.add(user)
+
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email or nickname already exists",
+        ) from exc
+
+    await db.refresh(user)
+
+    return ApiResponse(
+        success=True,
+        data=SignupResponse(user_id=user.user_id, nickname=user.nickname),
+    )
 
 
 @router.post(
     "/login",
-    response_model=LoginResponse,
+    response_model=ApiResponse[LoginResponse],
     summary="로그인 및 세션 생성",
 )
-async def login(payload: LoginRequest, request: Request) -> LoginResponse:
-    user_id = "placeholder-user-id"
-    nickname = "placeholder-nickname"
-    request.session["user_id"] = user_id
-    request.session["nickname"] = nickname
+async def login(
+    payload: LoginRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[LoginResponse]:
+    user = await db.scalar(select(User).where(User.email == payload.email))
+    if user is None or not verify_password(payload.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
 
-    return LoginResponse(
-        user_id=user_id,
-        nickname=nickname,
-        session_active=True,
+    request.session["user_id"] = user.user_id
+    request.session["nickname"] = user.nickname
+
+    return ApiResponse(
+        success=True,
+        data=LoginResponse(
+            user_id=user.user_id,
+            nickname=user.nickname,
+            session_active=True,
+        ),
     )
 
 
