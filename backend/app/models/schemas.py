@@ -1,6 +1,14 @@
 from enum import Enum
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
+
+T = TypeVar("T")
+
+
+class ApiResponse(BaseModel, Generic[T]):
+    success: bool
+    data: T
 
 
 class Difficulty(str, Enum):
