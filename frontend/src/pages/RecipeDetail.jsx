@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/lib/constants.js";
 import {
@@ -158,21 +158,20 @@ export default function RecipeDetail() {
     const stepsRef = useRef(null);
     const recipe = useMemo(() => RECIPES[id] ?? buildRecipe(id), [id]);
 
-    useEffect(() => {
-        document.title = recipe ? `${recipe.title} - ${SITE_NAME} | 추천 레시피` : `${SITE_NAME} | 추천 레시피`;
-    }, [recipe]);
-
     if (!recipe) {
         return (
-            <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
-                <EmptyState
-                    icon="🍽️"
-                    title="레시피를 찾을 수 없어요"
-                    description="추천 결과에서 다시 보고 싶은 레시피를 선택해주세요"
-                    action="추천 결과로 돌아가기"
-                    onAction={() => navigate("/recipes")}
-                />
-            </Card>
+            <>
+                <title>{`레시피 추천 | ${SITE_NAME}`}</title>
+                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
+                    <EmptyState
+                        icon="🍽️"
+                        title="레시피를 찾을 수 없어요"
+                        description="추천 결과에서 다시 보고 싶은 레시피를 선택해주세요"
+                        action="추천 결과로 돌아가기"
+                        onAction={() => navigate("/recipes")}
+                    />
+                </Card>
+            </>
         );
     }
 
@@ -183,6 +182,8 @@ export default function RecipeDetail() {
     };
 
     return (
+        <>
+        <title>{`${recipe.title} | ${SITE_NAME}`}</title>
         <div className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0 md:gap-7 md:py-2">
             <Breadcrumb
                 className="hidden md:flex"
@@ -305,5 +306,6 @@ export default function RecipeDetail() {
                 </Button>
             </div>
         </div>
+        </>
     );
 }

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/lib/constants.js";
 import {
@@ -273,21 +273,20 @@ export default function FeedDetail() {
     const [bookmarked, setBookmarked] = useState(false);
     const recipe = useMemo(() => FEED_RECIPES[id] ?? buildRecipe(id), [id]);
 
-    useEffect(() => {
-        document.title = recipe ? `${recipe.title} - ${SITE_NAME} | 공유 레시피` : `${SITE_NAME} | 공유 레시피`;
-    }, [recipe]);
-
     if (!recipe) {
         return (
-            <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
-                <EmptyState
-                    icon="🍽️"
-                    title="공유 레시피를 찾을 수 없어요"
-                    description="피드에서 다시 보고 싶은 레시피를 선택해주세요"
-                    action="공유 레시피로 돌아가기"
-                    onAction={() => navigate("/feed")}
-                />
-            </Card>
+            <>
+                <title>{`피드 | ${SITE_NAME}`}</title>
+                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
+                    <EmptyState
+                        icon="🍽️"
+                        title="공유 레시피를 찾을 수 없어요"
+                        description="피드에서 다시 보고 싶은 레시피를 선택해주세요"
+                        action="공유 레시피로 돌아가기"
+                        onAction={() => navigate("/feed")}
+                    />
+                </Card>
+            </>
         );
     }
 
@@ -298,6 +297,8 @@ export default function FeedDetail() {
     };
 
     return (
+        <>
+        <title>{`${recipe.title} | ${SITE_NAME}`}</title>
         <div className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0 md:gap-7 md:py-2">
             <Breadcrumb
                 className="hidden md:flex"
@@ -461,5 +462,6 @@ export default function FeedDetail() {
                 </Button>
             </div>
         </div>
+        </>
     );
 }

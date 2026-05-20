@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Favorite, Renew, Share, Star, Time, Video } from "@carbon/icons-react";
 import { Button, Card, Chip, EmptyState, PhotoPlaceholder, RecipeCard } from "@/components/index.js";
@@ -31,23 +30,26 @@ const hasResults = true; // TODO: 실제 추천 결과 상태로 교체
 export default function Recipes() {
     const navigate = useNavigate();
 
-    useEffect(() => { document.title = `${SITE_NAME} | 추천 레시피`; }, []);
-
     if (!hasResults) {
         return (
-            <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
-                <EmptyState
-                    icon="🍳"
-                    title="아직 추천 결과가 없어요"
-                    description="냉장고에 있는 재료를 입력하면 맞춤 레시피를 추천해드려요"
-                    action="재료 입력하러 가기"
-                    onAction={() => navigate("/home")}
-                />
-            </Card>
+            <>
+                <title>{`레시피 추천 | ${SITE_NAME}`}</title>
+                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
+                    <EmptyState
+                        icon="🍳"
+                        title="아직 추천 결과가 없어요"
+                        description="냉장고에 있는 재료를 입력하면 맞춤 레시피를 추천해드려요"
+                        action="재료 입력하러 가기"
+                        onAction={() => navigate("/home")}
+                    />
+                </Card>
+            </>
         );
     }
 
     return (
+        <>
+        <title>{`레시피 추천 | ${SITE_NAME}`}</title>
         <div className="flex flex-col gap-6 py-4 md:py-6">
 
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -158,5 +160,6 @@ export default function Recipes() {
             </div>
 
         </div>
+        </>
     );
 }

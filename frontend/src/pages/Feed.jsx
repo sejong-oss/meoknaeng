@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { SITE_NAME } from "@/lib/constants.js";
 import { useNavigate } from "react-router-dom";
 import { Search, Add, Filter } from "@carbon/icons-react";
@@ -86,9 +86,9 @@ export default function Feed() {
         });
     }, [searchQuery, activeFilters]);
 
-    useEffect(() => { document.title = `${SITE_NAME} | 공유 레시피`; }, []);
-
     return (
+        <>
+        <title>{`피드 | ${SITE_NAME}`}</title>
         <div className="flex flex-col gap-6 py-4 md:py-6">
 
             {/* 상단 타이틀 + 공유 버튼 (데스크탑) */}
@@ -221,5 +221,6 @@ export default function Feed() {
             </Button>
 
         </div>
+        </>
     );
 }

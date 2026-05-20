@@ -83,9 +83,9 @@ export default function Home() {
 
     const highlightIdx = activeIdx === -1 && suggestions.length > 0 ? 0 : activeIdx;
 
-    useEffect(() => { document.title = `${SITE_NAME} | 재료 입력`; }, []);
-
     return (
+        <>
+        <title>{`재료 입력 | ${SITE_NAME}`}</title>
         <div className="-mx-4 -my-6 md:mx-0 md:my-0 flex flex-col min-h-[calc(100dvh-4.5rem)] md:min-h-[calc(100dvh-5.5rem)]">
             <div className="flex-1 flex flex-col gap-6 px-4 md:px-0 py-10 md:py-6">
 
@@ -250,5 +250,6 @@ export default function Home() {
                 </Button>
             </div>
         </div>
+        </>
     );
 }
