@@ -1,5 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    useBeforeUnload,
+    useBlocker,
+    useLocation,
+    useNavigate,
+} from "react-router-dom";
 import {
     ArrowLeft,
     Checkmark,
@@ -17,6 +22,7 @@ import {
     FloatingActionButton,
     FormField,
     Input,
+    LeaveWriteModal,
     RecipeStepRow,
     Tabs,
     TabsContent,
@@ -25,34 +31,8 @@ import {
     Textarea,
     toast,
 } from "@/components/index.js";
+import { getRecommendedRecipe } from "@/data/recommendedRecipes.js";
 import { SITE_NAME } from "@/lib/constants.js";
-
-const SOURCE_RECIPE = {
-    title: "들기름 두부구이",
-    description: "물기를 뺀 두부를 들기름에 노릇하게 굽고 간장 양념을 곁들이는 냉장고 재료 기반 추천 레시피입니다.",
-    category: "한식",
-    time: "20분",
-    difficulty: "쉬움",
-    servings: "2인분",
-    ingredients: [
-        { name: "두부", amount: "1모" },
-        { name: "들기름", amount: "2T" },
-        { name: "간장", amount: "1.5T" },
-        { name: "대파", amount: "약간" },
-        { name: "고춧가루", amount: "0.5T" },
-    ],
-    steps: [
-        "두부는 키친타월로 물기를 제거하고 도톰하게 썰어주세요.",
-        "팬에 들기름을 두르고 두부를 앞뒤로 노릇하게 구워주세요.",
-        "간장, 대파, 고춧가루를 섞은 양념장을 곁들여 마무리해주세요.",
-    ],
-};
-
-const initialForm = {
-    title: SOURCE_RECIPE.title,
-    description: SOURCE_RECIPE.description,
-    tip: "",
-};
 
 function IngredientRow({ ingredient }) {
     return (
@@ -63,7 +43,7 @@ function IngredientRow({ ingredient }) {
     );
 }
 
-function SourceRecipeTabs({ variant = "pill" }) {
+function SourceRecipeTabs({ recipe, variant = "pill" }) {
     return (
         <Tabs defaultValue="ingredients" variant={variant}>
             <TabsList variant={variant} className={variant === "pill" ? "w-fit shrink-0" : "w-full"}>
@@ -73,7 +53,7 @@ function SourceRecipeTabs({ variant = "pill" }) {
 
             <TabsContent value="ingredients" className="mt-4">
                 <div className="grid gap-1.5 sm:grid-cols-2 md:grid-cols-1">
-                    {SOURCE_RECIPE.ingredients.map((ingredient) => (
+                    {recipe.ingredients.map((ingredient) => (
                         <IngredientRow key={ingredient.name} ingredient={ingredient} />
                     ))}
                 </div>
@@ -81,7 +61,7 @@ function SourceRecipeTabs({ variant = "pill" }) {
 
             <TabsContent value="steps" className="mt-4">
                 <div className="flex flex-col">
-                    {SOURCE_RECIPE.steps.map((step, index) => (
+                    {recipe.steps.map((step, index) => (
                         <RecipeStepRow key={step} index={index + 1} size="compact">
                             {step}
                         </RecipeStepRow>
@@ -92,66 +72,88 @@ function SourceRecipeTabs({ variant = "pill" }) {
     );
 }
 
-function SourceRecipeHeader({ label }) {
+function SourceRecipeHeader({ recipe, label }) {
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-3">
             <div className="min-w-0">
                 <p className="text-xs font-bold text-gray-500">{label}</p>
                 <h2 className="mt-0.5 truncate text-lg font-extrabold leading-tight text-gray-900">
-                    {SOURCE_RECIPE.title}
+                    {recipe.title}
                 </h2>
             </div>
 
             <div className="flex flex-wrap gap-1.5">
                 <Chip variant="neutral">
                     <Restaurant size={11} />
-                    {SOURCE_RECIPE.category}
+                    {recipe.category}
                 </Chip>
                 <Chip variant="neutral">
                     <Time size={11} />
-                    {SOURCE_RECIPE.time}
+                    {recipe.time}
                 </Chip>
                 <Chip variant="neutral">
                     <Growth size={11} />
-                    {SOURCE_RECIPE.difficulty}
+                    {recipe.difficulty}
                 </Chip>
                 <Chip variant="neutral">
                     <UserMultiple size={11} />
-                    {SOURCE_RECIPE.servings}
+                    {recipe.servings}
                 </Chip>
             </div>
         </div>
     );
 }
 
-function SourceRecipeSummary() {
+function SourceRecipeSummary({ recipe }) {
     return (
         <details className="group rounded-card border border-gray-200 bg-white p-4 shadow-md md:hidden">
             <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-                <SourceRecipeHeader label="공유할 레시피" />
+                <SourceRecipeHeader recipe={recipe} label="공유할 레시피" />
                 <ChevronDown size={18} className="mt-1 shrink-0 text-gray-500 transition-transform group-open:rotate-180" />
             </summary>
 
             <div className="mt-5">
-                <SourceRecipeTabs variant="line" />
+                <SourceRecipeTabs recipe={recipe} variant="line" />
             </div>
         </details>
     );
 }
 
-function SourceRecipeAside() {
+function SourceRecipeAside({ recipe }) {
     return (
         <Card className="gap-5 p-5 shadow-md">
-            <SourceRecipeHeader label="공유할 레시피" />
-            <SourceRecipeTabs variant="line" />
+            <SourceRecipeHeader recipe={recipe} label="공유할 레시피" />
+            <SourceRecipeTabs recipe={recipe} variant="line" />
         </Card>
     );
 }
 
 export default function FeedWrite() {
     const navigate = useNavigate();
-    const [form, setForm] = useState(initialForm);
+    const location = useLocation();
+    const sourceRecipe = getRecommendedRecipe(location.state?.recipeId);
+    const [form, setForm] = useState({
+        title: sourceRecipe?.title ?? "",
+        description: sourceRecipe?.description ?? "",
+        tip: "",
+    });
     const [errors, setErrors] = useState({});
+    const submittingRef = useRef(false);
+    const shouldConfirmLeave = useCallback(() => Boolean(sourceRecipe) && !submittingRef.current, [sourceRecipe]);
+    const blocker = useBlocker(shouldConfirmLeave);
+
+    useBeforeUnload((event) => {
+        if (!shouldConfirmLeave()) return;
+
+        event.preventDefault();
+        event.returnValue = "";
+    });
+
+    useEffect(() => {
+        if (sourceRecipe) return;
+
+        navigate("/feed", { replace: true, state: { openRecipeSelect: true } });
+    }, [navigate, sourceRecipe]);
 
     const updateField = (key, value) => {
         setForm((prev) => ({ ...prev, [key]: value }));
@@ -173,8 +175,11 @@ export default function FeedWrite() {
         }
 
         toast.success("레시피 공유 글이 등록됐어요");
+        submittingRef.current = true;
         navigate("/feed");
     };
+
+    if (!sourceRecipe) return null;
 
     return (
         <>
@@ -205,13 +210,13 @@ export default function FeedWrite() {
                                     레시피 공유
                                 </h1>
                                 <p className="text-sm font-medium text-gray-500 md:text-base">
-                                    추천받은 레시피에 직접 만들어 본 경험을 더해 공유해보세요.
+                                    추천받은 레시피에 직접 만들어 본 경험을 더해 다른 사용자와 공유해보세요.
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <SourceRecipeSummary />
+                    <SourceRecipeSummary recipe={sourceRecipe} />
 
                     <div className="grid gap-7 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
                         <section className="flex flex-col gap-5">
@@ -246,7 +251,7 @@ export default function FeedWrite() {
                         </section>
 
                         <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
-                            <SourceRecipeAside />
+                            <SourceRecipeAside recipe={sourceRecipe} />
                             <Button variant="primary" size="lg" type="submit" fullWidth>
                                 <Checkmark size={16} />
                                 등록하기
@@ -259,6 +264,13 @@ export default function FeedWrite() {
                     <Checkmark size={16} />
                     등록하기
                 </FloatingActionButton>
+
+                <LeaveWriteModal
+                    open={blocker.state === "blocked"}
+                    onOpenChange={(open) => { if (!open) blocker.reset?.(); }}
+                    onStay={() => blocker.reset?.()}
+                    onLeave={() => blocker.proceed?.()}
+                />
             </form>
         </>
     );
