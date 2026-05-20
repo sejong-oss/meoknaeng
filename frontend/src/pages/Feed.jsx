@@ -1,8 +1,23 @@
-import { useState, useMemo } from "react";
-import { SITE_NAME } from "@/lib/constants.js";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Add, Filter } from "@carbon/icons-react";
-import { Button, Chip, EmptyState, FeedCard, FloatingActionButton, Input, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/index.js";
+import {
+    Button,
+    Chip,
+    EmptyState,
+    FeedCard,
+    FloatingActionButton,
+    Input,
+    RecipeSelectModal,
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuItem,
+} from "@/components/index.js";
+import { RECOMMENDED_RECIPES } from "@/data/recommendedRecipes.js";
+import { SITE_NAME } from "@/lib/constants.js";
 
 const FEED_ITEMS = [
     { id: 1, title: "된장찌개", time: "20분", category: "한식", difficulty: "쉬움", author: "집밥하는모카", likes: 312 },
@@ -47,11 +62,12 @@ const FILTER_OPTIONS = [
     },
 ];
 
-
 export default function Feed() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
+    const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
@@ -65,6 +81,11 @@ export default function Feed() {
     const removeFilter = (key) => setActiveFilters((prev) => prev.filter((f) => f.key !== key));
     const clearAll = () => setActiveFilters([]);
     const isActive = (group, value) => activeFilters.some((f) => f.key === `${group}:${value}`);
+    const openRecipeSelect = () => setRecipeSelectOpen(true);
+    const writeFeedPost = (recipeId) => {
+        setRecipeSelectOpen(false);
+        navigate("/feed/write", { state: { recipeId } });
+    };
 
     const filteredItems = useMemo(() => {
         return FEED_ITEMS.filter((item) => {
@@ -90,25 +111,22 @@ export default function Feed() {
         <>
             <title>{`피드 | ${SITE_NAME}`}</title>
             <div className="flex flex-col gap-6 py-4 md:py-6">
-
-                {/* 상단 타이틀 + 공유 버튼 (데스크탑) */}
                 <div className="flex items-center justify-between">
                     <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
-                    오늘의 <span className="text-primary-500">한 그릇</span>
+                        오늘의 <span className="text-primary-500">한 그릇</span>
                     </h1>
                     <div className="hidden md:block">
                         <Button
                             variant="primary"
                             size="md"
-                            onClick={() => navigate("/feed/write")}
+                            onClick={openRecipeSelect}
                         >
                             <Add size={16} />
-                        레시피 공유
+                            레시피 공유
                         </Button>
                     </div>
                 </div>
 
-                {/* 검색바 + 필터 버튼 */}
                 <div className="flex gap-2 items-center">
                     <Input
                         className="flex-1 [&>div]:h-11"
@@ -158,7 +176,7 @@ export default function Feed() {
                                 <div>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onSelect={clearAll} className="justify-center text-xs">
-                                    전체 초기화
+                                        전체 초기화
                                     </DropdownMenuItem>
                                 </div>
                             )}
@@ -166,7 +184,6 @@ export default function Feed() {
                     </DropdownMenu>
                 </div>
 
-                {/* 적용된 필터 칩 */}
                 {activeFilters.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-medium text-gray-400 shrink-0">적용된 필터:</span>
@@ -179,12 +196,11 @@ export default function Feed() {
                             onClick={clearAll}
                             className="text-xs text-gray-400 hover:text-primary-500 underline"
                         >
-                        전체 초기화
+                            전체 초기화
                         </button>
                     </div>
                 )}
 
-                {/* 카드 그리드 */}
                 {filteredItems.length === 0 ? (
                     <EmptyState
                         icon="🍽️"
@@ -210,11 +226,18 @@ export default function Feed() {
                     </div>
                 )}
 
-            <FloatingActionButton onClick={() => navigate("/feed/write")}>
-                <Add size={16} />
-                레시피 공유
-            </FloatingActionButton>
+                <FloatingActionButton onClick={openRecipeSelect}>
+                    <Add size={16} />
+                    레시피 공유
+                </FloatingActionButton>
 
+                <RecipeSelectModal
+                    open={recipeSelectOpen}
+                    onOpenChange={setRecipeSelectOpen}
+                    recipes={RECOMMENDED_RECIPES}
+                    onSelect={writeFeedPost}
+                    onEmptyAction={() => navigate("/home")}
+                />
             </div>
         </>
     );
