@@ -88,139 +88,139 @@ export default function Feed() {
 
     return (
         <>
-        <title>{`피드 | ${SITE_NAME}`}</title>
-        <div className="flex flex-col gap-6 py-4 md:py-6">
+            <title>{`피드 | ${SITE_NAME}`}</title>
+            <div className="flex flex-col gap-6 py-4 md:py-6">
 
-            {/* 상단 타이틀 + 공유 버튼 (데스크탑) */}
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
+                {/* 상단 타이틀 + 공유 버튼 (데스크탑) */}
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
                     오늘의 <span className="text-primary-500">한 그릇</span>
-                </h1>
-                <div className="hidden md:block">
-                    <Button
-                        variant="primary"
-                        size="md"
-                        onClick={() => navigate("/feed/write")}
-                    >
-                        <Add size={16} />
-                        레시피 공유
-                    </Button>
-                </div>
-            </div>
-
-            {/* 검색바 + 필터 버튼 */}
-            <div className="flex gap-2 items-center">
-                <Input
-                    className="flex-1 [&>div]:h-11"
-                    icon={<Search size={16} />}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="레시피, 재료, 작성자 검색..."
-                />
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    </h1>
+                    <div className="hidden md:block">
                         <Button
-                            variant="outline"
+                            variant="primary"
                             size="md"
-                            className={`!h-11 ${activeFilters.length > 0 ? "border-primary-400 text-primary-600" : ""}`}
+                            onClick={() => navigate("/feed/write")}
                         >
-                            <Filter size={14} />
-                            <span className="hidden sm:inline">필터</span>
-                            {activeFilters.length > 0 && (
-                                <span className="inline-flex items-center justify-center w-4 h-4 bg-primary-500 text-white text-[10px] font-bold rounded-full">
-                                    {activeFilters.length}
-                                </span>
-                            )}
+                            <Add size={16} />
+                        레시피 공유
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-52">
-                        {FILTER_OPTIONS.map(({ group, label, options }) => (
-                            <div key={group}>
-                                <DropdownMenuLabel>{label}</DropdownMenuLabel>
-                                <div className="flex flex-wrap gap-x-1.5 gap-y-1 px-3 pb-2 mt-1">
-                                    {options.flatMap(({ label: optLabel, value }, chipIdx) => [
-                                        group === "category" && chipIdx === 3
-                                            ? <div key="break" className="w-full" />
-                                            : null,
-                                        <Chip
-                                            key={value}
-                                            variant={isActive(group, value) ? "brand" : "outline"}
-                                            onClick={() => toggleFilter(group, optLabel, value)}
-                                        >
-                                            {optLabel}
-                                        </Chip>,
-                                    ])}
+                    </div>
+                </div>
+
+                {/* 검색바 + 필터 버튼 */}
+                <div className="flex gap-2 items-center">
+                    <Input
+                        className="flex-1 [&>div]:h-11"
+                        icon={<Search size={16} />}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="레시피, 재료, 작성자 검색..."
+                    />
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Button
+                                variant="outline"
+                                size="md"
+                                className={`!h-11 ${activeFilters.length > 0 ? "border-primary-400 text-primary-600" : ""}`}
+                            >
+                                <Filter size={14} />
+                                <span className="hidden sm:inline">필터</span>
+                                {activeFilters.length > 0 && (
+                                    <span className="inline-flex items-center justify-center w-4 h-4 bg-primary-500 text-white text-[10px] font-bold rounded-full">
+                                        {activeFilters.length}
+                                    </span>
+                                )}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-52">
+                            {FILTER_OPTIONS.map(({ group, label, options }) => (
+                                <div key={group}>
+                                    <DropdownMenuLabel>{label}</DropdownMenuLabel>
+                                    <div className="flex flex-wrap gap-x-1.5 gap-y-1 px-3 pb-2 mt-1">
+                                        {options.flatMap(({ label: optLabel, value }, chipIdx) => [
+                                            group === "category" && chipIdx === 3
+                                                ? <div key="break" className="w-full" />
+                                                : null,
+                                            <Chip
+                                                key={value}
+                                                variant={isActive(group, value) ? "brand" : "outline"}
+                                                onClick={() => toggleFilter(group, optLabel, value)}
+                                            >
+                                                {optLabel}
+                                            </Chip>,
+                                        ])}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        {activeFilters.length > 0 && (
-                            <div>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onSelect={clearAll} className="justify-center text-xs">
+                            ))}
+                            {activeFilters.length > 0 && (
+                                <div>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onSelect={clearAll} className="justify-center text-xs">
                                     전체 초기화
-                                </DropdownMenuItem>
-                            </div>
-                        )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+                                    </DropdownMenuItem>
+                                </div>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
 
-            {/* 적용된 필터 칩 */}
-            {activeFilters.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-medium text-gray-400 shrink-0">적용된 필터:</span>
-                    {activeFilters.map((f) => (
-                        <Chip key={f.key} variant="brand-soft" onRemove={() => removeFilter(f.key)}>
-                            {f.label}
-                        </Chip>
-                    ))}
-                    <button
-                        onClick={clearAll}
-                        className="text-xs text-gray-400 hover:text-primary-500 underline"
-                    >
+                {/* 적용된 필터 칩 */}
+                {activeFilters.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-medium text-gray-400 shrink-0">적용된 필터:</span>
+                        {activeFilters.map((f) => (
+                            <Chip key={f.key} variant="brand-soft" onRemove={() => removeFilter(f.key)}>
+                                {f.label}
+                            </Chip>
+                        ))}
+                        <button
+                            onClick={clearAll}
+                            className="text-xs text-gray-400 hover:text-primary-500 underline"
+                        >
                         전체 초기화
-                    </button>
-                </div>
-            )}
+                        </button>
+                    </div>
+                )}
 
-            {/* 카드 그리드 */}
-            {filteredItems.length === 0 ? (
-                <EmptyState
-                    icon="🍽️"
-                    title="검색 결과가 없어요"
-                    description="다른 키워드나 필터를 시도해보세요"
-                    action="필터 초기화"
-                    onAction={clearAll}
-                />
-            ) : (
-                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {filteredItems.map((item) => (
-                        <FeedCard
-                            key={item.id}
-                            title={item.title}
-                            time={item.time}
-                            category={item.category}
-                            difficulty={item.difficulty}
-                            author={item.author}
-                            likes={item.likes}
-                            onClick={() => navigate(`/feed/${item.id}`)}
-                        />
-                    ))}
-                </div>
-            )}
+                {/* 카드 그리드 */}
+                {filteredItems.length === 0 ? (
+                    <EmptyState
+                        icon="🍽️"
+                        title="검색 결과가 없어요"
+                        description="다른 키워드나 필터를 시도해보세요"
+                        action="필터 초기화"
+                        onAction={clearAll}
+                    />
+                ) : (
+                    <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {filteredItems.map((item) => (
+                            <FeedCard
+                                key={item.id}
+                                title={item.title}
+                                time={item.time}
+                                category={item.category}
+                                difficulty={item.difficulty}
+                                author={item.author}
+                                likes={item.likes}
+                                onClick={() => navigate(`/feed/${item.id}`)}
+                            />
+                        ))}
+                    </div>
+                )}
 
-            <Button
-                variant="primary"
-                size="md"
-                onClick={() => navigate("/feed/write")}
-                className="md:hidden fixed bottom-[5.625rem] right-4 rounded-full shadow-lg z-10"
-            >
-                <Add size={16} />
+                <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => navigate("/feed/write")}
+                    className="md:hidden fixed bottom-[5.625rem] right-4 rounded-full shadow-lg z-10"
+                >
+                    <Add size={16} />
                 레시피 공유
-            </Button>
+                </Button>
 
-        </div>
+            </div>
         </>
     );
 }

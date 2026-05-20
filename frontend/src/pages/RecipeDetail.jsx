@@ -183,129 +183,129 @@ export default function RecipeDetail() {
 
     return (
         <>
-        <title>{`${recipe.title} | ${SITE_NAME}`}</title>
-        <div className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0 md:gap-7 md:py-2">
-            <Breadcrumb
-                className="hidden md:flex"
-                items={[
-                    { label: "추천 결과", onClick: () => navigate("/recipes") },
-                    { label: recipe.title },
-                ]}
-            />
+            <title>{`${recipe.title} | ${SITE_NAME}`}</title>
+            <div className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0 md:gap-7 md:py-2">
+                <Breadcrumb
+                    className="hidden md:flex"
+                    items={[
+                        { label: "추천 결과", onClick: () => navigate("/recipes") },
+                        { label: recipe.title },
+                    ]}
+                />
 
-            <div className="relative md:hidden">
-                <PhotoPlaceholder label={recipe.title} tone="deep" className="h-60 w-full" />
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(-1)}
-                    className="absolute left-4 top-4 size-10 rounded-full p-0 shadow-md"
-                    aria-label="뒤로 가기"
-                >
-                    <ArrowLeft size={20} />
-                </Button>
-            </div>
+                <div className="relative md:hidden">
+                    <PhotoPlaceholder label={recipe.title} tone="deep" className="h-60 w-full" />
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(-1)}
+                        className="absolute left-4 top-4 size-10 rounded-full p-0 shadow-md"
+                        aria-label="뒤로 가기"
+                    >
+                        <ArrowLeft size={20} />
+                    </Button>
+                </div>
 
-            <div className="relative z-10 -mt-8 grid gap-7 md:mt-0 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
-                <article className="flex flex-col gap-6 rounded-t-[2rem] bg-white px-5 pb-28 pt-8 shadow-xl md:rounded-none md:px-0 md:pb-0 md:pt-0 md:shadow-none">
-                    <section className="flex flex-col gap-4 md:gap-5">
-                        <div className="flex flex-col gap-3">
-                            <h1 className="text-3xl font-extrabold leading-[1.2] tracking-tight text-gray-900 md:text-4xl lg:text-5xl">
-                                {recipe.title}
-                            </h1>
-                            <p className="max-w-3xl text-sm leading-relaxed text-gray-600 md:text-base">
-                                {recipe.description}
-                            </p>
-                        </div>
+                <div className="relative z-10 -mt-8 grid gap-7 md:mt-0 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
+                    <article className="flex flex-col gap-6 rounded-t-[2rem] bg-white px-5 pb-28 pt-8 shadow-xl md:rounded-none md:px-0 md:pb-0 md:pt-0 md:shadow-none">
+                        <section className="flex flex-col gap-4 md:gap-5">
+                            <div className="flex flex-col gap-3">
+                                <h1 className="text-3xl font-extrabold leading-[1.2] tracking-tight text-gray-900 md:text-4xl lg:text-5xl">
+                                    {recipe.title}
+                                </h1>
+                                <p className="max-w-3xl text-sm leading-relaxed text-gray-600 md:text-base">
+                                    {recipe.description}
+                                </p>
+                            </div>
 
-                        <div className="flex gap-2 border-y border-gray-200 py-3 md:hidden">
-                            <RecipeStat label="시간" value={recipe.time} />
-                            <RecipeStat label="난이도" value={recipe.difficulty} />
-                            <RecipeStat label="인분" value={recipe.servings} />
-                        </div>
+                            <div className="flex gap-2 border-y border-gray-200 py-3 md:hidden">
+                                <RecipeStat label="시간" value={recipe.time} />
+                                <RecipeStat label="난이도" value={recipe.difficulty} />
+                                <RecipeStat label="인분" value={recipe.servings} />
+                            </div>
 
-                        <PhotoPlaceholder
-                            label={`${recipe.title} / main`}
-                            tone="deep"
-                            className="hidden h-[23.75rem] w-full rounded-card md:flex"
-                        />
-                    </section>
+                            <PhotoPlaceholder
+                                label={`${recipe.title} / main`}
+                                tone="deep"
+                                className="hidden h-[23.75rem] w-full rounded-card md:flex"
+                            />
+                        </section>
 
-                    <section className="flex flex-col gap-3 md:hidden">
-                        <RecipeSectionTitle meta={ingredientsMeta}>재료</RecipeSectionTitle>
-                        <div className="flex flex-col gap-1.5">
-                            {recipe.ingredients.map((ingredient) => (
-                                <IngredientRow key={ingredient.name} ingredient={ingredient} />
-                            ))}
-                        </div>
-                    </section>
-
-                    <section ref={stepsRef} className="scroll-mt-6 flex flex-col gap-2 md:scroll-mt-24">
-                        <RecipeSectionTitle meta={`${recipe.steps.length} STEPS`}>조리법</RecipeSectionTitle>
-                        <div className="flex flex-col">
-                            {recipe.steps.map((step, index) => (
-                                <RecipeStepRow key={step} index={index + 1}>{step}</RecipeStepRow>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="flex flex-col gap-3">
-                        <RecipeSectionTitle>관련 영상</RecipeSectionTitle>
-                        <div className="grid gap-3 md:grid-cols-3">
-                            {recipe.videos.map((video) => (
-                                <VideoCard key={video.title} video={video} />
-                            ))}
-                        </div>
-                    </section>
-                </article>
-
-                <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
-                    <Card className="gap-5 p-5 shadow-md">
-                        <RecipeSectionTitle>요리 정보</RecipeSectionTitle>
-                        <div className="flex gap-2">
-                            <RecipeStat label="시간" value={recipe.time} Icon={Time} />
-                            <RecipeStat label="난이도" value={recipe.difficulty} Icon={Growth} />
-                            <RecipeStat label="인분" value={recipe.servings} Icon={UserMultiple} />
-                        </div>
-                        <div className="flex flex-col gap-2">
+                        <section className="flex flex-col gap-3 md:hidden">
                             <RecipeSectionTitle meta={ingredientsMeta}>재료</RecipeSectionTitle>
                             <div className="flex flex-col gap-1.5">
                                 {recipe.ingredients.map((ingredient) => (
                                     <IngredientRow key={ingredient.name} ingredient={ingredient} />
                                 ))}
                             </div>
-                        </div>
-                        <Button variant="primary" size="lg" fullWidth onClick={handleStartCooking}>
-                            요리 시작
-                            <ArrowRight size={16} />
-                        </Button>
-                        <div className="grid grid-cols-2 gap-2">
-                            <Button variant="outline" size="sm">
-                                <Favorite size={14} />
-                                저장
-                            </Button>
-                            <Button variant="outline" size="sm">
-                                <Share size={14} />
-                                공유
-                            </Button>
-                        </div>
-                    </Card>
-                </aside>
-            </div>
+                        </section>
 
-            <div className="sticky bottom-0 z-20 -mx-0 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-xl md:hidden">
-                <Button variant="primary" size="lg" className="flex-1" onClick={handleStartCooking}>
+                        <section ref={stepsRef} className="scroll-mt-6 flex flex-col gap-2 md:scroll-mt-24">
+                            <RecipeSectionTitle meta={`${recipe.steps.length} STEPS`}>조리법</RecipeSectionTitle>
+                            <div className="flex flex-col">
+                                {recipe.steps.map((step, index) => (
+                                    <RecipeStepRow key={step} index={index + 1}>{step}</RecipeStepRow>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="flex flex-col gap-3">
+                            <RecipeSectionTitle>관련 영상</RecipeSectionTitle>
+                            <div className="grid gap-3 md:grid-cols-3">
+                                {recipe.videos.map((video) => (
+                                    <VideoCard key={video.title} video={video} />
+                                ))}
+                            </div>
+                        </section>
+                    </article>
+
+                    <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
+                        <Card className="gap-5 p-5 shadow-md">
+                            <RecipeSectionTitle>요리 정보</RecipeSectionTitle>
+                            <div className="flex gap-2">
+                                <RecipeStat label="시간" value={recipe.time} Icon={Time} />
+                                <RecipeStat label="난이도" value={recipe.difficulty} Icon={Growth} />
+                                <RecipeStat label="인분" value={recipe.servings} Icon={UserMultiple} />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <RecipeSectionTitle meta={ingredientsMeta}>재료</RecipeSectionTitle>
+                                <div className="flex flex-col gap-1.5">
+                                    {recipe.ingredients.map((ingredient) => (
+                                        <IngredientRow key={ingredient.name} ingredient={ingredient} />
+                                    ))}
+                                </div>
+                            </div>
+                            <Button variant="primary" size="lg" fullWidth onClick={handleStartCooking}>
+                            요리 시작
+                                <ArrowRight size={16} />
+                            </Button>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button variant="outline" size="sm">
+                                    <Favorite size={14} />
+                                저장
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                    <Share size={14} />
+                                공유
+                                </Button>
+                            </div>
+                        </Card>
+                    </aside>
+                </div>
+
+                <div className="sticky bottom-0 z-20 -mx-0 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-xl md:hidden">
+                    <Button variant="primary" size="lg" className="flex-1" onClick={handleStartCooking}>
                     요리 시작
-                    <ArrowRight size={16} />
-                </Button>
-                <Button variant="outline" size="lg" className="px-4" aria-label="저장">
-                    <Favorite size={18} />
-                </Button>
-                <Button variant="outline" size="lg" className="px-4" aria-label="공유">
-                    <Share size={18} />
-                </Button>
+                        <ArrowRight size={16} />
+                    </Button>
+                    <Button variant="outline" size="lg" className="px-4" aria-label="저장">
+                        <Favorite size={18} />
+                    </Button>
+                    <Button variant="outline" size="lg" className="px-4" aria-label="공유">
+                        <Share size={18} />
+                    </Button>
+                </div>
             </div>
-        </div>
         </>
     );
 }
