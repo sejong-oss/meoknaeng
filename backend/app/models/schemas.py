@@ -67,3 +67,37 @@ class RecipeDetail(BaseModel):
     servings: int | None
     ingredients: list[RecipeDetailIngredient]
     steps: list[RecipeDetailStep]
+
+
+class PostCreateRequest(BaseModel):
+    title: str = Field(..., max_length=200)
+    description: str | None = None
+    tip: str | None = Field(None, max_length=200)
+    cook_time: int | None = None
+    category: str | None = None
+    difficulty: str | None = None
+    source_recipe_id: str | None = None
+
+
+class PostUpdateRequest(BaseModel):
+    title: str | None = Field(None, max_length=200)
+    description: str | None = None
+    tip: str | None = Field(None, max_length=200)
+    cook_time: int | None = None
+    category: str | None = None
+    difficulty: str | None = None
+
+
+class PostResponse(BaseModel):
+    post_id: str
+    author_id: str
+    title: str
+    description: str | None
+    tip: str | None
+    cook_time: int | None
+    category: str | None
+    difficulty: str | None
+    source_recipe_id: str | None
+    comment_count: int
+    created_at: str
+    updated_at: str

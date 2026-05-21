@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.auth import router as auth_router
 from app.api.ingredients import router as ingredients_router
+from app.api.post import router as post_router
 from app.api.recipe import router as recipe_router
 from app.api.recipe_save import router as recipe_save_router
 from app.api.users import router as users_router
@@ -22,6 +23,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(ingredients_router)
+app.include_router(post_router)
 app.include_router(recipe_router)
 app.include_router(recipe_save_router)
 app.include_router(users_router)
