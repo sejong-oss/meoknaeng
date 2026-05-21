@@ -45,3 +45,25 @@ class RecipeRequest(BaseModel):
 
 class RecipeResponse(BaseModel):
     recipes: list[Recipe] = Field(..., description="추천 레시피 목록")
+
+
+class RecipeDetailIngredient(BaseModel):
+    name: str
+    amount: str
+
+
+class RecipeDetailStep(BaseModel):
+    order: int
+    description: str | None
+
+
+class RecipeDetail(BaseModel):
+    recipe_id: str
+    name: str
+    description: str | None
+    category: str | None
+    cook_time: int | None
+    difficulty: str | None
+    servings: int | None
+    ingredients: list[RecipeDetailIngredient]
+    steps: list[RecipeDetailStep]
