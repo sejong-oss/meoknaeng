@@ -1,8 +1,11 @@
 from datetime import datetime, timezone
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.post import Post
+from app.models.recipe import Recipe
 from app.models.schemas import PostCreateRequest, PostUpdateRequest
 
 
@@ -70,3 +73,53 @@ async def delete_post(post_id: str, user_id: str, db: AsyncSession) -> None:
 
     await db.delete(post)
     await db.commit()
+
+
+async def get_post_list(
+    db: AsyncSession,
+    page: int,
+    size: int,
+    q: str | None,
+    category: str | None,
+    difficulty: str | None,
+    sort: str,
+) -> tuple[list[Post], int]:
+    filters = []
+    if q:
+        filters.append(Post.title.ilike(f"%{q}%"))
+    if category:
+        filters.append(Post.category == category)
+    if difficulty:
+        filters.append(Post.difficulty == difficulty)
+
+    total = (await db.execute(
+        select(func.count(Post.post_id)).filter(*filters)
+    )).scalar_one()
+
+    order_clause = Post.comment_count.desc() if sort == "popular" else Post.created_at.desc()
+    stmt = (
+        select(Post)
+        .filter(*filters)
+        .options(selectinload(Post.author), selectinload(Post.source_recipe))
+        .order_by(order_clause)
+        .offset((page - 1) * size)
+        .limit(size)
+    )
+    posts = (await db.execute(stmt)).scalars().all()
+    return list(posts), total
+
+
+async def get_post_detail(post_id: str, db: AsyncSession) -> Post:
+    stmt = (
+        select(Post)
+        .options(
+            selectinload(Post.author),
+            selectinload(Post.source_recipe).selectinload(Recipe.ingredients),
+            selectinload(Post.source_recipe).selectinload(Recipe.steps),
+        )
+        .where(Post.post_id == post_id)
+    )
+    post = (await db.execute(stmt)).scalar_one_or_none()
+    if not post:
+        raise PostError(404, "Post not found")
+    return post
