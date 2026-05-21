@@ -59,7 +59,7 @@ async def get_my_profile(
     return ApiResponse(success=True, data=_to_user_profile_response(user))
 
 
-@router.put(
+@router.patch(
     "/me",
     response_model=ApiResponse[UserProfileResponse],
     summary="내 정보 수정",
@@ -114,7 +114,7 @@ async def get_my_ingredients(
     )
 
 
-@router.put(
+@router.patch(
     "/me/ingredients",
     response_model=ApiResponse[UserIngredientsResponse],
     summary="내 재료 수정",
