@@ -8,7 +8,8 @@ T = TypeVar("T")
 
 class ApiResponse(BaseModel, Generic[T]):
     success: bool
-    data: T
+    data: T | None = None
+    message: str | None = None
 
 
 class Difficulty(str, Enum):
