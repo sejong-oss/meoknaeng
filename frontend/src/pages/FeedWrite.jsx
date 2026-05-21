@@ -194,7 +194,7 @@ export default function FeedWrite() {
                         ]}
                     />
 
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div className="flex flex-col gap-3">
                             <Button
                                 variant="ghost"
@@ -213,6 +213,12 @@ export default function FeedWrite() {
                                     추천받은 레시피에 직접 만들어 본 경험을 더해 다른 사용자와 공유해보세요.
                                 </p>
                             </div>
+                        </div>
+                        <div className="hidden md:block">
+                            <Button variant="primary" size="md" type="submit">
+                                <Checkmark size={16} />
+                                등록하기
+                            </Button>
                         </div>
                     </div>
 
@@ -252,10 +258,6 @@ export default function FeedWrite() {
 
                         <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
                             <SourceRecipeAside recipe={sourceRecipe} />
-                            <Button variant="primary" size="lg" type="submit" fullWidth>
-                                <Checkmark size={16} />
-                                등록하기
-                            </Button>
                         </aside>
                     </div>
                 </div>
