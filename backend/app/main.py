@@ -6,6 +6,7 @@ from app.api.auth import router as auth_router
 from app.api.ingredients import router as ingredients_router
 from app.api.recipe import router as recipe_router
 from app.api.recipe_save import router as recipe_save_router
+from app.api.users import router as users_router
 from app.config import ALLOWED_ORIGINS, SESSION_SECRET_KEY
 
 app = FastAPI(title="Recipe Recommender API")
@@ -23,6 +24,7 @@ app.include_router(auth_router)
 app.include_router(ingredients_router)
 app.include_router(recipe_router)
 app.include_router(recipe_save_router)
+app.include_router(users_router)
 
 
 @app.get("/")

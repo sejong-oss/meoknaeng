@@ -1,0 +1,63 @@
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+class UsersBaseModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class UserProfileResponse(UsersBaseModel):
+    user_id: str = Field(..., alias="userId", description="사용자 ID")
+    email: str = Field(..., description="사용자 이메일")
+    nickname: str = Field(..., description="사용자 닉네임")
+    created_at: datetime = Field(..., alias="createdAt", description="가입 일시")
+
+
+class UserProfileUpdateRequest(UsersBaseModel):
+    nickname: str | None = Field(
+        None, min_length=1, max_length=50, description="변경할 사용자 닉네임"
+    )
+
+
+class UserIngredientItem(UsersBaseModel):
+    name: str = Field(..., description="재료 이름")
+
+
+class UserIngredientsResponse(UsersBaseModel):
+    ingredients: list[UserIngredientItem] = Field(..., description="내 재료 목록")
+
+
+class UserIngredientsUpdateRequest(UsersBaseModel):
+    ingredients: list[str] = Field(..., description="최종 저장할 내 재료 이름 목록")
+
+    @field_validator("ingredients")
+    @classmethod
+    def normalize_ingredients(cls, ingredients: list[str]) -> list[str]:
+        normalized: list[str] = []
+        seen: set[str] = set()
+
+        for ingredient in ingredients:
+            name = ingredient.strip()
+            if not name:
+                raise ValueError("Ingredient name must not be blank")
+            if name not in seen:
+                normalized.append(name)
+                seen.add(name)
+
+        return normalized
+
+
+class SavedRecipeItem(UsersBaseModel):
+    recipe_id: str = Field(..., alias="recipeId", description="레시피 ID")
+    name: str = Field(..., description="레시피 이름")
+    description: str | None = Field(None, description="레시피 설명")
+    category: str | None = Field(None, description="레시피 카테고리")
+    cook_time: int | None = Field(None, alias="cookTime", description="조리 시간")
+    difficulty: str | None = Field(None, description="난이도")
+    servings: int | None = Field(None, description="인분")
+    saved_at: datetime = Field(..., alias="savedAt", description="저장 일시")
+
+
+class SavedRecipesResponse(UsersBaseModel):
+    recipes: list[SavedRecipeItem] = Field(..., description="저장한 레시피 목록")
