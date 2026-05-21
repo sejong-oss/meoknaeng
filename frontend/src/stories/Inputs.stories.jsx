@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Input, TagInput } from "@/components/index.js";
+import { FormField, Input, Textarea } from "@/components/index.js";
 import { Search } from "@carbon/icons-react";
 
 export default { title: "Design System/Inputs" };
@@ -13,17 +12,16 @@ export const AllInputs = () => (
     </div>
 );
 
-export const TagInputDemo = () => {
-    const [tags, setTags] = useState(["양파", "계란", "대파"]);
-    return (
-        <div className="p-8 bg-white font-sans max-w-sm">
-            <p className="text-xs text-gray-400 mb-3">Enter 또는 쉼표로 태그 추가</p>
-            <TagInput
-                tags={tags}
-                onAdd={(t) => setTags([...tags, t])}
-                onRemove={(t) => setTags(tags.filter((x) => x !== t))}
-                placeholder="재료를 입력하세요"
-            />
-        </div>
-    );
-};
+export const FormFields = () => (
+    <div className="flex max-w-sm flex-col gap-5 bg-white p-8 font-sans">
+        <FormField label="제목" required>
+            <Input placeholder="게시물 제목을 입력하세요" />
+        </FormField>
+        <FormField label="레시피 소개" hint="추천받은 레시피에 직접 만들어 본 경험을 적어주세요.">
+            <Textarea placeholder="레시피를 소개해주세요" rows={5} />
+        </FormField>
+        <FormField label="나만의 조리 팁" error="조리 팁은 200자 이내로 입력해주세요.">
+            <Textarea placeholder="조리 팁을 입력하세요" rows={4} error />
+        </FormField>
+    </div>
+);

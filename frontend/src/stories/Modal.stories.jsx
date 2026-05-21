@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Modal, ModalTrigger, ModalContent, ModalFooter, ModalClose, Button, Chip } from "@/components/index.js";
+import { Modal, ModalTrigger, ModalContent, ModalFooter, ModalClose, Button } from "@/components/index.js";
 
 export default { title: "Design System/Modal" };
 

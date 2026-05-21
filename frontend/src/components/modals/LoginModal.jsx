@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Modal, ModalContent, Input, Button } from "@/components/index.js";
 
 export function LoginModal({
@@ -11,12 +11,13 @@ export function LoginModal({
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    useEffect(() => {
-        if (!open) {
+    const handleOpenChange = (nextOpen) => {
+        if (!nextOpen) {
             setEmail("");
             setPassword("");
         }
-    }, [open]);
+        onOpenChange?.(nextOpen);
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -24,7 +25,7 @@ export function LoginModal({
     };
 
     return (
-        <Modal open={open} onOpenChange={onOpenChange}>
+        <Modal open={open} onOpenChange={handleOpenChange}>
             <ModalContent
                 title="로그인"
                 description="로그인을 통해 레시피 저장과 공유 기능을 사용해보세요."

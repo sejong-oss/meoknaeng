@@ -1,3 +1,20 @@
+export function FormField({ label, required = false, children, hint, error }) {
+    return (
+        <label className="flex flex-col gap-2">
+            <span className="flex items-center gap-1 text-sm font-semibold text-gray-800">
+                {label}
+                {required && <span className="text-primary-500">*</span>}
+            </span>
+            {children}
+            {error ? (
+                <span className="text-xs font-medium text-red-500">{error}</span>
+            ) : hint ? (
+                <span className="text-xs text-gray-500">{hint}</span>
+            ) : null}
+        </label>
+    );
+}
+
 export function Input({
     placeholder,
     value,
@@ -35,44 +52,33 @@ export function Input({
     );
 }
 
-export function TagInput({ tags = [], onAdd, onRemove, placeholder = "입력하세요", className = "" }) {
-    const handleKeyDown = (e) => {
-        if ((e.key === "Enter" || e.key === ",") && e.target.value.trim()) {
-            e.preventDefault();
-            onAdd?.(e.target.value.trim());
-            e.target.value = "";
-        }
-        if (e.key === "Backspace" && !e.target.value && tags.length > 0) {
-            onRemove?.(tags[tags.length - 1]);
-        }
-    };
-
+export function Textarea({
+    placeholder,
+    value,
+    onChange,
+    rows = 4,
+    maxLength,
+    error = false,
+    disabled = false,
+    className = "",
+    ...props
+}) {
     return (
-        <div className={[
-            "flex flex-wrap gap-1.5 px-3.5 py-2.5 bg-white border border-gray-200 rounded-input",
-            "focus-within:border-primary-500 transition-colors",
-            className,
-        ].join(" ")}>
-            {tags.map((tag) => (
-                <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-100 text-primary-800 text-xs font-medium rounded-full"
-                >
-                    {tag}
-                    <button
-                        type="button"
-                        onClick={() => onRemove?.(tag)}
-                        className="text-primary-400 hover:text-primary-600 leading-none"
-                    >
-                        ×
-                    </button>
-                </span>
-            ))}
-            <input
-                onKeyDown={handleKeyDown}
-                placeholder={tags.length === 0 ? placeholder : ""}
-                className="bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400 min-w-24 py-0.5"
-            />
-        </div>
+        <textarea
+            value={value}
+            onChange={onChange}
+            rows={rows}
+            maxLength={maxLength}
+            disabled={disabled}
+            placeholder={placeholder}
+            className={[
+                "w-full resize-none rounded-input border bg-gray-50 px-3.5 py-3 text-sm text-gray-900 outline-none transition-colors",
+                "placeholder:text-gray-400 focus:border-primary-500 focus:bg-white disabled:cursor-not-allowed",
+                error ? "border-red-300 bg-red-50" : "border-gray-200",
+                disabled ? "text-gray-500 opacity-70" : "",
+                className,
+            ].join(" ")}
+            {...props}
+        />
     );
 }

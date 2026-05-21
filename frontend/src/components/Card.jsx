@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Favorite, FavoriteFilled, Growth, Time, Category, UserMultiple } from "@carbon/icons-react";
+import { Favorite, FavoriteFilled, Growth, Time, Restaurant, UserMultiple } from "@carbon/icons-react";
 import { Chip } from "@/components/Chip.jsx";
 import { Avatar } from "@/components/Avatar.jsx";
 import { PhotoPlaceholder } from "@/components/PhotoPlaceholder.jsx";
@@ -110,7 +110,7 @@ export function ContentCard({
                 {(time || category || difficulty || servings) && (
                     <div className="flex gap-1 flex-wrap">
                         {time && <Chip variant="neutral"><Time size={11} />{time}</Chip>}
-                        {category && <Chip variant="neutral"><Category size={11} />{category}</Chip>}
+                        {category && <Chip variant="neutral"><Restaurant size={11} />{category}</Chip>}
                         {difficulty && <Chip variant="neutral"><Growth size={11} />{difficulty}</Chip>}
                         {servings && <Chip variant="neutral"><UserMultiple size={11} />{servings}</Chip>}
                     </div>

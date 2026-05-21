@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Chip } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
@@ -25,18 +25,14 @@ export default function Home() {
     const [ingredients, setIngredients] = useState([]);
     const [query, setQuery] = useState("");
     const [activeIdx, setActiveIdx] = useState(-1);
-    const [suggestions, setSuggestions] = useState([]);
     const inputRef = useRef(null);
-
-    useEffect(() => {
+    const suggestions = useMemo(() => {
         const trimmed = query.trim();
-        setSuggestions(
-            trimmed
-                ? INGREDIENT_LIST.filter(
-                    (item) => item.startsWith(trimmed) && !ingredients.includes(item)
-                ).slice(0, 4)
-                : []
-        );
+        return trimmed
+            ? INGREDIENT_LIST.filter(
+                (item) => item.startsWith(trimmed) && !ingredients.includes(item)
+            ).slice(0, 4)
+            : [];
     }, [query, ingredients]);
 
     function addIngredient(value) {
@@ -73,7 +69,7 @@ export default function Home() {
             removeIngredient(ingredients[ingredients.length - 1]);
         } else if (e.key === "Escape") {
             setActiveIdx(-1);
-            setSuggestions([]);
+            setQuery("");
         }
     }
 
