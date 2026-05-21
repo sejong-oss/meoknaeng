@@ -2,8 +2,9 @@ from datetime import datetime, timezone
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.models.recipe import Recipe, RecipeSave
+from app.models.recipe import Recipe, RecipeIngredient, RecipeStep, RecipeSave
 
 
 class RecipeSaveError(Exception):
@@ -45,3 +46,15 @@ async def unsave_recipe(user_id: str, recipe_id: str, db: AsyncSession) -> None:
         raise RecipeSaveError(404, "Saved recipe not found")
 
     await db.commit()
+
+
+async def get_recipe(recipe_id: str, db: AsyncSession) -> Recipe:
+    result = await db.execute(
+        select(Recipe)
+        .options(selectinload(Recipe.ingredients), selectinload(Recipe.steps))
+        .where(Recipe.recipe_id == recipe_id)
+    )
+    recipe = result.scalar_one_or_none()
+    if not recipe:
+        raise RecipeSaveError(404, "Recipe not found")
+    return recipe
