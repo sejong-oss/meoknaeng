@@ -224,7 +224,7 @@ export default function FeedWrite() {
                                 <Input
                                     value={form.title}
                                     onChange={(event) => updateField("title", event.target.value)}
-                                    placeholder="예: 들기름 두부구이 후기"
+                                    placeholder="게시물 제목을 입력해주세요"
                                     maxLength={200}
                                     error={Boolean(errors.title)}
                                 />
@@ -243,7 +243,7 @@ export default function FeedWrite() {
                                 <Textarea
                                     value={form.tip}
                                     onChange={(event) => updateField("tip", event.target.value)}
-                                    placeholder="예: 두부 물기를 충분히 빼면 훨씬 바삭하게 구워져요."
+                                    placeholder="나만의 조리 팁을 입력해주세요"
                                     rows={4}
                                     maxLength={200}
                                 />
