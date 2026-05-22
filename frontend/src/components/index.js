@@ -27,3 +27,4 @@ export {
 } from "@/components/DropdownMenu.jsx";
 export { TopNav, BottomTabBar } from "@/components/Nav.jsx";
 export { EmptyState } from "@/components/EmptyState.jsx";
+export { IngredientInput } from "@/components/IngredientInput.jsx";

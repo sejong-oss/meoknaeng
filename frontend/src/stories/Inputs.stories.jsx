@@ -1,5 +1,11 @@
-import { FormField, Input, Textarea } from "@/components/index.js";
+import { useState } from "react";
+import { FormField, IngredientInput as IngredientInputComponent, Input, Textarea } from "@/components/index.js";
 import { Search } from "@carbon/icons-react";
+
+const DEMO_INGREDIENT_LIST = [
+    "가지", "감자", "간장", "계란", "고추장", "김치", "닭고기", "당근", "대파",
+    "된장", "두부", "마늘", "버섯", "소고기", "양파", "우유", "치즈", "파프리카",
+];
 
 export default { title: "Design System/Inputs" };
 
@@ -11,6 +17,21 @@ export const AllInputs = () => (
         <Input placeholder="비활성 입력" disabled />
     </div>
 );
+
+export const IngredientInput = () => {
+    const [ingredients, setIngredients] = useState(["양파", "계란"]);
+    return (
+        <div className="p-8 bg-gray-50 font-sans max-w-md">
+            <p className="text-xs text-gray-400 mb-3">자동완성 포함 — "마", "두" 등 입력해보기</p>
+            <IngredientInputComponent
+                ingredients={ingredients}
+                onAdd={(v) => setIngredients((prev) => [...prev, v])}
+                onRemove={(v) => setIngredients((prev) => prev.filter((i) => i !== v))}
+                ingredientList={DEMO_INGREDIENT_LIST}
+            />
+        </div>
+    );
+};
 
 export const FormFields = () => (
     <div className="flex max-w-sm flex-col gap-5 bg-white p-8 font-sans">

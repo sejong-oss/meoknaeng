@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { Settings, UserAvatar } from "@carbon/icons-react";
+import { ChevronDown, Settings, UserAvatar } from "@carbon/icons-react";
 import {
     Button, Card, Chip, EmptyState,
-    FeedCard, RecipeCard,
+    FeedCard, IngredientInput, RecipeCard,
     Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { INGREDIENT_LIST, SITE_NAME } from "@/lib/constants.js";
 
 const MOCK_USER = {
     name: "모카",
@@ -50,7 +50,17 @@ export default function My() {
     const user = MOCK_USER; // TODO: replace with auth state
     const [ingredients, setIngredients] = useState(user?.ingredients ?? []);
     const [editingIngredients, setEditingIngredients] = useState(false);
-    const [newIngredient, setNewIngredient] = useState("");
+    const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
+    const [hasOverflow, setHasOverflow] = useState(false);
+    const ingredientsRef = useRef(null);
+    const expandedRef = useRef(false);
+    expandedRef.current = ingredientsExpanded;
+
+    useEffect(() => {
+        const el = ingredientsRef.current;
+        if (!el || editingIngredients || expandedRef.current) return;
+        setHasOverflow(el.scrollHeight > el.clientHeight + 4);
+    }, [ingredients.length, editingIngredients]);
 
     if (!user) {
         return (
@@ -80,7 +90,7 @@ export default function My() {
                     <div className="flex-1 min-w-0">
                         <h1 className="text-xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
                         <p className="mt-0.5 text-xs font-medium text-primary-600">
-                            레시피 {user.recipes} · 팔로워 {user.followers} · 팔로잉 {user.following}
+                            팔로워 {user.followers} · 팔로잉 {user.following}
                         </p>
                     </div>
                     <Button variant="ghost" size="sm" className="shrink-0 !px-2" aria-label="설정">
@@ -99,7 +109,6 @@ export default function My() {
                         <div className="text-center mt-1">
                             <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
                             <div className="mt-2 flex items-center gap-3.5 justify-center text-xs text-gray-500">
-                                <span><span className="font-bold text-gray-900">{user.recipes}</span> 레시피</span>
                                 <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
                                 <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
                             </div>
@@ -111,52 +120,51 @@ export default function My() {
                     <Card>
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
-                                <h3 className="text-xl font-extrabold tracking-tight text-gray-900 md:text-2xl">내 재료</h3>
-                                <Chip variant="neutral">{ingredients.length}</Chip>
+                                <h3 className="text-xl font-extrabold tracking-tight text-gray-900">내 재료</h3>
+                                <Chip variant="brand-soft">{ingredients.length}</Chip>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => { setEditingIngredients((v) => !v); setNewIngredient(""); }}
-                            >
-                                {editingIngredients ? "완료" : "편집"}
-                            </Button>
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEditingIngredients((v) => !v)}
+                                >
+                                    {editingIngredients ? "완료" : "편집"}
+                                </Button>
+                                {!editingIngredients && (hasOverflow || ingredientsExpanded) && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIngredientsExpanded((v) => !v)}
+                                        className="p-1 text-gray-600 transition-colors"
+                                    >
+                                        <ChevronDown
+                                            size={16}
+                                            className={`transition-transform duration-200 ${ingredientsExpanded ? "rotate-180" : ""}`}
+                                        />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         {editingIngredients ? (
-                            <div className="flex flex-wrap items-center gap-2 rounded-input border border-gray-200 bg-white px-3 py-2.5 focus-within:border-primary-500 transition-colors cursor-text">
-                                {ingredients.map((ing) => (
-                                    <Chip
-                                        key={ing}
-                                        variant="brand"
-                                        onRemove={() => setIngredients((prev) => prev.filter((i) => i !== ing))}
-                                        className="!px-3.5 !py-1.5"
-                                    >
-                                        {ing}
-                                    </Chip>
-                                ))}
-                                <input
-                                    value={newIngredient}
-                                    onChange={(e) => setNewIngredient(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if ((e.key === "Enter" || e.key === ",") && newIngredient.trim()) {
-                                            e.preventDefault();
-                                            const trimmed = newIngredient.trim();
-                                            if (!ingredients.includes(trimmed)) setIngredients((prev) => [...prev, trimmed]);
-                                            setNewIngredient("");
-                                        }
-                                        if (e.key === "Backspace" && !newIngredient && ingredients.length > 0) {
-                                            setIngredients((prev) => prev.slice(0, -1));
-                                        }
-                                    }}
-                                    placeholder={ingredients.length === 0 ? "재료를 입력하세요" : ""}
-                                    className="bg-transparent outline-none text-sm text-gray-900 placeholder:text-gray-400 min-w-[4rem] flex-1 py-0.5"
-                                />
-                            </div>
+                            <IngredientInput
+                                ingredients={ingredients}
+                                onAdd={(value) => setIngredients((prev) => [...prev, value])}
+                                onRemove={(value) => setIngredients((prev) => prev.filter((i) => i !== value))}
+                                ingredientList={INGREDIENT_LIST}
+                            />
                         ) : (
-                            <div className="flex flex-wrap gap-2">
-                                {ingredients.map((ing) => (
-                                    <Chip key={ing} variant="brand" className="!px-3.5 !py-1.5">{ing}</Chip>
-                                ))}
+                            <div>
+                                <div
+                                    ref={ingredientsRef}
+                                    className={[
+                                        "flex flex-wrap gap-2.5 overflow-hidden transition-[max-height] duration-300",
+                                        ingredientsExpanded ? "max-h-none" : "max-h-[4.5rem] md:max-h-28",
+                                    ].join(" ")}
+                                >
+                                    {ingredients.map((ing) => (
+                                        <Chip key={ing} variant="brand">{ing}</Chip>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </Card>
@@ -168,13 +176,13 @@ export default function My() {
                     <Tabs defaultValue="saved" variant="line">
                         <TabsList variant="line">
                             <TabsTrigger value="saved" variant="line">
-                                저장 <span className="ml-1 text-xs opacity-60">{MOCK_SAVED.length}</span>
+                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{MOCK_SAVED.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="mine" variant="line">
                                 내 글 <span className="ml-1 text-xs opacity-60">{MOCK_MINE.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="likes" variant="line">
-                                좋아요 <span className="ml-1 text-xs opacity-60">87</span>
+                                좋아요 <span className="ml-1 text-xs opacity-60">{MOCK_LIKES.length}</span>
                             </TabsTrigger>
                         </TabsList>
 
