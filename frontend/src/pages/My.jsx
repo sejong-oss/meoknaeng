@@ -18,11 +18,14 @@ const MOCK_USER = {
 
 const MOCK_SAVED = [
     { id: "dubu-jorim", title: "두부 간장조림", time: "20분", difficulty: "쉬움", servings: "2인분", description: "짭조름한 양념이 두부에 잘 스며드는 집밥 반찬" },
-    { id: "2", title: "김치찜", time: "30분", difficulty: "보통", servings: "2인분", description: "깊은 맛의 국물이 우러난 푸짐한 한 그릇" },
-    { id: "3", title: "파스타 알리오", time: "25분", difficulty: "보통", servings: "1인분", description: "마늘 향 가득한 간단 오일 파스타" },
-    { id: "4", title: "계란말이", time: "15분", difficulty: "쉬움", servings: "2인분", description: "부드럽게 말아낸 기본 집밥 반찬" },
-    { id: "5", title: "된장찌개", time: "20분", difficulty: "쉬움", servings: "2인분", description: "자투리 채소로 끓이는 깊은 맛 찌개" },
-    { id: "6", title: "김치볶음밥", time: "15분", difficulty: "쉬움", servings: "1인분", description: "잘 익은 김치로 볶아낸 간단 한 그릇" },
+    { id: "2", title: "두부 계란말이", time: "15분", difficulty: "쉬움", servings: "1인분", description: "계란과 두부를 부드럽게 말아내는 간단한 반찬이에요." },
+    { id: "3", title: "두부김치", time: "12분", difficulty: "쉬움", servings: "2인분", description: "매콤한 김치에 담백한 두부를 곁들이는 빠른 메뉴예요." },
+    { id: "4", title: "김치찜", time: "30분", difficulty: "보통", servings: "2인분", description: "깊은 맛의 국물이 우러난 푸짐한 한 그릇" },
+    { id: "5", title: "파스타 알리오", time: "25분", difficulty: "보통", servings: "1인분", description: "마늘 향 가득한 간단 오일 파스타" },
+    { id: "6", title: "계란말이", time: "15분", difficulty: "쉬움", servings: "2인분", description: "부드럽게 말아낸 기본 집밥 반찬" },
+    { id: "7", title: "된장찌개", time: "20분", difficulty: "쉬움", servings: "2인분", description: "자투리 채소로 끓이는 깊은 맛 찌개" },
+    { id: "8", title: "김치볶음밥", time: "15분", difficulty: "쉬움", servings: "1인분", description: "잘 익은 김치로 볶아낸 간단 한 그릇" },
+    { id: "9", title: "제육볶음", time: "20분", difficulty: "보통", servings: "2인분", description: "고추장 양념에 볶아낸 매콤한 돼지고기 볶음" },
 ];
 
 const MOCK_MINE = [
