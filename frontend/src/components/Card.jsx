@@ -64,11 +64,12 @@ export function ContentCard({
     image,
     author,
     likes,
+    defaultLiked = false,
     badge,
     onClick,
     className = "",
 }) {
-    const [liked, setLiked] = useState(false);
+    const [liked, setLiked] = useState(defaultLiked);
     const hasLikes = Number.isFinite(likes);
 
     return (

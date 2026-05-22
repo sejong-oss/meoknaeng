@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { ChevronDown, Settings, UserAvatar } from "@carbon/icons-react";
+import { ChevronDown, UserAvatar } from "@carbon/icons-react";
 import {
     Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
@@ -89,20 +89,18 @@ export default function My() {
                     <ProfileAvatar className="w-16 h-16 shrink-0" />
                     <div className="flex-1 min-w-0">
                         <h1 className="text-xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
-                        <p className="mt-0.5 text-xs font-medium text-primary-600">
-                            팔로워 {user.followers} · 팔로잉 {user.following}
-                        </p>
+                        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                            <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
+                            <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
+                        </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="shrink-0 !px-2" aria-label="설정">
-                        <Settings size={18} />
-                    </Button>
                 </div>
             </div>
 
             <div className="flex flex-col gap-4 md:grid md:grid-cols-[21.25rem_1fr] md:items-start md:gap-10 md:py-2">
 
                 {/* 사이드바 */}
-                <aside className="flex flex-col gap-4">
+                <aside className="flex flex-col gap-4 md:pt-10">
                     {/* 데스크탑 프로필 */}
                     <div className="hidden md:flex flex-col items-center gap-3 rounded-card border border-gray-100 bg-gradient-to-b from-primary-50 to-white px-4 py-10">
                         <ProfileAvatar className="w-24 h-24" />
@@ -127,7 +125,10 @@ export default function My() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => setEditingIngredients((v) => !v)}
+                                    onClick={() => {
+                                        if (editingIngredients) setIngredientsExpanded(false);
+                                        setEditingIngredients((v) => !v);
+                                    }}
                                 >
                                     {editingIngredients ? "완료" : "편집"}
                                 </Button>
@@ -211,7 +212,6 @@ export default function My() {
                                         time={item.time}
                                         category={item.category}
                                         difficulty={item.difficulty}
-                                        author={item.author}
                                         likes={item.likes}
                                         description={item.description}
                                         onClick={() => navigate(`/feed/${item.id}`)}
@@ -231,7 +231,7 @@ export default function My() {
                                         difficulty={item.difficulty}
                                         author={item.author}
                                         likes={item.likes}
-                                        description={item.description}
+                                        defaultLiked
                                         onClick={() => navigate(`/feed/${item.id}`)}
                                     />
                                 ))}
