@@ -56,14 +56,12 @@ export default function My() {
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
     const ingredientsRef = useRef(null);
-    const expandedRef = useRef(false);
-    expandedRef.current = ingredientsExpanded;
 
     useEffect(() => {
         const el = ingredientsRef.current;
-        if (!el || editingIngredients || expandedRef.current) return;
+        if (!el || editingIngredients || ingredientsExpanded) return;
         setHasOverflow(el.scrollHeight > el.clientHeight + 4);
-    }, [ingredients.length, editingIngredients]);
+    }, [ingredients.length, editingIngredients, ingredientsExpanded]);
 
     if (!user) {
         return (
