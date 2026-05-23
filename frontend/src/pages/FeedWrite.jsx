@@ -31,7 +31,7 @@ import {
     Textarea,
     toast,
 } from "@/components/index.js";
-import { getRecommendedRecipe } from "@/data/recommendedRecipes.js";
+import { getRecommendedRecipe } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
 
 function IngredientRow({ ingredient }) {

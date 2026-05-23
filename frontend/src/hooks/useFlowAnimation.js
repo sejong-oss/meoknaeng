@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { FLOW_ANIMATION_INGREDIENTS, FLOW_ANIMATION_RECIPES } from "@/data/mockData.js";
 
-const INGREDIENTS = ["양파", "계란", "두부"];
-export const RECIPES = [
-    { name: "두부 간장조림", match: 98 },
-    { name: "계란말이", match: 85 },
-    { name: "파채 무침", match: 71 },
-];
+export const RECIPES = FLOW_ANIMATION_RECIPES;
 
 export function useFlowAnimation() {
     const [phase, setPhase] = useState(0);
@@ -27,7 +23,7 @@ export function useFlowAnimation() {
                 setPhase(1);
                 await sleep(400);
 
-                for (const word of INGREDIENTS) {
+                for (const word of FLOW_ANIMATION_INGREDIENTS) {
                     for (let i = 1; i <= word.length; i++) {
                         if (!alive.current) return;
                         setTypingText(word.slice(0, i));

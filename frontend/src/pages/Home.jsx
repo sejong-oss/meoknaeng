@@ -2,14 +2,8 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Chip, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
-import { INGREDIENT_LIST, SITE_NAME } from "@/lib/constants.js";
-
-const COMMON_INGREDIENTS = [
-    "마늘", "양파", "계란", "대파", "감자", "당근", "두부", "간장", "김치", "우유", "치즈", "쌀",
-];
-
-const RECENT_INGREDIENTS = ["삼겹살", "파스타면", "참치캔", "치즈", "우유", "애호박"];
-
+import { COMMON_INGREDIENTS, INGREDIENT_LIST, RECENT_INGREDIENTS } from "@/data/mockData.js";
+import { SITE_NAME } from "@/lib/constants.js";
 export default function Home() {
     const navigate = useNavigate();
     const [ingredients, setIngredients] = useState([]);

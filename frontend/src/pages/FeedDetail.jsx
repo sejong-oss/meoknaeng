@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { FEED_DETAIL_FALLBACKS, FEED_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
 import {
     ArrowLeft,
@@ -30,92 +31,6 @@ import {
     RecipeStat,
     RecipeStepRow,
 } from "@/components/index.js";
-
-const FEED_RECIPES = {
-    "1": {
-        id: "1",
-        title: "된장찌개",
-        description: "멸치육수 없이도 깊은 맛이 나도록 된장과 고추장을 살짝 섞어 끓였어요. 냉장고에 남은 자투리 채소를 정리하기 좋은 집밥 메뉴입니다.",
-        note: "두부를 마지막에 넣고 오래 젓지 않으면 모양이 덜 부서져요.",
-        time: "20분",
-        difficulty: "쉬움",
-        category: "한식",
-        servings: "2인분",
-        createdAt: "3시간 전",
-        author: {
-            name: "집밥하는모카",
-        },
-        likes: 312,
-        bookmarks: 89,
-        ingredients: [
-            { name: "두부", amount: "1/2모" },
-            { name: "된장", amount: "2T" },
-            { name: "애호박", amount: "1/3개" },
-            { name: "양파", amount: "1/2개" },
-            { name: "대파", amount: "약간" },
-            { name: "청양고추", amount: "1개" },
-        ],
-        steps: [
-            "물에 된장과 고추장을 풀고 양파, 애호박을 넣어 중불에서 끓여주세요.",
-            "국물이 끓으면 두부를 큼직하게 썰어 넣고 5분 정도 더 끓여주세요.",
-            "대파와 청양고추를 넣은 뒤 한소끔 끓이고 간을 맞춰 마무리해주세요.",
-        ],
-        comments: [
-            { id: 1, author: "냉장고정리중", body: "고추장 조금 넣는 게 진짜 포인트네요. 국물이 훨씬 둥글어졌어요.", time: "2시간 전", likes: 5 },
-            { id: 2, author: "두부좋아", body: "저는 버섯도 넣었는데 잘 어울렸어요.", time: "1시간 전", likes: 2 },
-            { id: 3, author: "밥한공기", body: "오늘 저녁으로 바로 해먹었습니다. 간단해서 좋아요.", time: "34분 전", likes: 1 },
-        ],
-        related: [
-            { id: "2", title: "두부 스테이크", time: "20분", difficulty: "쉬움", servings: "1인분", description: "물기를 뺀 두부를 노릇하게 굽고 달큰한 간장 소스를 끼얹은 반찬" },
-            { id: "4", title: "계란말이", time: "20분", difficulty: "쉬움", servings: "2인분", description: "부드럽게 말아낸 계란에 남은 채소를 더한 기본 집밥 반찬" },
-        ],
-    },
-    "2": {
-        id: "2",
-        title: "두부 스테이크",
-        description: "물기를 뺀 두부를 노릇하게 굽고 달큰한 간장 소스를 끼얹은 든든한 반찬이에요.",
-        note: "두부를 굽기 전에 전분을 얇게 입히면 겉면이 더 바삭해져요.",
-        time: "20분",
-        difficulty: "쉬움",
-        category: "한식",
-        servings: "1인분",
-        createdAt: "어제",
-        author: {
-            name: "오늘의키친",
-        },
-        likes: 187,
-        bookmarks: 42,
-        ingredients: [
-            { name: "두부", amount: "1모" },
-            { name: "간장", amount: "2T" },
-            { name: "전분", amount: "2T" },
-            { name: "올리고당", amount: "1T" },
-            { name: "쪽파", amount: "약간" },
-        ],
-        steps: [
-            "두부는 키친타월로 물기를 빼고 두툼하게 썰어 전분을 묻혀주세요.",
-            "달군 팬에 기름을 두르고 두부를 앞뒤로 노릇하게 구워주세요.",
-            "간장, 올리고당, 물을 섞은 소스를 넣고 윤기가 돌 때까지 졸여주세요.",
-        ],
-        comments: [
-            { id: 1, author: "단짠러버", body: "소스 비율이 좋아서 밥반찬으로 딱이에요.", time: "5시간 전", likes: 4 },
-            { id: 2, author: "프라이팬요리", body: "전분 묻히니까 훨씬 맛있네요.", time: "3시간 전", likes: 1 },
-        ],
-        related: [
-            { id: "1", title: "된장찌개", time: "20분", difficulty: "쉬움", servings: "2인분", description: "자투리 채소와 두부로 빠르게 끓이는 깊은 맛의 집밥 찌개" },
-            { id: "3", title: "김치볶음밥", time: "20분", difficulty: "쉬움", servings: "1인분", description: "잘 익은 김치와 밥을 볶아 한 그릇으로 끝내는 간단 메뉴" },
-        ],
-    },
-};
-
-const FALLBACK_RECIPES = {
-    "3": { title: "김치볶음밥", author: "자취요리", likes: 94, category: "한식" },
-    "4": { title: "계란말이", author: "고동그라미", likes: 428, category: "한식" },
-    "5": { title: "알리오올리오", author: "파스타러버", likes: 221, category: "양식", time: "25분", difficulty: "보통" },
-    "6": { title: "떡볶이", author: "맵부심", likes: 156, category: "한식", time: "15분" },
-    "7": { title: "오믈렛 브런치", author: "브런치킹", likes: 98, category: "양식", time: "12분" },
-    "8": { title: "비빔국수", author: "쿨하게쿡", likes: 267, category: "한식", time: "10분" },
-};
 
 const StatChip = ({ Icon, children }) => (
     <Chip variant="neutral">
@@ -242,14 +157,14 @@ const RelatedRecipeRow = ({ recipe, onClick }) => {
 };
 
 function buildRecipe(id) {
-    const fallback = FALLBACK_RECIPES[id];
+    const fallback = FEED_DETAIL_FALLBACKS[id];
 
     if (!fallback) {
         return null;
     }
 
     return {
-        ...FEED_RECIPES["1"],
+        ...FEED_DETAIL_RECIPES["1"],
         id,
         title: fallback.title,
         time: fallback.time ?? "20분",
@@ -271,7 +186,7 @@ export default function FeedDetail() {
     const stepsRef = useRef(null);
     const [liked, setLiked] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
-    const recipe = useMemo(() => FEED_RECIPES[id] ?? buildRecipe(id), [id]);
+    const recipe = useMemo(() => FEED_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
 
     if (!recipe) {
         return (

@@ -1,5 +1,6 @@
 import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { RECIPE_DETAIL_FALLBACKS, RECIPE_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
 import {
     ArrowLeft,
@@ -21,55 +22,6 @@ import {
     RecipeStat,
     RecipeStepRow,
 } from "@/components/index.js";
-
-const RECIPES = {
-    "dubu-jorim": {
-        id: "dubu-jorim",
-        title: "두부 간장조림",
-        match: 98,
-        time: "20분",
-        difficulty: "쉬움",
-        servings: "2인분",
-        description: "짭조름한 양념이 두부에 잘 스며들어 밥이 술술 넘어가는 한 그릇. 양파의 단맛이 두부의 고소함과 어우러져 깊은 맛을 내요.",
-        summary: "냉장고 재료 그대로 만들 수 있는 든든한 집밥 반찬이에요.",
-        ingredients: [
-            { name: "두부", amount: "1모", status: "owned" },
-            { name: "간장", amount: "3T", status: "owned" },
-            { name: "양파", amount: "1/2개", status: "owned" },
-            { name: "대파", amount: "약간", status: "owned" },
-            { name: "다진마늘", amount: "1T", status: "needed" },
-            { name: "참기름", amount: "1t", status: "optional" },
-        ],
-        steps: [
-            "두부는 키친타월로 물기를 닦고 먹기 좋은 두께로 썰어주세요.",
-            "달군 팬에 기름을 두르고 두부를 앞뒤로 노릇하게 구워주세요.",
-            "간장, 다진마늘, 물, 양파를 넣고 중약불에서 양념을 끼얹으며 졸여주세요.",
-            "대파와 참기름을 넣고 한 번 더 뒤적여 마무리해주세요.",
-        ],
-        videos: [
-            { title: "[집밥백선생] 두부 간장조림 황금레시피", channel: "백선생", views: "조회 124만", duration: "4:32" },
-            { title: "밥도둑 두부조림, 냉장고 재료로 끝", channel: "오늘의 집밥", views: "조회 38만", duration: "6:18" },
-            { title: "부서지지 않는 두부조림 양념 비율", channel: "요리노트", views: "조회 21만", duration: "5:04" },
-        ],
-    },
-};
-
-const FALLBACK_RECIPES = {
-    "2": {
-        title: "두부 계란말이",
-        time: "15분",
-        difficulty: "쉬움",
-        servings: "1인분",
-        description: "계란과 두부를 부드럽게 말아내는 간단한 반찬이에요.",
-    },
-    "3": {
-        title: "두부김치",
-        time: "12분",
-        difficulty: "쉬움",
-        servings: "2인분",
-        description: "매콤한 김치에 담백한 두부를 곁들이는 빠른 메뉴예요.",
-    },
-};
 
 const ingredientStatusStyles = {
     owned: {
@@ -133,14 +85,14 @@ const VideoCard = ({ video }) => (
 );
 
 function buildRecipe(id) {
-    const fallback = FALLBACK_RECIPES[id];
+    const fallback = RECIPE_DETAIL_FALLBACKS[id];
 
     if (!fallback) {
         return null;
     }
 
     return {
-        ...RECIPES["dubu-jorim"],
+        ...RECIPE_DETAIL_RECIPES["dubu-jorim"],
         id,
         match: 92,
         title: fallback.title,
@@ -156,7 +108,7 @@ export default function RecipeDetail() {
     const { id = "dubu-jorim" } = useParams();
     const navigate = useNavigate();
     const stepsRef = useRef(null);
-    const recipe = useMemo(() => RECIPES[id] ?? buildRecipe(id), [id]);
+    const recipe = useMemo(() => RECIPE_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
 
     if (!recipe) {
         return (

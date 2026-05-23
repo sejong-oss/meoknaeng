@@ -16,51 +16,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuItem,
 } from "@/components/index.js";
-import { RECOMMENDED_RECIPES } from "@/data/recommendedRecipes.js";
+import { FEED_FILTER_OPTIONS, FEED_ITEMS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
-
-const FEED_ITEMS = [
-    { id: 1, title: "된장찌개", time: "20분", category: "한식", difficulty: "쉬움", author: "집밥하는모카", likes: 312 },
-    { id: 2, title: "두부 스테이크", time: "20분", category: "한식", difficulty: "쉬움", author: "오늘의키친", likes: 187 },
-    { id: 3, title: "김치볶음밥", time: "20분", category: "한식", difficulty: "쉬움", author: "자취요리", likes: 94 },
-    { id: 4, title: "계란말이", time: "20분", category: "한식", difficulty: "쉬움", author: "고동그라미", likes: 428 },
-    { id: 5, title: "알리오올리오", time: "25분", category: "양식", difficulty: "보통", author: "파스타러버", likes: 221 },
-    { id: 6, title: "떡볶이", time: "15분", category: "한식", difficulty: "쉬움", author: "맵부심", likes: 156 },
-    { id: 7, title: "오믈렛 브런치", time: "12분", category: "양식", difficulty: "쉬움", author: "브런치킹", likes: 98 },
-    { id: 8, title: "비빔국수", time: "10분", category: "한식", difficulty: "쉬움", author: "쿨하게쿡", likes: 267 },
-];
-
-const FILTER_OPTIONS = [
-    {
-        group: "category",
-        label: "카테고리",
-        options: [
-            { label: "한식", value: "한식" },
-            { label: "양식", value: "양식" },
-            { label: "일식", value: "일식" },
-            { label: "중식", value: "중식" },
-            { label: "간식", value: "간식" },
-        ],
-    },
-    {
-        group: "time",
-        label: "조리시간",
-        options: [
-            { label: "15분 이내", value: "15" },
-            { label: "30분 이내", value: "30" },
-            { label: "1시간 이내", value: "60" },
-        ],
-    },
-    {
-        group: "difficulty",
-        label: "난이도",
-        options: [
-            { label: "쉬움", value: "쉬움" },
-            { label: "보통", value: "보통" },
-            { label: "어려움", value: "어려움" },
-        ],
-    },
-];
 
 export default function Feed() {
     const navigate = useNavigate();
@@ -153,7 +110,7 @@ export default function Feed() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-52">
-                            {FILTER_OPTIONS.map(({ group, label, options }) => (
+                            {FEED_FILTER_OPTIONS.map(({ group, label, options }) => (
                                 <div key={group}>
                                     <DropdownMenuLabel>{label}</DropdownMenuLabel>
                                     <div className="flex flex-wrap gap-x-1.5 gap-y-1 px-3 pb-2 mt-1">
