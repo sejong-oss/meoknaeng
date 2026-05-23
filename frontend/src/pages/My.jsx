@@ -121,8 +121,8 @@ export default function My() {
                     <Card>
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
-                                <h3 className="text-xl font-extrabold tracking-tight text-gray-900">내 재료</h3>
-                                <Chip variant="brand-soft">{ingredients.length}</Chip>
+                                <h3 className="text-lg font-extrabold tracking-tight text-gray-900">내 재료</h3>
+                                <Chip variant="neutral">{ingredients.length}</Chip>
                             </div>
                             <div className="flex items-center gap-1">
                                 <Button
