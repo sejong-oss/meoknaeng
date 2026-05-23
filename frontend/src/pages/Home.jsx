@@ -55,35 +55,44 @@ export default function Home() {
                             재료를 입력하면 AI가 가능한 요리 조합을 찾아드려요.
                             </p>
                         </div>
-                        <IngredientInput
-                            ref={ingredientInputRef}
-                            ingredients={ingredients}
-                            onAdd={handleAdd}
-                            onRemove={handleRemove}
-                            ingredientList={INGREDIENT_LIST}
-                            chipClassName="!px-4 !py-2 !text-sm !gap-1.5"
-                            footer={
-                                <div className="hidden md:flex items-center justify-between gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        disabled={ingredients.length === 0}
-                                        onClick={handleReset}
-                                    >
-                                    전체 초기화
-                                    </Button>
-                                    <Button
-                                        variant="primary"
-                                        size="lg"
-                                        disabled={ingredients.length === 0}
-                                        onClick={() => navigate("/recipes", { state: { ingredients } })}
-                                    >
-                                    레시피 추천 받기
-                                        <ArrowRight size={16} />
-                                    </Button>
-                                </div>
-                            }
-                        />
+                        <div
+                            className={[
+                                "flex flex-col gap-3",
+                                "px-4 py-3 md:px-5 md:pt-5 md:pb-3",
+                                "bg-white border border-gray-200 rounded-card cursor-text",
+                                "shadow-sm md:shadow-lg",
+                                "focus-within:border-primary-400 transition-colors duration-150",
+                            ].join(" ")}
+                            onClick={() => ingredientInputRef.current?.focus()}
+                        >
+                            <IngredientInput
+                                ref={ingredientInputRef}
+                                ingredients={ingredients}
+                                onAdd={handleAdd}
+                                onRemove={handleRemove}
+                                ingredientList={INGREDIENT_LIST}
+                                chipClassName="!px-4 !py-2 !text-sm !gap-1.5"
+                            />
+                            <div className="hidden md:flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={ingredients.length === 0}
+                                    onClick={(e) => { e.stopPropagation(); handleReset(); }}
+                                >
+                                전체 초기화
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    disabled={ingredients.length === 0}
+                                    onClick={(e) => { e.stopPropagation(); navigate("/recipes", { state: { ingredients } }); }}
+                                >
+                                레시피 추천 받기
+                                    <ArrowRight size={16} />
+                                </Button>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-16 mt-2">

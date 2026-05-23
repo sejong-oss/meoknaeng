@@ -6,7 +6,6 @@ export const IngredientInput = forwardRef(function IngredientInput({
     onAdd,
     onRemove,
     ingredientList = [],
-    footer,
     chipClassName = "",
     className = "",
 }, ref) {
@@ -16,6 +15,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
 
     useImperativeHandle(ref, () => ({
         reset: () => setQuery(""),
+        focus: () => inputRef.current?.focus(),
     }));
 
     const suggestions = useMemo(() => {
@@ -66,42 +66,27 @@ export const IngredientInput = forwardRef(function IngredientInput({
     return (
         <div className={`flex flex-col ${className}`}>
             <div
-                className={[
-                    "flex flex-col gap-3",
-                    "px-4 py-3 md:px-5 md:pt-5 md:pb-3",
-                    "bg-white border border-gray-200 rounded-card cursor-text",
-                    "shadow-sm md:shadow-lg",
-                    "focus-within:border-primary-400 transition-colors duration-150",
-                ].join(" ")}
+                onClick={() => inputRef.current?.focus()}
+                className="flex flex-wrap content-start items-center gap-2 md:gap-2.5 min-h-[2.5rem]"
             >
-                <div
-                    onClick={() => inputRef.current?.focus()}
-                    className="flex flex-wrap content-start items-center gap-2 md:gap-2.5 min-h-[2.5rem]"
-                >
-                    {ingredients.map((item) => (
-                        <Chip
-                            key={item}
-                            variant="brand"
-                            onRemove={() => onRemove?.(item)}
-                            className={chipClassName}
-                        >
-                            {item}
-                        </Chip>
-                    ))}
-                    <input
-                        ref={inputRef}
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={ingredients.length === 0 ? "재료를 입력하세요" : ""}
-                        className="bg-transparent outline-none text-base text-gray-900 placeholder:text-gray-400 min-w-[2rem] flex-1 py-1.5 px-1"
-                    />
-                </div>
-                {footer && (
-                    <div className="pt-3 border-t border-gray-100">
-                        {footer}
-                    </div>
-                )}
+                {ingredients.map((item) => (
+                    <Chip
+                        key={item}
+                        variant="brand"
+                        onRemove={() => onRemove?.(item)}
+                        className={chipClassName}
+                    >
+                        {item}
+                    </Chip>
+                ))}
+                <input
+                    ref={inputRef}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={ingredients.length === 0 ? "재료를 입력하세요" : ""}
+                    className="bg-transparent outline-none text-base text-gray-900 placeholder:text-gray-400 min-w-[2rem] flex-1 py-1.5 px-1"
+                />
             </div>
             {suggestions.length > 0 && (
                 <div className="mt-1 bg-white border border-gray-200 rounded-card overflow-hidden shadow-lg">

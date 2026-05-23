@@ -21,8 +21,7 @@ export const AllInputs = () => (
 export const IngredientInput = () => {
     const [ingredients, setIngredients] = useState(["양파", "계란"]);
     return (
-        <div className="p-8 bg-gray-50 font-sans max-w-md">
-            <p className="text-xs text-gray-400 mb-3">자동완성 포함 — "마", "두" 등 입력해보기</p>
+        <div className="p-8 font-sans max-w-md">
             <IngredientInputComponent
                 ingredients={ingredients}
                 onAdd={(v) => setIngredients((prev) => [...prev, v])}
