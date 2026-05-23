@@ -5,6 +5,7 @@ from app.api.ingredients_schemas import (
     IngredientAutocompleteResponse,
 )
 from app.models.schemas import ApiResponse
+from app.service.ingredients import search_ingredients
 
 router = APIRouter(prefix="/ingredients", tags=["ingredients"])
 
@@ -226,12 +227,10 @@ async def autocomplete_ingredients(
             data=IngredientAutocompleteResponse(query=query, limit=limit, items=[]),
         )
 
-    normalized_query = query.casefold()
     matched_items = [
         IngredientAutocompleteItem(**ingredient)
-        for ingredient in _INGREDIENT_SEEDS
-        if normalized_query in ingredient["name"].casefold()
-    ][:limit]
+        for ingredient in search_ingredients(_INGREDIENT_SEEDS, query, limit)
+    ]
 
     return ApiResponse(
         success=True,
