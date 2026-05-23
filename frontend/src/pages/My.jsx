@@ -118,7 +118,7 @@ export default function My() {
                     </div>
 
                     {/* 내 재료 */}
-                    <Card>
+                    <Card className="!p-5">
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                                 <h3 className="text-lg font-extrabold tracking-tight text-gray-900">내 재료</h3>
