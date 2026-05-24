@@ -29,7 +29,6 @@ const authUserToView = (user) => ({
 export const useAppStore = create((set) => ({
     user: null,
     authStatus: "idle",
-    authError: null,
     loginModalOpen: false,
     pantryIngredients: [],
     recommendationIngredients: RECIPE_RESULT_INGREDIENTS,
@@ -44,7 +43,7 @@ export const useAppStore = create((set) => ({
     openLoginModal: () => set({ loginModalOpen: true }),
     setLoginModalOpen: (loginModalOpen) => set({ loginModalOpen }),
     restoreSession: async () => {
-        set({ authStatus: "checking", authError: null });
+        set({ authStatus: "checking" });
 
         try {
             const user = await getMyProfile();
@@ -55,20 +54,17 @@ export const useAppStore = create((set) => ({
                 pantryIngredients: nextUser.ingredients,
                 authStatus: "success",
             });
-        } catch (error) {
+        } catch {
             set({
                 user: null,
                 pantryIngredients: [],
                 authStatus: "idle",
             });
 
-            if (error.status && error.status !== 401) {
-                set({ authError: error.message });
-            }
         }
     },
     login: async (credentials) => {
-        set({ authStatus: "loading", authError: null });
+        set({ authStatus: "loading" });
 
         try {
             const user = await loginRequest(credentials);
@@ -81,15 +77,12 @@ export const useAppStore = create((set) => ({
                 authStatus: "success",
             });
         } catch (error) {
-            set({
-                authStatus: "error",
-                authError: error.message,
-            });
+            set({ authStatus: "error" });
             throw error;
         }
     },
     signup: async (credentials) => {
-        set({ authStatus: "loading", authError: null });
+        set({ authStatus: "loading" });
 
         try {
             await signupRequest(credentials);
@@ -106,15 +99,12 @@ export const useAppStore = create((set) => ({
                 authStatus: "success",
             });
         } catch (error) {
-            set({
-                authStatus: "error",
-                authError: error.message,
-            });
+            set({ authStatus: "error" });
             throw error;
         }
     },
     logout: async () => {
-        set({ authStatus: "loading", authError: null });
+        set({ authStatus: "loading" });
 
         try {
             await logoutRequest();
@@ -132,9 +122,6 @@ export const useAppStore = create((set) => ({
     removePantryIngredient: (ingredient) => set((state) => ({
         pantryIngredients: state.pantryIngredients.filter((item) => item !== ingredient),
     })),
-    setPantryIngredients: (ingredients) => set({
-        pantryIngredients: uniqueItems(ingredients),
-    }),
     setRecommendationIngredients: (ingredients) => set({
         recommendationIngredients: uniqueItems(ingredients),
     }),

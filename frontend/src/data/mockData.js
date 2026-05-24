@@ -8,7 +8,7 @@ const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
 const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 const toDateLabel = (value) => value;
 
-export const MOCK_INGREDIENT_AUTOCOMPLETE_RESPONSE = apiResponse({
+const MOCK_INGREDIENT_AUTOCOMPLETE_RESPONSE = apiResponse({
     query: "",
     limit: 10,
     items: [
@@ -77,7 +77,7 @@ export const FLOW_ANIMATION_RECIPES = [
 
 export const RECIPE_RESULT_INGREDIENTS = ["양파", "계란", "두부", "대파", "간장"];
 
-export const MOCK_RECIPE_RECOMMEND_RESPONSE = apiResponse({
+const MOCK_RECIPE_RECOMMEND_RESPONSE = apiResponse({
     recipes: [
         {
             recipe_id: "dubu-jorim",
@@ -248,7 +248,7 @@ const recommendedRecipes = MOCK_RECIPE_RECOMMEND_RESPONSE.data.recipes;
 export const RECIPE_RESULT_HERO = recipeSummaryToView(recommendedRecipes[0]);
 export const RECIPE_RESULT_OTHERS = recommendedRecipes.slice(1).map(recipeSummaryToView);
 
-export const MOCK_RECIPE_DETAIL_RESPONSES = {
+const MOCK_RECIPE_DETAIL_RESPONSES = {
     "dubu-jorim": apiResponse({
         recipe_id: "dubu-jorim",
         name: "두부 간장조림",
@@ -274,7 +274,7 @@ export const MOCK_RECIPE_DETAIL_RESPONSES = {
     }),
 };
 
-export const MOCK_RECIPE_VIDEOS_BY_ID = {
+const MOCK_RECIPE_VIDEOS_BY_ID = {
     "dubu-jorim": [
         { title: "[집밥백선생] 두부 간장조림 황금레시피", channel: "백선생", views: "조회 124만", duration: "4:32" },
         { title: "밥도둑 두부조림, 냉장고 재료로 끝", channel: "오늘의 집밥", views: "조회 38만", duration: "6:18" },
@@ -314,7 +314,7 @@ export const RECIPE_DETAIL_FALLBACKS = Object.fromEntries(
     recommendedRecipes.slice(1, 3).map((recipe) => [recipe.recipe_id, recipeSummaryToView(recipe)])
 );
 
-export const MOCK_POST_LIST_RESPONSE = apiResponse({
+const MOCK_POST_LIST_RESPONSE = apiResponse({
     posts: [
         {
             post_id: "1",
@@ -418,7 +418,7 @@ export const MOCK_POST_LIST_RESPONSE = apiResponse({
     size: 20,
 });
 
-export const MOCK_POST_SOCIAL_BY_ID = {
+const MOCK_POST_SOCIAL_BY_ID = {
     "1": {
         likes: 312,
         bookmarks: 89,
@@ -533,7 +533,7 @@ const tofuSteakSourceRecipe = {
     ],
 };
 
-export const MOCK_POST_DETAIL_RESPONSES = {
+const MOCK_POST_DETAIL_RESPONSES = {
     "1": apiResponse({
         post_id: "1",
         author_id: "user-mocha",
@@ -568,7 +568,7 @@ export const MOCK_POST_DETAIL_RESPONSES = {
     }),
 };
 
-export const FEED_RELATED_RECIPES_BY_ID = {
+const FEED_RELATED_RECIPES_BY_ID = {
     "1": [
         { recipe_id: "2", name: "두부 스테이크", description: "물기를 뺀 두부를 노릇하게 굽고 달큰한 간장 소스를 끼얹은 반찬", cook_time: 20, difficulty: "쉬움", servings: 1 },
         { recipe_id: "4", name: "계란말이", description: "부드럽게 말아낸 계란에 남은 채소를 더한 기본 집밥 반찬", cook_time: 20, difficulty: "쉬움", servings: 2 },
@@ -647,16 +647,7 @@ export function getRecommendedRecipe(id) {
     return RECOMMENDED_RECIPES.find((recipe) => recipe.id === id);
 }
 
-export const MOCK_MY_PROFILE_RESPONSE = apiResponse({
-    user_id: "user-mocha",
-    nickname: "모카",
-    recipe_count: 12,
-    follower_count: 24,
-    following_count: 38,
-    ingredients: ["양파", "계란", "두부", "대파", "간장", "마늘", "감자", "당근", "김치", "쌀", "우유", "치즈"],
-});
-
-export const MOCK_MY_SAVED_RECIPES_RESPONSE = apiResponse({
+const MOCK_MY_SAVED_RECIPES_RESPONSE = apiResponse({
     recipes: [
         { recipe_id: "dubu-jorim", name: "두부 간장조림", cook_time_minutes: 20, difficulty: "쉬움", servings: 2, summary: "짭조름한 양념이 두부에 잘 스며드는 집밥 반찬" },
         { recipe_id: "2", name: "두부 계란말이", cook_time_minutes: 15, difficulty: "쉬움", servings: 1, summary: "계란과 두부를 부드럽게 말아내는 간단한 반찬이에요." },
@@ -670,7 +661,7 @@ export const MOCK_MY_SAVED_RECIPES_RESPONSE = apiResponse({
     ],
 });
 
-export const MOCK_MY_POSTS_RESPONSE = apiResponse({
+const MOCK_MY_POSTS_RESPONSE = apiResponse({
     posts: [
         { post_id: "f7", title: "떡볶이", description: "쫄깃한 떡에 매콤달콤한 양념을 더한 분식", cook_time: 15, category: "한식", difficulty: "쉬움", author_nickname: "모카", like_count: 156 },
         { post_id: "f8", title: "미역국", description: "참기름 향 가득한 든든한 국", cook_time: 25, category: "한식", difficulty: "쉬움", author_nickname: "모카", like_count: 89 },
@@ -678,20 +669,12 @@ export const MOCK_MY_POSTS_RESPONSE = apiResponse({
     ],
 });
 
-export const MOCK_MY_LIKED_POSTS_RESPONSE = apiResponse({
+const MOCK_MY_LIKED_POSTS_RESPONSE = apiResponse({
     posts: [
         { post_id: "1", title: "된장찌개", description: "자투리 채소와 두부로 빠르게 끓이는 집밥 찌개", cook_time: 20, category: "한식", difficulty: "쉬움", author_nickname: "집밥하는모카", like_count: 312 },
         { post_id: "2", title: "두부 스테이크", description: "물기를 뺀 두부를 노릇하게 굽고 소스를 끼얹은 반찬", cook_time: 20, category: "한식", difficulty: "쉬움", author_nickname: "오늘의키친", like_count: 187 },
         { post_id: "4", title: "계란말이", description: "부드럽게 말아낸 계란에 남은 채소를 더한 집밥", cook_time: 20, category: "한식", difficulty: "쉬움", author_nickname: "고동그라미", like_count: 428 },
     ],
-});
-
-const myProfileToView = (profile) => ({
-    name: profile.nickname,
-    recipes: profile.recipe_count,
-    followers: profile.follower_count,
-    following: profile.following_count,
-    ingredients: profile.ingredients,
 });
 
 const myPostToView = (post) => ({
@@ -705,7 +688,6 @@ const myPostToView = (post) => ({
     description: post.description,
 });
 
-export const MY_PROFILE = myProfileToView(MOCK_MY_PROFILE_RESPONSE.data);
 export const MY_SAVED_RECIPES = MOCK_MY_SAVED_RECIPES_RESPONSE.data.recipes.map(recipeSummaryToView);
 export const MY_POSTS = MOCK_MY_POSTS_RESPONSE.data.posts.map(myPostToView);
 export const MY_LIKED_POSTS = MOCK_MY_LIKED_POSTS_RESPONSE.data.posts.map(myPostToView);
