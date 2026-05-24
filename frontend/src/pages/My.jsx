@@ -2,20 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Checkmark, ChevronDown, Edit, UserAvatar } from "@carbon/icons-react";
 import {
-    Button, Card, Chip, EmptyState,
+    Avatar, Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
     Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
-
-function ProfileAvatar({ className = "" }) {
-    return (
-        <div className={`rounded-full bg-gradient-to-br from-primary-200 to-primary-400 border-4 border-white shadow-lg ${className}`} />
-    );
-}
-
 
 export default function My() {
     const navigate = useNavigate();
@@ -83,7 +76,7 @@ export default function My() {
             {/* 모바일 히어로 */}
             <div className="md:hidden -mx-4 -mt-6 mb-5 bg-gradient-to-b from-primary-50 to-white px-5 pb-6 pt-7">
                 <div className="flex items-center gap-4">
-                    <ProfileAvatar className="w-16 h-16 shrink-0" />
+                    <Avatar name={user.name} size="xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                     <div className="flex-1 min-w-0">
                         <h1 className="text-xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
                         <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
@@ -100,7 +93,7 @@ export default function My() {
                 <aside className="flex flex-col gap-4 md:pt-10">
                     {/* 데스크탑 프로필 */}
                     <div className="hidden md:flex flex-col items-center gap-3 rounded-card border border-gray-100 bg-gradient-to-b from-primary-50 to-white px-4 py-10">
-                        <ProfileAvatar className="w-24 h-24" />
+                        <Avatar name={user.name} size="2xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                         <div className="text-center mt-1">
                             <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
                             <div className="mt-2 flex items-center gap-3.5 justify-center text-xs text-gray-500">
