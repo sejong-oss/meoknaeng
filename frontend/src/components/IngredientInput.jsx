@@ -9,6 +9,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
     ingredientList = [],
     chipClassName = "",
     className = "",
+    inputClassName = "",
     suggestionsAnchorRef,
 }, ref) {
     const [query, setQuery] = useState("");
@@ -88,7 +89,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={ingredients.length === 0 ? "재료를 입력하세요" : ""}
-                    className="bg-transparent outline-none text-base text-gray-900 placeholder:text-gray-400 min-w-[2rem] flex-1 py-1.5 px-1"
+                    className={`bg-transparent outline-none text-base text-gray-900 placeholder:text-gray-400 min-w-[2rem] flex-1 py-1.5 px-1 ${inputClassName}`}
                 />
             </div>
         </div>

@@ -56,37 +56,27 @@ export default function My() {
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
     const ingredientsRef = useRef(null);
+    const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
 
     useEffect(() => {
         const el = ingredientsRef.current;
-        if (!hasIngredients) {
-            setHasOverflow(false);
-            return;
-        }
-        if (!el || editingIngredients) return;
+        const collapsedHeightEl = collapsedIngredientsHeightRef.current;
+        if (!hasIngredients) return;
+        if (!el || !collapsedHeightEl || editingIngredients) return;
 
         const computeOverflow = () => {
-            const collapsedHeightValue = getComputedStyle(el)
-                .getPropertyValue("--ingredients-collapsed-height")
-                .trim();
-            const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-            const collapsedHeight = collapsedHeightValue.endsWith("rem")
-                ? parseFloat(collapsedHeightValue) * rootFontSize
-                : parseFloat(collapsedHeightValue);
-
-            setHasOverflow(el.scrollHeight > collapsedHeight + 4);
+            setHasOverflow(el.scrollHeight > collapsedHeightEl.offsetHeight + 4);
         };
 
         computeOverflow();
 
         const resizeObserver = new ResizeObserver(computeOverflow);
         resizeObserver.observe(el);
-        window.addEventListener("resize", computeOverflow);
+        resizeObserver.observe(collapsedHeightEl);
 
         return () => {
             resizeObserver.disconnect();
-            window.removeEventListener("resize", computeOverflow);
         };
     }, [hasIngredients, ingredients.length, editingIngredients]);
 
@@ -183,15 +173,20 @@ export default function My() {
                                 onRemove={(value) => setIngredients((prev) => prev.filter((i) => i !== value))}
                                 ingredientList={INGREDIENT_LIST}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2.5"
+                                inputClassName="!text-sm"
                             />
                         ) : hasIngredients ? (
-                            <div className="mt-2 rounded-card border border-transparent bg-gray-50 px-3 py-2.5">
+                            <div className="relative mt-2 rounded-card border border-transparent bg-gray-50 px-3 py-2.5">
+                                <div
+                                    ref={collapsedIngredientsHeightRef}
+                                    aria-hidden="true"
+                                    className="pointer-events-none absolute h-[4.5rem] w-px opacity-0 md:h-28"
+                                />
                                 <div
                                     ref={ingredientsRef}
                                     className={[
                                         "flex flex-wrap gap-2.5 overflow-hidden transition-[max-height] duration-300",
-                                        "[--ingredients-collapsed-height:4.5rem] md:[--ingredients-collapsed-height:7rem]",
-                                        ingredientsExpanded ? "max-h-none" : "max-h-[var(--ingredients-collapsed-height)]",
+                                        ingredientsExpanded ? "max-h-none" : "max-h-[4.5rem] md:max-h-28",
                                     ].join(" ")}
                                 >
                                     {ingredients.map((ing) => (
