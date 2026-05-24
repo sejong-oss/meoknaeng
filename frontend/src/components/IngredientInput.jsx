@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef, forwardRef, useImperativeHandle } from "react";
+import * as Popover from "@radix-ui/react-popover";
 import { Chip } from "@/components/Chip.jsx";
 
 export const IngredientInput = forwardRef(function IngredientInput({
@@ -8,9 +9,11 @@ export const IngredientInput = forwardRef(function IngredientInput({
     ingredientList = [],
     chipClassName = "",
     className = "",
+    suggestionsAnchorRef,
 }, ref) {
     const [query, setQuery] = useState("");
     const [activeIdx, setActiveIdx] = useState(-1);
+    const rootRef = useRef(null);
     const inputRef = useRef(null);
 
     useImperativeHandle(ref, () => ({
@@ -62,9 +65,10 @@ export const IngredientInput = forwardRef(function IngredientInput({
     }
 
     const highlightIdx = activeIdx === -1 && suggestions.length > 0 ? 0 : activeIdx;
+    const open = suggestions.length > 0;
 
-    return (
-        <div className={`flex flex-col ${className}`}>
+    const inputBody = (
+        <div ref={rootRef} className={`relative flex flex-col ${className}`}>
             <div
                 onClick={() => inputRef.current?.focus()}
                 className="flex flex-wrap content-start items-center gap-2 md:gap-2.5 min-h-[2.5rem]"
@@ -88,8 +92,30 @@ export const IngredientInput = forwardRef(function IngredientInput({
                     className="bg-transparent outline-none text-base text-gray-900 placeholder:text-gray-400 min-w-[2rem] flex-1 py-1.5 px-1"
                 />
             </div>
-            {suggestions.length > 0 && (
-                <div className="mt-1 bg-white border border-gray-200 rounded-card overflow-hidden shadow-lg">
+        </div>
+    );
+
+    return (
+        <Popover.Root open={open} modal={false}>
+            {suggestionsAnchorRef ? (
+                <>
+                    <Popover.Anchor virtualRef={suggestionsAnchorRef} />
+                    {inputBody}
+                </>
+            ) : (
+                <Popover.Anchor asChild>
+                    {inputBody}
+                </Popover.Anchor>
+            )}
+            <Popover.Portal>
+                <Popover.Content
+                    side="bottom"
+                    align="start"
+                    sideOffset={8}
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                    onCloseAutoFocus={(e) => e.preventDefault()}
+                    className="z-50 w-[var(--radix-popover-trigger-width)] bg-white border border-gray-200 rounded-card overflow-hidden shadow-lg"
+                >
                     {suggestions.map((item, i) => {
                         const matchLen = query.trim().length;
                         const isHighlighted = i === highlightIdx;
@@ -121,8 +147,8 @@ export const IngredientInput = forwardRef(function IngredientInput({
                             </button>
                         );
                     })}
-                </div>
-            )}
-        </div>
+                </Popover.Content>
+            </Popover.Portal>
+        </Popover.Root>
     );
 });
