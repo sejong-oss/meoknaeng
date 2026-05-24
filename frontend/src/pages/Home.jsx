@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Chip, EmptyState, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
@@ -8,26 +8,23 @@ import { useAppStore } from "@/store/useAppStore.js";
 export default function Home() {
     const navigate = useNavigate();
     const user = useAppStore((state) => state.user);
-    const ingredients = useAppStore((state) => state.selectedIngredients);
+    const [ingredients, setIngredients] = useState([]);
     const pantryIngredients = useAppStore((state) => state.pantryIngredients);
-    const addSelectedIngredient = useAppStore((state) => state.addSelectedIngredient);
-    const removeSelectedIngredient = useAppStore((state) => state.removeSelectedIngredient);
-    const setSelectedIngredients = useAppStore((state) => state.setSelectedIngredients);
     const setRecommendationIngredients = useAppStore((state) => state.setRecommendationIngredients);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const inputPanelRef = useRef(null);
     const ingredientInputRef = useRef(null);
 
     function handleAdd(value) {
-        addSelectedIngredient(value);
+        setIngredients((prev) => [...prev, value]);
     }
 
     function handleRemove(item) {
-        removeSelectedIngredient(item);
+        setIngredients((prev) => prev.filter((ingredient) => ingredient !== item));
     }
 
     function handleReset() {
-        setSelectedIngredients([]);
+        setIngredients([]);
         ingredientInputRef.current?.reset();
     }
 
