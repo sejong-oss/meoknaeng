@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import datetime, timezone
 
 from pydantic import ValidationError
@@ -41,6 +42,7 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession) -> RecipeRe
     now = datetime.now(timezone.utc)
     for recipe in response.recipes:
         orm_recipe = RecipeORM(
+            recipe_id=str(uuid.uuid4()),
             name=recipe.name,
             description=recipe.summary,
             cook_time=recipe.cook_time_minutes,
