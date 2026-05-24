@@ -13,7 +13,6 @@ export const IngredientInput = forwardRef(function IngredientInput({
 }, ref) {
     const [query, setQuery] = useState("");
     const [activeIdx, setActiveIdx] = useState(-1);
-    const rootRef = useRef(null);
     const inputRef = useRef(null);
 
     useImperativeHandle(ref, () => ({
@@ -68,7 +67,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
     const open = suggestions.length > 0;
 
     const inputBody = (
-        <div ref={rootRef} className={`relative flex flex-col ${className}`}>
+        <div className={`relative flex flex-col ${className}`}>
             <div
                 onClick={() => inputRef.current?.focus()}
                 className="flex flex-wrap content-start items-center gap-2 md:gap-2.5 min-h-[2.5rem]"

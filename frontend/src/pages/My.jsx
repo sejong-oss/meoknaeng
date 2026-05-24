@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { ChevronDown, UserAvatar } from "@carbon/icons-react";
+import { Checkmark, ChevronDown, Edit, UserAvatar } from "@carbon/icons-react";
 import {
     Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
@@ -150,16 +150,6 @@ export default function My() {
                                 <Chip variant="neutral">{ingredients.length}</Chip>
                             </div>
                             <div className="flex items-center gap-1">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        if (editingIngredients) setIngredientsExpanded(false);
-                                        setEditingIngredients((v) => !v);
-                                    }}
-                                >
-                                    {editingIngredients ? "완료" : "편집"}
-                                </Button>
                                 {!editingIngredients && hasIngredients && (hasOverflow || ingredientsExpanded) && (
                                     <button
                                         type="button"
@@ -172,6 +162,18 @@ export default function My() {
                                         />
                                     </button>
                                 )}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    aria-label={editingIngredients ? "내 재료 편집 완료" : "내 재료 편집"}
+                                    className="h-8 w-8 !px-0 !py-0"
+                                    onClick={() => {
+                                        if (editingIngredients) setIngredientsExpanded(false);
+                                        setEditingIngredients((v) => !v);
+                                    }}
+                                >
+                                    {editingIngredients ? <Checkmark size={16} /> : <Edit size={16} />}
+                                </Button>
                             </div>
                         </div>
                         {editingIngredients ? (
