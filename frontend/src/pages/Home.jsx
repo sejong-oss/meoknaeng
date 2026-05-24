@@ -81,7 +81,7 @@ export default function Home() {
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between gap-3 md:block">
                                 <h1 className="min-w-0 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
-                                오늘은 <span className="text-primary-500">뭐</span> 해먹지?
+                                    오늘은 <span className="text-primary-500">뭐</span> 해먹지?
                                 </h1>
                                 <Button
                                     variant="outline"
@@ -91,11 +91,11 @@ export default function Home() {
                                     className="shrink-0 md:hidden"
                                 >
                                     <Renew size={14} />
-                                전체 초기화
+                                    전체 초기화
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-600">
-                            재료를 입력하면 AI가 가능한 요리 조합을 찾아드려요.
+                                재료를 입력하면 AI가 가능한 요리 조합을 찾아드려요.
                             </p>
                         </div>
                         <div
@@ -125,7 +125,7 @@ export default function Home() {
                                     disabled={ingredients.length === 0}
                                     onClick={(e) => { e.stopPropagation(); handleReset(); }}
                                 >
-                                전체 초기화
+                                    전체 초기화
                                 </Button>
                                 <Button
                                     variant="primary"
@@ -133,7 +133,7 @@ export default function Home() {
                                     disabled={ingredients.length === 0}
                                     onClick={(e) => { e.stopPropagation(); handleRecommend(); }}
                                 >
-                                레시피 추천 받기
+                                    레시피 추천 받기
                                     <ArrowRight size={16} />
                                 </Button>
                             </div>
@@ -213,7 +213,7 @@ export default function Home() {
                         disabled={ingredients.length === 0}
                         onClick={handleRecommend}
                     >
-                    레시피 추천 받기
+                        레시피 추천 받기
                         <ArrowRight size={16} />
                     </Button>
                 </div>
