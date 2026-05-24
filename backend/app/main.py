@@ -59,6 +59,17 @@ async def request_validation_exception_handler(
     )
 
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(
+    request: Request,
+    exc: Exception,
+) -> JSONResponse:
+    return _error_response(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        message="Internal Server Error",
+    )
+
+
 @app.get("/")
 def read_root():
     return {"message": "Recipe Recommender API is running"}
