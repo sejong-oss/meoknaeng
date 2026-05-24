@@ -18,5 +18,7 @@ SESSION_SECRET_KEY = os.getenv(
     "SESSION_SECRET_KEY", "placeholder-session-secret-key"
 )
 
+HTTPS_ONLY = os.getenv("HTTPS_ONLY", "false").lower() == "true"
+
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
 ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]
