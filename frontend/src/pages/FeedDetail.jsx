@@ -1,12 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FEED_DETAIL_FALLBACKS, FEED_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
+import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
     ArrowRight,
-    Bookmark,
-    BookmarkFilled,
     ChevronRight,
     Favorite,
     FavoriteFilled,
@@ -46,7 +45,7 @@ const IngredientRow = ({ ingredient }) => (
     </div>
 );
 
-const PostHeader = ({ recipe, likeCount, bookmarkCount, liked, bookmarked, onLike, onBookmark }) => (
+const PostHeader = ({ recipe, likeCount, liked, onLike }) => (
     <div className="flex flex-col gap-2.5 border-b border-gray-200 pb-4">
         <div className="flex items-center gap-2.5">
             <Avatar name={recipe.author.name} size="md" />
@@ -70,15 +69,6 @@ const PostHeader = ({ recipe, likeCount, bookmarkCount, liked, bookmarked, onLik
                 >
                     {liked ? <FavoriteFilled size={13} /> : <Favorite size={13} />}
                     좋아요 {likeCount}
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onBookmark}
-                    className={`!px-0 !py-0 hover:!bg-transparent hover:text-primary-600 ${bookmarked ? "text-primary-600" : "text-gray-500"}`}
-                >
-                    {bookmarked ? <BookmarkFilled size={13} /> : <Bookmark size={13} />}
-                    북마크 {bookmarkCount}
                 </Button>
             </div>
             <Button
@@ -184,8 +174,9 @@ export default function FeedDetail() {
     const { id = "1" } = useParams();
     const navigate = useNavigate();
     const stepsRef = useRef(null);
-    const [liked, setLiked] = useState(false);
-    const [bookmarked, setBookmarked] = useState(false);
+    const likedPosts = useAppStore((state) => state.likedPosts);
+    const likedPostIds = useAppStore((state) => state.likedPostIds);
+    const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
     const recipe = useMemo(() => FEED_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
 
     if (!recipe) {
@@ -205,8 +196,9 @@ export default function FeedDetail() {
         );
     }
 
-    const likeCount = recipe.likes + (liked ? 1 : 0);
-    const bookmarkCount = recipe.bookmarks + (bookmarked ? 1 : 0);
+    const initiallyLiked = likedPosts.some((post) => post.id === recipe.id);
+    const liked = likedPostIds.includes(recipe.id);
+    const likeCount = recipe.likes + (liked ? 1 : 0) - (initiallyLiked ? 1 : 0);
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
@@ -253,11 +245,8 @@ export default function FeedDetail() {
                             <PostHeader
                                 recipe={recipe}
                                 likeCount={likeCount}
-                                bookmarkCount={bookmarkCount}
                                 liked={liked}
-                                bookmarked={bookmarked}
-                                onLike={() => setLiked((value) => !value)}
-                                onBookmark={() => setBookmarked((value) => !value)}
+                                onLike={() => toggleLikedPost(recipe.id)}
                             />
 
                             <p className="max-w-3xl text-sm leading-relaxed text-gray-600 md:text-base">

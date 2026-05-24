@@ -7,6 +7,8 @@ export const Sizes = () => (
         <Avatar name="김" size="sm" />
         <Avatar name="김" size="md" />
         <Avatar name="김" size="lg" />
+        <Avatar name="김" size="xl" />
+        <Avatar name="김" size="2xl" />
     </div>
 );
 

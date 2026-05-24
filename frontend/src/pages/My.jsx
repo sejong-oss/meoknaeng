@@ -1,38 +1,35 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Checkmark, ChevronDown, Edit, UserAvatar } from "@carbon/icons-react";
 import {
-    Button, Card, Chip, EmptyState,
+    Avatar, Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
     Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
-import {
-    INGREDIENT_LIST,
-    MY_LIKED_POSTS,
-    MY_POSTS,
-    MY_PROFILE,
-    MY_SAVED_RECIPES,
-} from "@/data/mockData.js";
+import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
-
-function ProfileAvatar({ className = "" }) {
-    return (
-        <div className={`rounded-full bg-gradient-to-br from-primary-200 to-primary-400 border-4 border-white shadow-lg ${className}`} />
-    );
-}
-
+import { useAppStore } from "@/store/useAppStore.js";
 
 export default function My() {
     const navigate = useNavigate();
-    const { openLoginModal } = useOutletContext();
-    const user = MY_PROFILE;
-    const [ingredients, setIngredients] = useState(user?.ingredients ?? []);
+    const user = useAppStore((state) => state.user);
+    const ingredients = useAppStore((state) => state.pantryIngredients);
+    const savedRecipes = useAppStore((state) => state.savedRecipes);
+    const myPosts = useAppStore((state) => state.myPosts);
+    const likedPosts = useAppStore((state) => state.likedPosts);
+    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
+    const likedPostIds = useAppStore((state) => state.likedPostIds);
+    const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
     const [editingIngredients, setEditingIngredients] = useState(false);
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
+    const visibleSavedRecipes = savedRecipes.filter((recipe) => savedRecipeIds.includes(recipe.id));
+    const visibleLikedPosts = likedPosts.filter((post) => likedPostIds.includes(post.id));
 
     useEffect(() => {
         const el = ingredientsRef.current;
@@ -79,7 +76,7 @@ export default function My() {
             {/* 모바일 히어로 */}
             <div className="md:hidden -mx-4 -mt-6 mb-5 bg-gradient-to-b from-primary-50 to-white px-5 pb-6 pt-7">
                 <div className="flex items-center gap-4">
-                    <ProfileAvatar className="w-16 h-16 shrink-0" />
+                    <Avatar name={user.name} size="xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                     <div className="flex-1 min-w-0">
                         <h1 className="text-xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
                         <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
@@ -96,7 +93,7 @@ export default function My() {
                 <aside className="flex flex-col gap-4 md:pt-10">
                     {/* 데스크탑 프로필 */}
                     <div className="hidden md:flex flex-col items-center gap-3 rounded-card border border-gray-100 bg-gradient-to-b from-primary-50 to-white px-4 py-10">
-                        <ProfileAvatar className="w-24 h-24" />
+                        <Avatar name={user.name} size="2xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                         <div className="text-center mt-1">
                             <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
                             <div className="mt-2 flex items-center gap-3.5 justify-center text-xs text-gray-500">
@@ -116,16 +113,18 @@ export default function My() {
                             </div>
                             <div className="flex items-center gap-1">
                                 {!editingIngredients && hasIngredients && (hasOverflow || ingredientsExpanded) && (
-                                    <button
-                                        type="button"
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        aria-label={ingredientsExpanded ? "내 재료 접기" : "내 재료 펼치기"}
+                                        className="h-8 w-8 !px-0 !py-0"
                                         onClick={() => setIngredientsExpanded((v) => !v)}
-                                        className="p-1 text-gray-600 transition-colors"
                                     >
                                         <ChevronDown
                                             size={16}
                                             className={`transition-transform duration-200 ${ingredientsExpanded ? "rotate-180" : ""}`}
                                         />
-                                    </button>
+                                    </Button>
                                 )}
                                 <Button
                                     variant="ghost"
@@ -144,8 +143,8 @@ export default function My() {
                         {editingIngredients ? (
                             <IngredientInput
                                 ingredients={ingredients}
-                                onAdd={(value) => setIngredients((prev) => [...prev, value])}
-                                onRemove={(value) => setIngredients((prev) => prev.filter((i) => i !== value))}
+                                onAdd={addPantryIngredient}
+                                onRemove={removePantryIngredient}
                                 ingredientList={INGREDIENT_LIST}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2.5"
                                 inputClassName="!text-sm"
@@ -185,19 +184,19 @@ export default function My() {
                     <Tabs defaultValue="saved" variant="line">
                         <TabsList variant="line">
                             <TabsTrigger value="saved" variant="line">
-                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{MY_SAVED_RECIPES.length}</span>
+                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{visibleSavedRecipes.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="mine" variant="line">
-                                내 글 <span className="ml-1 text-xs opacity-60">{MY_POSTS.length}</span>
+                                내 글 <span className="ml-1 text-xs opacity-60">{myPosts.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="likes" variant="line">
-                                좋아요 <span className="ml-1 text-xs opacity-60">{MY_LIKED_POSTS.length}</span>
+                                좋아요 <span className="ml-1 text-xs opacity-60">{visibleLikedPosts.length}</span>
                             </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="saved">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {MY_SAVED_RECIPES.map((recipe) => (
+                                {visibleSavedRecipes.map((recipe) => (
                                     <RecipeCard
                                         key={recipe.id}
                                         title={recipe.title}
@@ -213,7 +212,7 @@ export default function My() {
 
                         <TabsContent value="mine">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {MY_POSTS.map((item) => (
+                                {myPosts.map((item) => (
                                     <FeedCard
                                         key={item.id}
                                         title={item.title}
@@ -230,7 +229,7 @@ export default function My() {
 
                         <TabsContent value="likes">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {MY_LIKED_POSTS.map((item) => (
+                                {visibleLikedPosts.map((item) => (
                                     <FeedCard
                                         key={item.id}
                                         title={item.title}

@@ -8,12 +8,6 @@ const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
 const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 const toDateLabel = (value) => value;
 
-export const COMMON_INGREDIENTS = [
-    "마늘", "양파", "계란", "대파", "감자", "당근", "두부", "간장", "김치", "우유", "치즈", "쌀",
-];
-
-export const RECENT_INGREDIENTS = ["삼겹살", "파스타면", "참치캔", "치즈", "우유", "애호박"];
-
 export const MOCK_INGREDIENT_AUTOCOMPLETE_RESPONSE = apiResponse({
     query: "",
     limit: 10,
