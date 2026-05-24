@@ -48,3 +48,27 @@ export async function request(path, options = {}) {
         });
     }
 }
+
+export function login({ email, password }) {
+    return request("/auth/login", {
+        method: "POST",
+        data: { email, password },
+    });
+}
+
+export function signup({ email, password, nickname }) {
+    return request("/auth/signup", {
+        method: "POST",
+        data: { email, password, nickname },
+    });
+}
+
+export function getMyProfile() {
+    return request("/users/me");
+}
+
+export function logout() {
+    return request("/auth/logout", {
+        method: "DELETE",
+    });
+}

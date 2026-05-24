@@ -26,6 +26,8 @@ const DROPDOWN_ITEMS = [
 export function TopNav({
     user,
     onLoginClick,
+    onLogoutClick,
+    authPending = false,
     className = "",
     variant = "default",
     showItems = true,
@@ -64,7 +66,9 @@ export function TopNav({
                     </nav>
                 )}
                 {!showItems && <div className="flex-1" />}
-                {showAuth && user ? (
+                {showAuth && authPending ? (
+                    null
+                ) : showAuth && user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger>
                             <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 cursor-pointer shrink-0">
@@ -80,11 +84,11 @@ export function TopNav({
                                 </DropdownMenuItem>
                             ))}
                             <DropdownMenuSeparator />
-                            <DropdownMenuDangerItem>로그아웃</DropdownMenuDangerItem>
+                            <DropdownMenuDangerItem onSelect={onLogoutClick}>로그아웃</DropdownMenuDangerItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : showAuth ? (
-                    <Button variant="ghost" size="sm" onClick={onLoginClick} className="shrink-0">
+                    <Button variant="ghost" size="md" onClick={onLoginClick} className="shrink-0">
                         로그인
                     </Button>
                 ) : null}
