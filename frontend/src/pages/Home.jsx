@@ -13,6 +13,7 @@ const RECENT_INGREDIENTS = ["삼겹살", "파스타면", "참치캔", "치즈", 
 export default function Home() {
     const navigate = useNavigate();
     const [ingredients, setIngredients] = useState([]);
+    const inputPanelRef = useRef(null);
     const ingredientInputRef = useRef(null);
 
     function handleAdd(value) {
@@ -56,6 +57,7 @@ export default function Home() {
                             </p>
                         </div>
                         <div
+                            ref={inputPanelRef}
                             className={[
                                 "flex flex-col gap-3",
                                 "px-4 py-3 md:px-5 md:pt-5 md:pb-3",
@@ -71,6 +73,7 @@ export default function Home() {
                                 onAdd={handleAdd}
                                 onRemove={handleRemove}
                                 ingredientList={INGREDIENT_LIST}
+                                suggestionsAnchorRef={inputPanelRef}
                                 chipClassName="!px-4 !py-2 !text-sm !gap-1.5"
                             />
                             <div className="hidden md:flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
