@@ -2,13 +2,30 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Chip, EmptyState, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
-import { INGREDIENT_LIST, RECENT_INGREDIENTS } from "@/data/mockData.js";
+import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
+
+const RECENT_INGREDIENTS_STORAGE_KEY = "meoknaeng:recent-ingredients";
+const MAX_RECENT_INGREDIENTS = 8;
+
+function getStoredRecentIngredients() {
+    if (typeof window === "undefined") return [];
+
+    try {
+        const stored = window.localStorage.getItem(RECENT_INGREDIENTS_STORAGE_KEY);
+        const parsed = stored ? JSON.parse(stored) : [];
+        return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
+    } catch {
+        return [];
+    }
+}
+
 export default function Home() {
     const navigate = useNavigate();
     const user = useAppStore((state) => state.user);
     const [ingredients, setIngredients] = useState([]);
+    const [recentIngredients, setRecentIngredients] = useState(getStoredRecentIngredients);
     const pantryIngredients = useAppStore((state) => state.pantryIngredients);
     const setRecommendationIngredients = useAppStore((state) => state.setRecommendationIngredients);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
@@ -16,7 +33,17 @@ export default function Home() {
     const ingredientInputRef = useRef(null);
 
     function handleAdd(value) {
+        if (ingredients.includes(value)) return;
+
         setIngredients((prev) => [...prev, value]);
+        saveRecentIngredients([value]);
+    }
+
+    function handleAddPantryIngredient(value) {
+        if (ingredients.includes(value)) return;
+
+        setIngredients((prev) => [...prev, value]);
+        saveRecentIngredients([value]);
     }
 
     function handleRemove(item) {
@@ -26,6 +53,17 @@ export default function Home() {
     function handleReset() {
         setIngredients([]);
         ingredientInputRef.current?.reset();
+    }
+
+    function saveRecentIngredients(items) {
+        if (items.length === 0) return;
+
+        const nextRecentIngredients = [...new Set([...items, ...recentIngredients])]
+            .filter(Boolean)
+            .slice(0, MAX_RECENT_INGREDIENTS);
+
+        setRecentIngredients(nextRecentIngredients);
+        window.localStorage.setItem(RECENT_INGREDIENTS_STORAGE_KEY, JSON.stringify(nextRecentIngredients));
     }
 
     function handleRecommend() {
@@ -114,7 +152,7 @@ export default function Home() {
                                     전체 보기
                                 </button>
                             </div>
-                            <div className="bg-gray-50 rounded-xl p-4 flex flex-wrap gap-1.5">
+                            <div className="bg-gray-50 rounded-xl p-4 flex flex-wrap gap-2">
                                 {!user ? (
                                     <EmptyState
                                         title="내 재료를 저장해둘 수 있어요"
@@ -125,7 +163,7 @@ export default function Home() {
                                     />
                                 ) : pantryIngredients.length > 0 ? (
                                     pantryIngredients.filter((i) => !ingredients.includes(i)).map((item) => (
-                                        <Chip key={item} variant="outline" onClick={() => handleAdd(item)} className="!px-4 !py-2 !text-sm">
+                                        <Chip key={item} variant="brand-soft" onClick={() => handleAddPantryIngredient(item)} className="!px-4 !py-2 !text-sm">
                                             + {item}
                                         </Chip>
                                     ))
@@ -148,17 +186,19 @@ export default function Home() {
                         </div>
                         <div className="flex flex-col gap-4">
                             <h3 className="text-lg font-bold tracking-tight text-gray-900">최근 입력 재료</h3>
-                            <div className="bg-gray-50 rounded-xl p-4 flex flex-wrap gap-1.5">
-                                {RECENT_INGREDIENTS.filter((i) => !ingredients.includes(i)).map((item) => (
-                                    <Chip key={item} variant="dashed" onClick={() => handleAdd(item)} className="!px-4 !py-2 !text-sm">
-                + {item}
-                                    </Chip>
-                                ))}
-                                {RECENT_INGREDIENTS.every((i) => ingredients.includes(i)) && (
-                                    <div className="w-full flex flex-col items-center gap-1.5 py-3 text-center">
-                                        <CheckmarkFilled size={24} className="text-primary-400" />
-                                        <p className="text-sm text-gray-600">재료를 모두 추가했어요.</p>
-                                    </div>
+                            <div className="bg-gray-50 rounded-xl p-4 flex flex-wrap gap-2">
+                                {recentIngredients.length > 0 ? (
+                                    recentIngredients.map((item) => (
+                                        <Chip key={item} variant="outline" onClick={() => handleAdd(item)} className="!px-4 !py-2 !text-sm !text-gray-700">
+                                            + {item}
+                                        </Chip>
+                                    ))
+                                ) : (
+                                    <EmptyState
+                                        title="최근 입력한 재료가 없어요"
+                                        description="재료를 입력하면 다음에 다시 고를 수 있도록 저장돼요."
+                                        className="w-full !py-5 !px-3"
+                                    />
                                 )}
                             </div>
                         </div>
