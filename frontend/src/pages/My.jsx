@@ -56,12 +56,39 @@ export default function My() {
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
     const ingredientsRef = useRef(null);
+    const hasIngredients = ingredients.length > 0;
 
     useEffect(() => {
         const el = ingredientsRef.current;
-        if (!el || editingIngredients || ingredientsExpanded) return;
-        setHasOverflow(el.scrollHeight > el.clientHeight + 4);
-    }, [ingredients.length, editingIngredients, ingredientsExpanded]);
+        if (!hasIngredients) {
+            setHasOverflow(false);
+            return;
+        }
+        if (!el || editingIngredients) return;
+
+        const computeOverflow = () => {
+            const collapsedHeightValue = getComputedStyle(el)
+                .getPropertyValue("--ingredients-collapsed-height")
+                .trim();
+            const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+            const collapsedHeight = collapsedHeightValue.endsWith("rem")
+                ? parseFloat(collapsedHeightValue) * rootFontSize
+                : parseFloat(collapsedHeightValue);
+
+            setHasOverflow(el.scrollHeight > collapsedHeight + 4);
+        };
+
+        computeOverflow();
+
+        const resizeObserver = new ResizeObserver(computeOverflow);
+        resizeObserver.observe(el);
+        window.addEventListener("resize", computeOverflow);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener("resize", computeOverflow);
+        };
+    }, [hasIngredients, ingredients.length, editingIngredients]);
 
     if (!user) {
         return (
@@ -133,7 +160,7 @@ export default function My() {
                                 >
                                     {editingIngredients ? "완료" : "편집"}
                                 </Button>
-                                {!editingIngredients && (hasOverflow || ingredientsExpanded) && (
+                                {!editingIngredients && hasIngredients && (hasOverflow || ingredientsExpanded) && (
                                     <button
                                         type="button"
                                         onClick={() => setIngredientsExpanded((v) => !v)}
@@ -153,14 +180,16 @@ export default function My() {
                                 onAdd={(value) => setIngredients((prev) => [...prev, value])}
                                 onRemove={(value) => setIngredients((prev) => prev.filter((i) => i !== value))}
                                 ingredientList={INGREDIENT_LIST}
+                                className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2.5"
                             />
-                        ) : (
-                            <div>
+                        ) : hasIngredients ? (
+                            <div className="mt-2 rounded-card border border-transparent bg-gray-50 px-3 py-2.5">
                                 <div
                                     ref={ingredientsRef}
                                     className={[
                                         "flex flex-wrap gap-2.5 overflow-hidden transition-[max-height] duration-300",
-                                        ingredientsExpanded ? "max-h-none" : "max-h-[4.5rem] md:max-h-28",
+                                        "[--ingredients-collapsed-height:4.5rem] md:[--ingredients-collapsed-height:7rem]",
+                                        ingredientsExpanded ? "max-h-none" : "max-h-[var(--ingredients-collapsed-height)]",
                                     ].join(" ")}
                                 >
                                     {ingredients.map((ing) => (
@@ -168,6 +197,12 @@ export default function My() {
                                     ))}
                                 </div>
                             </div>
+                        ) : (
+                            <EmptyState
+                                title="아직 등록한 재료가 없어요"
+                                description="편집을 눌러 냉장고 재료를 추가해보세요."
+                                className="mt-2 rounded-card border border-transparent bg-gray-50 !py-6 !px-4"
+                            />
                         )}
                     </Card>
 
