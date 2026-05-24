@@ -652,3 +652,66 @@ export const RECOMMENDED_RECIPES = recommendedRecipes.slice(0, 3).map(recommende
 export function getRecommendedRecipe(id) {
     return RECOMMENDED_RECIPES.find((recipe) => recipe.id === id);
 }
+
+export const MOCK_MY_PROFILE_RESPONSE = apiResponse({
+    user_id: "user-mocha",
+    nickname: "모카",
+    recipe_count: 12,
+    follower_count: 24,
+    following_count: 38,
+    ingredients: ["양파", "계란", "두부", "대파", "간장", "마늘", "감자", "당근", "김치", "쌀", "우유", "치즈"],
+});
+
+export const MOCK_MY_SAVED_RECIPES_RESPONSE = apiResponse({
+    recipes: [
+        { recipe_id: "dubu-jorim", name: "두부 간장조림", cook_time_minutes: 20, difficulty: "쉬움", servings: 2, summary: "짭조름한 양념이 두부에 잘 스며드는 집밥 반찬" },
+        { recipe_id: "2", name: "두부 계란말이", cook_time_minutes: 15, difficulty: "쉬움", servings: 1, summary: "계란과 두부를 부드럽게 말아내는 간단한 반찬이에요." },
+        { recipe_id: "3", name: "두부김치", cook_time_minutes: 12, difficulty: "쉬움", servings: 2, summary: "매콤한 김치에 담백한 두부를 곁들이는 빠른 메뉴예요." },
+        { recipe_id: "4", name: "김치찜", cook_time_minutes: 30, difficulty: "중간", servings: 2, summary: "깊은 맛의 국물이 우러난 푸짐한 한 그릇" },
+        { recipe_id: "5", name: "파스타 알리오", cook_time_minutes: 25, difficulty: "중간", servings: 1, summary: "마늘 향 가득한 간단 오일 파스타" },
+        { recipe_id: "6", name: "계란말이", cook_time_minutes: 15, difficulty: "쉬움", servings: 2, summary: "부드럽게 말아낸 기본 집밥 반찬" },
+        { recipe_id: "7", name: "된장찌개", cook_time_minutes: 20, difficulty: "쉬움", servings: 2, summary: "자투리 채소로 끓이는 깊은 맛 찌개" },
+        { recipe_id: "8", name: "김치볶음밥", cook_time_minutes: 15, difficulty: "쉬움", servings: 1, summary: "잘 익은 김치로 볶아낸 간단 한 그릇" },
+        { recipe_id: "9", name: "제육볶음", cook_time_minutes: 20, difficulty: "중간", servings: 2, summary: "고추장 양념에 볶아낸 매콤한 돼지고기 볶음" },
+    ],
+});
+
+export const MOCK_MY_POSTS_RESPONSE = apiResponse({
+    posts: [
+        { post_id: "f7", title: "떡볶이", description: "쫄깃한 떡에 매콤달콤한 양념을 더한 분식", cook_time: 15, category: "한식", difficulty: "쉬움", author_nickname: "모카", like_count: 156 },
+        { post_id: "f8", title: "미역국", description: "참기름 향 가득한 든든한 국", cook_time: 25, category: "한식", difficulty: "쉬움", author_nickname: "모카", like_count: 89 },
+        { post_id: "f9", title: "갈비찜", description: "간장 양념이 배어든 부드러운 갈비찜", cook_time: 60, category: "한식", difficulty: "중간", author_nickname: "모카", like_count: 312 },
+    ],
+});
+
+export const MOCK_MY_LIKED_POSTS_RESPONSE = apiResponse({
+    posts: [
+        { post_id: "1", title: "된장찌개", description: "자투리 채소와 두부로 빠르게 끓이는 집밥 찌개", cook_time: 20, category: "한식", difficulty: "쉬움", author_nickname: "집밥하는모카", like_count: 312 },
+        { post_id: "2", title: "두부 스테이크", description: "물기를 뺀 두부를 노릇하게 굽고 소스를 끼얹은 반찬", cook_time: 20, category: "한식", difficulty: "쉬움", author_nickname: "오늘의키친", like_count: 187 },
+        { post_id: "4", title: "계란말이", description: "부드럽게 말아낸 계란에 남은 채소를 더한 집밥", cook_time: 20, category: "한식", difficulty: "쉬움", author_nickname: "고동그라미", like_count: 428 },
+    ],
+});
+
+const myProfileToView = (profile) => ({
+    name: profile.nickname,
+    recipes: profile.recipe_count,
+    followers: profile.follower_count,
+    following: profile.following_count,
+    ingredients: profile.ingredients,
+});
+
+const myPostToView = (post) => ({
+    id: post.post_id,
+    title: post.title,
+    time: formatMinutes(post.cook_time),
+    category: post.category,
+    difficulty: post.difficulty,
+    author: post.author_nickname,
+    likes: post.like_count,
+    description: post.description,
+});
+
+export const MY_PROFILE = myProfileToView(MOCK_MY_PROFILE_RESPONSE.data);
+export const MY_SAVED_RECIPES = MOCK_MY_SAVED_RECIPES_RESPONSE.data.recipes.map(recipeSummaryToView);
+export const MY_POSTS = MOCK_MY_POSTS_RESPONSE.data.posts.map(myPostToView);
+export const MY_LIKED_POSTS = MOCK_MY_LIKED_POSTS_RESPONSE.data.posts.map(myPostToView);
