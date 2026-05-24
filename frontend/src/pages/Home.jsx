@@ -1,30 +1,33 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Chip, IngredientInput } from "@/components";
+import { Button, Chip, EmptyState, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
-import { COMMON_INGREDIENTS, INGREDIENT_LIST, RECENT_INGREDIENTS } from "@/data/mockData.js";
+import { INGREDIENT_LIST, RECENT_INGREDIENTS } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 export default function Home() {
     const navigate = useNavigate();
-    const ingredients = useAppStore((state) => state.pantryIngredients);
-    const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
-    const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
-    const setPantryIngredients = useAppStore((state) => state.setPantryIngredients);
+    const user = useAppStore((state) => state.user);
+    const ingredients = useAppStore((state) => state.selectedIngredients);
+    const pantryIngredients = useAppStore((state) => state.pantryIngredients);
+    const addSelectedIngredient = useAppStore((state) => state.addSelectedIngredient);
+    const removeSelectedIngredient = useAppStore((state) => state.removeSelectedIngredient);
+    const setSelectedIngredients = useAppStore((state) => state.setSelectedIngredients);
     const setRecommendationIngredients = useAppStore((state) => state.setRecommendationIngredients);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
     const inputPanelRef = useRef(null);
     const ingredientInputRef = useRef(null);
 
     function handleAdd(value) {
-        addPantryIngredient(value);
+        addSelectedIngredient(value);
     }
 
     function handleRemove(item) {
-        removePantryIngredient(item);
+        removeSelectedIngredient(item);
     }
 
     function handleReset() {
-        setPantryIngredients([]);
+        setSelectedIngredients([]);
         ingredientInputRef.current?.reset();
     }
 
@@ -105,18 +108,40 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-16 mt-2">
                         <div className="flex flex-col gap-4">
                             <div className="flex items-baseline justify-between gap-2">
-                                <h3 className="text-lg font-bold tracking-tight text-gray-900">자주 쓰는 재료</h3>
-                                <span className="text-sm font-medium text-primary-500 cursor-pointer hover:text-primary-600 transition-colors">
-              전체 보기
-                                </span>
+                                <h3 className="text-lg font-bold tracking-tight text-gray-900">내 재료</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/my")}
+                                    className="text-sm font-medium text-primary-500 cursor-pointer hover:text-primary-600 transition-colors"
+                                >
+                                    전체 보기
+                                </button>
                             </div>
                             <div className="bg-gray-50 rounded-xl p-4 flex flex-wrap gap-1.5">
-                                {COMMON_INGREDIENTS.filter((i) => !ingredients.includes(i)).map((item) => (
-                                    <Chip key={item} variant="outline" onClick={() => handleAdd(item)} className="!px-4 !py-2 !text-sm">
-                + {item}
-                                    </Chip>
-                                ))}
-                                {COMMON_INGREDIENTS.every((i) => ingredients.includes(i)) && (
+                                {!user ? (
+                                    <EmptyState
+                                        title="내 재료를 저장해둘 수 있어요"
+                                        description="로그인하면 내 재료를 불러와 바로 추천에 사용할 수 있어요."
+                                        action="로그인하기"
+                                        onAction={openLoginModal}
+                                        className="w-full !py-5 !px-3"
+                                    />
+                                ) : pantryIngredients.length > 0 ? (
+                                    pantryIngredients.filter((i) => !ingredients.includes(i)).map((item) => (
+                                        <Chip key={item} variant="outline" onClick={() => handleAdd(item)} className="!px-4 !py-2 !text-sm">
+                                            + {item}
+                                        </Chip>
+                                    ))
+                                ) : (
+                                    <EmptyState
+                                        title="등록한 재료가 없어요"
+                                        description="마이페이지에서 냉장고 재료를 추가해보세요."
+                                        action="내 재료 관리"
+                                        onAction={() => navigate("/my")}
+                                        className="w-full !py-5 !px-3"
+                                    />
+                                )}
+                                {user && pantryIngredients.length > 0 && pantryIngredients.every((i) => ingredients.includes(i)) && (
                                     <div className="w-full flex flex-col items-center gap-1.5 py-3 text-center">
                                         <CheckmarkFilled size={24} className="text-primary-400" />
                                         <p className="text-sm text-gray-600">재료를 모두 추가했어요.</p>

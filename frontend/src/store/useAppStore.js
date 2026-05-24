@@ -14,6 +14,7 @@ const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filt
 export const useAppStore = create((set) => ({
     user: MY_PROFILE,
     loginModalOpen: false,
+    selectedIngredients: [],
     pantryIngredients: MY_PROFILE?.ingredients ?? [],
     recommendationIngredients: RECIPE_RESULT_INGREDIENTS,
     recommendationHero: RECIPE_RESULT_HERO,
@@ -26,6 +27,15 @@ export const useAppStore = create((set) => ({
 
     openLoginModal: () => set({ loginModalOpen: true }),
     setLoginModalOpen: (loginModalOpen) => set({ loginModalOpen }),
+    addSelectedIngredient: (ingredient) => set((state) => ({
+        selectedIngredients: uniqueItems([...state.selectedIngredients, ingredient]),
+    })),
+    removeSelectedIngredient: (ingredient) => set((state) => ({
+        selectedIngredients: state.selectedIngredients.filter((item) => item !== ingredient),
+    })),
+    setSelectedIngredients: (ingredients) => set({
+        selectedIngredients: uniqueItems(ingredients),
+    }),
     addPantryIngredient: (ingredient) => set((state) => ({
         pantryIngredients: uniqueItems([...state.pantryIngredients, ingredient]),
     })),
