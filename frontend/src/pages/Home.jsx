@@ -1,26 +1,36 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Chip, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
 import { COMMON_INGREDIENTS, INGREDIENT_LIST, RECENT_INGREDIENTS } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
+import { useAppStore } from "@/store/useAppStore.js";
 export default function Home() {
     const navigate = useNavigate();
-    const [ingredients, setIngredients] = useState([]);
+    const ingredients = useAppStore((state) => state.pantryIngredients);
+    const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
+    const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
+    const setPantryIngredients = useAppStore((state) => state.setPantryIngredients);
+    const setRecommendationIngredients = useAppStore((state) => state.setRecommendationIngredients);
     const inputPanelRef = useRef(null);
     const ingredientInputRef = useRef(null);
 
     function handleAdd(value) {
-        setIngredients((prev) => [...prev, value]);
+        addPantryIngredient(value);
     }
 
     function handleRemove(item) {
-        setIngredients((prev) => prev.filter((i) => i !== item));
+        removePantryIngredient(item);
     }
 
     function handleReset() {
-        setIngredients([]);
+        setPantryIngredients([]);
         ingredientInputRef.current?.reset();
+    }
+
+    function handleRecommend() {
+        setRecommendationIngredients(ingredients);
+        navigate("/recipes");
     }
 
     return (
@@ -83,7 +93,7 @@ export default function Home() {
                                     variant="primary"
                                     size="lg"
                                     disabled={ingredients.length === 0}
-                                    onClick={(e) => { e.stopPropagation(); navigate("/recipes", { state: { ingredients } }); }}
+                                    onClick={(e) => { e.stopPropagation(); handleRecommend(); }}
                                 >
                                 레시피 추천 받기
                                     <ArrowRight size={16} />
@@ -139,7 +149,7 @@ export default function Home() {
                         size="lg"
                         className="flex-1"
                         disabled={ingredients.length === 0}
-                        onClick={() => navigate("/recipes", { state: { ingredients } })}
+                        onClick={handleRecommend}
                     >
                     레시피 추천 받기
                         <ArrowRight size={16} />

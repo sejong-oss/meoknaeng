@@ -1,19 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Checkmark, ChevronDown, Edit, UserAvatar } from "@carbon/icons-react";
 import {
     Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
     Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
-import {
-    INGREDIENT_LIST,
-    MY_LIKED_POSTS,
-    MY_POSTS,
-    MY_PROFILE,
-    MY_SAVED_RECIPES,
-} from "@/data/mockData.js";
+import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
+import { useAppStore } from "@/store/useAppStore.js";
 
 function ProfileAvatar({ className = "" }) {
     return (
@@ -24,15 +19,24 @@ function ProfileAvatar({ className = "" }) {
 
 export default function My() {
     const navigate = useNavigate();
-    const { openLoginModal } = useOutletContext();
-    const user = MY_PROFILE;
-    const [ingredients, setIngredients] = useState(user?.ingredients ?? []);
+    const user = useAppStore((state) => state.user);
+    const ingredients = useAppStore((state) => state.pantryIngredients);
+    const savedRecipes = useAppStore((state) => state.savedRecipes);
+    const myPosts = useAppStore((state) => state.myPosts);
+    const likedPosts = useAppStore((state) => state.likedPosts);
+    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
+    const likedPostIds = useAppStore((state) => state.likedPostIds);
+    const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
     const [editingIngredients, setEditingIngredients] = useState(false);
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
+    const visibleSavedRecipes = savedRecipes.filter((recipe) => savedRecipeIds.includes(recipe.id));
+    const visibleLikedPosts = likedPosts.filter((post) => likedPostIds.includes(post.id));
 
     useEffect(() => {
         const el = ingredientsRef.current;
@@ -144,8 +148,8 @@ export default function My() {
                         {editingIngredients ? (
                             <IngredientInput
                                 ingredients={ingredients}
-                                onAdd={(value) => setIngredients((prev) => [...prev, value])}
-                                onRemove={(value) => setIngredients((prev) => prev.filter((i) => i !== value))}
+                                onAdd={addPantryIngredient}
+                                onRemove={removePantryIngredient}
                                 ingredientList={INGREDIENT_LIST}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2.5"
                                 inputClassName="!text-sm"
@@ -185,19 +189,19 @@ export default function My() {
                     <Tabs defaultValue="saved" variant="line">
                         <TabsList variant="line">
                             <TabsTrigger value="saved" variant="line">
-                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{MY_SAVED_RECIPES.length}</span>
+                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{visibleSavedRecipes.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="mine" variant="line">
-                                내 글 <span className="ml-1 text-xs opacity-60">{MY_POSTS.length}</span>
+                                내 글 <span className="ml-1 text-xs opacity-60">{myPosts.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="likes" variant="line">
-                                좋아요 <span className="ml-1 text-xs opacity-60">{MY_LIKED_POSTS.length}</span>
+                                좋아요 <span className="ml-1 text-xs opacity-60">{visibleLikedPosts.length}</span>
                             </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="saved">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {MY_SAVED_RECIPES.map((recipe) => (
+                                {visibleSavedRecipes.map((recipe) => (
                                     <RecipeCard
                                         key={recipe.id}
                                         title={recipe.title}
@@ -213,7 +217,7 @@ export default function My() {
 
                         <TabsContent value="mine">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {MY_POSTS.map((item) => (
+                                {myPosts.map((item) => (
                                     <FeedCard
                                         key={item.id}
                                         title={item.title}
@@ -230,7 +234,7 @@ export default function My() {
 
                         <TabsContent value="likes">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {MY_LIKED_POSTS.map((item) => (
+                                {visibleLikedPosts.map((item) => (
                                     <FeedCard
                                         key={item.id}
                                         title={item.title}

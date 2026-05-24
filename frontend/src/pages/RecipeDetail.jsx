@@ -2,10 +2,12 @@ import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RECIPE_DETAIL_FALLBACKS, RECIPE_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/lib/constants.js";
+import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
     ArrowRight,
-    Favorite,
+    Bookmark,
+    BookmarkFilled,
     Growth,
     PlayFilledAlt,
     Share,
@@ -108,6 +110,8 @@ export default function RecipeDetail() {
     const { id = "dubu-jorim" } = useParams();
     const navigate = useNavigate();
     const stepsRef = useRef(null);
+    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
+    const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
     const recipe = useMemo(() => RECIPE_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
 
     if (!recipe) {
@@ -129,6 +133,7 @@ export default function RecipeDetail() {
 
     const ownedIngredients = recipe.ingredients.filter((ingredient) => ingredient.status === "owned").length;
     const ingredientsMeta = `${ownedIngredients}/${recipe.ingredients.length} 보유`;
+    const isSaved = savedRecipeIds.includes(recipe.id);
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
@@ -232,8 +237,12 @@ export default function RecipeDetail() {
                                 <ArrowRight size={16} />
                             </Button>
                             <div className="grid grid-cols-2 gap-2">
-                                <Button variant="outline" size="sm">
-                                    <Favorite size={14} />
+                                <Button
+                                    variant={isSaved ? "primary" : "outline"}
+                                    size="sm"
+                                    onClick={() => toggleSavedRecipe(recipe.id)}
+                                >
+                                    {isSaved ? <BookmarkFilled size={14} /> : <Bookmark size={14} />}
                                 저장
                                 </Button>
                                 <Button variant="outline" size="sm">
@@ -250,8 +259,14 @@ export default function RecipeDetail() {
                     요리 시작
                         <ArrowRight size={16} />
                     </Button>
-                    <Button variant="outline" size="lg" className="px-4" aria-label="저장">
-                        <Favorite size={18} />
+                    <Button
+                        variant={isSaved ? "primary" : "outline"}
+                        size="lg"
+                        className="px-4"
+                        aria-label={isSaved ? "저장 취소" : "저장"}
+                        onClick={() => toggleSavedRecipe(recipe.id)}
+                    >
+                        {isSaved ? <BookmarkFilled size={18} /> : <Bookmark size={18} />}
                     </Button>
                     <Button variant="outline" size="lg" className="px-4" aria-label="공유">
                         <Share size={18} />
