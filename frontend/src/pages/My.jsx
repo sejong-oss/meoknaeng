@@ -113,16 +113,18 @@ export default function My() {
                             </div>
                             <div className="flex items-center gap-1">
                                 {!editingIngredients && hasIngredients && (hasOverflow || ingredientsExpanded) && (
-                                    <button
-                                        type="button"
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        aria-label={ingredientsExpanded ? "내 재료 접기" : "내 재료 펼치기"}
+                                        className="h-8 w-8 !px-0 !py-0"
                                         onClick={() => setIngredientsExpanded((v) => !v)}
-                                        className="p-1 text-gray-600 transition-colors"
                                     >
                                         <ChevronDown
                                             size={16}
                                             className={`transition-transform duration-200 ${ingredientsExpanded ? "rotate-180" : ""}`}
                                         />
-                                    </button>
+                                    </Button>
                                 )}
                                 <Button
                                     variant="ghost"
