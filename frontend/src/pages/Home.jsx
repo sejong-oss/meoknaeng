@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, Chip, EmptyState, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 const RECENT_INGREDIENTS_STORAGE_KEY = "meoknaeng:recent-ingredients";

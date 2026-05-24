@@ -1,6 +1,6 @@
 import * as RadixSelect from "@radix-ui/react-select";
 import { ChevronDown, ChevronUp, Checkmark } from "@carbon/icons-react";
-import { popoverAnim, sideAnim } from "@/lib/animations.js";
+import { popoverAnim, sideAnim } from "@/libs/animations.js";
 
 const triggerSizes = {
     sm: "h-8 px-3 text-xs gap-1.5",

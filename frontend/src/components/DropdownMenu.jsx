@@ -1,6 +1,6 @@
 import * as Radix from "@radix-ui/react-dropdown-menu";
 import { ChevronRight, Checkmark } from "@carbon/icons-react";
-import { popoverAnim, sideAnim } from "@/lib/animations.js";
+import { popoverAnim, sideAnim } from "@/libs/animations.js";
 
 const itemBase = [
     "relative flex items-center gap-2 px-3 py-2 rounded-btn",

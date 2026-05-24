@@ -7,7 +7,7 @@ import {
 import { Avatar } from "@/components/Avatar.jsx";
 import { Button } from "@/components/Button.jsx";
 import { Container } from "@/components/Container.jsx";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 
 const NAV_ITEMS = [
     { key: "home", label: "홈", to: "/home" },

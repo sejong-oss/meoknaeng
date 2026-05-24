@@ -1,4 +1,4 @@
-import { toast } from "@/lib/toast.js";
+import { toast } from "@/libs/toast.js";
 import { Button } from "@/components/index.js";
 
 export default { title: "Design System/Toast" };

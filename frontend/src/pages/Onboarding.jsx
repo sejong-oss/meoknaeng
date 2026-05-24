@@ -2,9 +2,9 @@ import { useId, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button, Chip, Container } from "@/components/index.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { RECIPES, useFlowAnimation } from "@/hooks/useFlowAnimation.js";
-import { EMPTY_EDGE, computeSvgPaths } from "@/lib/utils.js";
+import { EMPTY_EDGE, computeSvgPaths } from "@/libs/utils.js";
 
 const SPRING = { type: "spring", stiffness: 380, damping: 26 };
 const FADE_OUT = { duration: 0.2, ease: "easeOut" };

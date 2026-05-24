@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RECIPE_DETAIL_FALLBACKS, RECIPE_DETAIL_RECIPES } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,

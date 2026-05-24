@@ -11,7 +11,7 @@ export { Avatar } from "@/components/Avatar.jsx";
 export { Skeleton, CardSkeleton, FeedSkeleton } from "@/components/Skeleton.jsx";
 export { Toast } from "@/components/Toast.jsx";
 export { ToasterProvider } from "@/components/ToasterProvider.jsx";
-export { toast } from "@/lib/toast.js";
+export { toast } from "@/libs/toast.js";
 export { ProgressBar } from "@/components/ProgressBar.jsx";
 export { Select, SelectItem, SelectGroup, SelectSeparator } from "@/components/Select.jsx";
 export { Modal, ModalTrigger, ModalContent, ModalFooter, ModalClose } from "@/components/Modal.jsx";

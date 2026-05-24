@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Bookmark, BookmarkFilled, Renew, Share, Star, Time, Video } from "@carbon/icons-react";
 import { Button, Card, Chip, EmptyState, PhotoPlaceholder, RecipeCard } from "@/components/index.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 export default function Recipes() {

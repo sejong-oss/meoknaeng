@@ -7,7 +7,7 @@ import {
     Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 export default function My() {

@@ -17,7 +17,7 @@ import {
     DropdownMenuItem,
 } from "@/components/index.js";
 import { FEED_FILTER_OPTIONS, FEED_ITEMS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 
 export default function Feed() {
     const navigate = useNavigate();
