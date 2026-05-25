@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Checkmark, ChevronDown, Close, Edit, UserAvatar } from "@carbon/icons-react";
+import { Checkmark, ChevronDown, Close, Edit, Logout, UserAvatar } from "@carbon/icons-react";
 import {
     Avatar, Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
@@ -27,6 +27,7 @@ export default function My() {
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
     const updateNickname = useAppStore((state) => state.updateNickname);
+    const logout = useAppStore((state) => state.logout);
     const [editingIngredients, setEditingIngredients] = useState(false);
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
@@ -102,6 +103,16 @@ export default function My() {
             toast.error(error.message ?? "닉네임을 수정하지 못했어요.");
         } finally {
             setSavingNickname(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            toast.success("로그아웃했어요.");
+            navigate("/home", { replace: true });
+        } catch (error) {
+            toast.error(error.message ?? "로그아웃하지 못했어요.");
         }
     };
 
@@ -208,6 +219,17 @@ export default function My() {
                             <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
                         </div>
                     </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        aria-label="로그아웃"
+                        disabled={authStatus === "loading"}
+                        className="shrink-0"
+                        onClick={handleLogout}
+                    >
+                        <Logout size={16} />
+                        로그아웃
+                    </Button>
                 </div>
             </div>
 
