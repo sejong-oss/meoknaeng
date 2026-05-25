@@ -185,7 +185,7 @@ export default function FeedDetail() {
                 <title>{`피드 | ${SITE_NAME}`}</title>
                 <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
                     <EmptyState
-                        icon="🍽️"
+                        icon={<Restaurant size={28} />}
                         title="공유 레시피를 찾을 수 없어요"
                         description="피드에서 다시 보고 싶은 레시피를 선택해주세요"
                         action="공유 레시피로 돌아가기"

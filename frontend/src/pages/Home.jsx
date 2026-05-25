@@ -38,10 +38,12 @@ export default function Home() {
     const [ingredients, setIngredients] = useState([]);
     const [recentIngredients, setRecentIngredients] = useState(getStoredRecentIngredients);
     const pantryIngredients = useAppStore((state) => state.pantryIngredients);
-    const setRecommendationIngredients = useAppStore((state) => state.setRecommendationIngredients);
+    const recommendRecipes = useAppStore((state) => state.recommendRecipes);
+    const recommendationStatus = useAppStore((state) => state.recommendationStatus);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const inputPanelRef = useRef(null);
     const ingredientInputRef = useRef(null);
+    const isRecommending = recommendationStatus === "loading";
 
     function handleAdd(value) {
         if (ingredients.includes(value)) return;
@@ -78,7 +80,9 @@ export default function Home() {
     }
 
     function handleRecommend() {
-        setRecommendationIngredients(ingredients);
+        if (isRecommending) return;
+
+        recommendRecipes(ingredients).catch(() => {});
         navigate("/recipes");
     }
 
@@ -142,10 +146,10 @@ export default function Home() {
                                 <Button
                                     variant="primary"
                                     size="lg"
-                                    disabled={ingredients.length === 0}
+                                    disabled={ingredients.length === 0 || isRecommending}
                                     onClick={(e) => { e.stopPropagation(); handleRecommend(); }}
                                 >
-                                    레시피 추천 받기
+                                    {isRecommending ? "추천 중..." : "레시피 추천 받기"}
                                     <ArrowRight size={16} />
                                 </Button>
                             </div>
@@ -222,10 +226,10 @@ export default function Home() {
                         variant="primary"
                         size="lg"
                         className="flex-1"
-                        disabled={ingredients.length === 0}
+                        disabled={ingredients.length === 0 || isRecommending}
                         onClick={handleRecommend}
                     >
-                        레시피 추천 받기
+                        {isRecommending ? "추천 중..." : "레시피 추천 받기"}
                         <ArrowRight size={16} />
                     </Button>
                 </div>

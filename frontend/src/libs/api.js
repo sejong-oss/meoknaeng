@@ -88,3 +88,13 @@ export function autocompleteIngredients({ query, limit = 10 }) {
         },
     });
 }
+
+export function recommendRecipes({ ingredients, query }) {
+    return request("/recipe/recommend", {
+        method: "POST",
+        data: {
+            ingredients,
+            query,
+        },
+    });
+}

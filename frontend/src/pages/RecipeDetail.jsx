@@ -10,6 +10,7 @@ import {
     BookmarkFilled,
     Growth,
     PlayFilledAlt,
+    Restaurant,
     Share,
     Time,
     UserMultiple,
@@ -112,7 +113,11 @@ export default function RecipeDetail() {
     const stepsRef = useRef(null);
     const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
-    const recipe = useMemo(() => RECIPE_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
+    const recommendationRecipeDetails = useAppStore((state) => state.recommendationRecipeDetails);
+    const recipe = useMemo(
+        () => recommendationRecipeDetails[id] ?? RECIPE_DETAIL_RECIPES[id] ?? buildRecipe(id),
+        [id, recommendationRecipeDetails]
+    );
 
     if (!recipe) {
         return (
@@ -120,7 +125,7 @@ export default function RecipeDetail() {
                 <title>{`레시피 추천 | ${SITE_NAME}`}</title>
                 <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
                     <EmptyState
-                        icon="🍽️"
+                        icon={<Restaurant size={28} />}
                         title="레시피를 찾을 수 없어요"
                         description="추천 결과에서 다시 보고 싶은 레시피를 선택해주세요"
                         action="추천 결과로 돌아가기"
