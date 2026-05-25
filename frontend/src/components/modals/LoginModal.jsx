@@ -72,6 +72,18 @@ export function LoginModal({
                         />
                     </label>
 
+                    <label className="flex flex-col gap-1.5">
+                        <span className="text-sm font-medium text-gray-700">비밀번호</span>
+                        <Input
+                            type="password"
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            placeholder="비밀번호를 입력해주세요."
+                            autoComplete="current-password"
+                            required
+                        />
+                    </label>
+
                     {isSignup && (
                         <label className="flex flex-col gap-1.5">
                             <span className="text-sm font-medium text-gray-700">닉네임</span>
@@ -85,18 +97,6 @@ export function LoginModal({
                             />
                         </label>
                     )}
-
-                    <label className="flex flex-col gap-1.5">
-                        <span className="text-sm font-medium text-gray-700">비밀번호</span>
-                        <Input
-                            type="password"
-                            value={password}
-                            onChange={(event) => setPassword(event.target.value)}
-                            placeholder="비밀번호를 입력해주세요."
-                            autoComplete="current-password"
-                            required
-                        />
-                    </label>
 
                     {(onPasswordResetClick || onSignUpClick || onSignupSubmit) && (
                         <div className="flex flex-col items-start gap-2 text-sm text-gray-500">
