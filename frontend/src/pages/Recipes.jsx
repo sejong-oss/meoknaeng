@@ -171,7 +171,7 @@ export default function Recipes() {
         return (
             <>
                 <title>{`레시피 추천 | ${SITE_NAME}`}</title>
-                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
+                <div className="flex min-h-[calc(100dvh-10rem)] items-center justify-center">
                     <EmptyState
                         icon={<Restaurant size={28} />}
                         title="아직 추천 결과가 없어요"
@@ -179,7 +179,7 @@ export default function Recipes() {
                         action="재료 입력하러 가기"
                         onAction={() => navigate("/home")}
                     />
-                </Card>
+                </div>
             </>
         );
     }

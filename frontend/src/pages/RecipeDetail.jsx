@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
 import { getRecipe } from "@/libs/api.js";
+import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
@@ -14,7 +15,6 @@ import {
     Time,
     Video,
     UserMultiple,
-    WarningAlt,
 } from "@carbon/icons-react";
 import {
     Breadcrumb,
@@ -175,13 +175,12 @@ export default function RecipeDetail() {
     const recommendationIngredients = useAppStore((state) => state.recommendationIngredients);
     const [recipe, setRecipe] = useState(null);
     const [status, setStatus] = useState("loading");
-    const [errorMessage, setErrorMessage] = useState(null);
 
     useEffect(() => {
         if (!id) {
             setRecipe(null);
-            setStatus("error");
-            setErrorMessage("레시피 ID가 올바르지 않아요.");
+            toast.error("레시피를 찾을 수 없어요.");
+            navigate("/recipes", { replace: true });
             return;
         }
 
@@ -189,47 +188,35 @@ export default function RecipeDetail() {
 
         setRecipe(null);
         setStatus("loading");
-        setErrorMessage(null);
 
         getRecipe(id)
             .then((data) => {
                 if (ignore) return;
 
+                if (!data) {
+                    toast.error("레시피를 찾을 수 없어요.");
+                    navigate("/recipes", { replace: true });
+                    return;
+                }
+
                 setRecipe(recipeToDetailView(data, recommendationIngredients));
                 setStatus("success");
             })
-            .catch((error) => {
+            .catch(() => {
                 if (ignore) return;
 
                 setRecipe(null);
-                setStatus("error");
-                setErrorMessage(error.message);
+                toast.error("레시피를 찾을 수 없어요.");
+                navigate("/recipes", { replace: true });
             });
 
         return () => {
             ignore = true;
         };
-    }, [id, recommendationIngredients]);
+    }, [id, navigate, recommendationIngredients]);
 
     if (status === "loading") {
         return <RecipeDetailSkeleton />;
-    }
-
-    if (status === "error" || !recipe) {
-        return (
-            <>
-                <title>{`레시피 추천 | ${SITE_NAME}`}</title>
-                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
-                    <EmptyState
-                        icon={<WarningAlt size={28} />}
-                        title="레시피를 찾을 수 없어요"
-                        description={errorMessage ?? "추천 결과에서 다시 보고 싶은 레시피를 선택해주세요"}
-                        action="추천 결과로 돌아가기"
-                        onAction={() => navigate("/recipes")}
-                    />
-                </Card>
-            </>
-        );
     }
 
     const ownedIngredients = recipe.ingredients.filter((ingredient) => ingredient.status === "owned").length;
