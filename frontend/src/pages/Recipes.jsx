@@ -55,6 +55,7 @@ export default function Recipes() {
     const completionStartedRef = useRef(false);
     const hasResults = Boolean(hero);
     const isHeroSaved = hero ? savedRecipeIds.includes(hero.id) : false;
+    const heroOwnedIngredientCount = hero?.ownedIngredientCount ?? 0;
     const isLoading = recommendationStatus === "loading";
     const showLoading = isLoading || isCompleting || (recommendationStatus === "success" && holdResult);
     const isError = recommendationStatus === "error";
@@ -257,7 +258,7 @@ export default function Recipes() {
                                 <div className="flex flex-wrap gap-1.5">
                                     <Chip variant="outline">
                                         <FruitBowl size={12} />
-                                        {ingredients.length}/{hero.ingredientCount} 재료 보유
+                                        {heroOwnedIngredientCount}/{hero.ingredientCount} 재료 보유
                                     </Chip>
                                     <Chip variant="outline">
                                         <Time size={12} />

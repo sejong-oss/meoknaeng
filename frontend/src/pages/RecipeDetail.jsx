@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
 import { getRecipe } from "@/libs/api.js";
+import { addRecipeIngredientStatuses } from "@/libs/recipeIngredients.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
@@ -65,10 +66,7 @@ const recipeToDetailView = (recipe, ownedIngredients) => ({
     time: formatMinutes(recipe.cook_time),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
-    ingredients: (recipe.ingredients ?? []).map((ingredient) => ({
-        ...ingredient,
-        status: ownedIngredients.includes(ingredient.name) ? "owned" : "needed",
-    })),
+    ingredients: addRecipeIngredientStatuses(recipe.ingredients, ownedIngredients),
     steps: (recipe.steps ?? [])
         .slice()
         .sort((a, b) => a.order - b.order)

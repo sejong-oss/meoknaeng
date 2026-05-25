@@ -12,6 +12,7 @@ import {
     signup as signupRequest,
     updateMyProfile,
 } from "@/libs/api.js";
+import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
 const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
@@ -30,7 +31,7 @@ const authUserToView = (user) => ({
 
 const recipeId = (recipe) => recipe.recipe_id ?? recipe.name;
 
-const recipeToSummaryView = (recipe) => ({
+const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     id: recipeId(recipe),
     title: recipe.name,
     time: formatMinutes(recipe.cook_time_minutes ?? recipe.cook_time),
@@ -38,6 +39,7 @@ const recipeToSummaryView = (recipe) => ({
     servings: formatServings(recipe.servings),
     description: recipe.summary ?? recipe.description,
     ingredientCount: recipe.ingredients?.length ?? 0,
+    ownedIngredientCount: countOwnedRecipeIngredients(recipe.ingredients, ownedIngredients),
 });
 
 export const useAppStore = create((set) => ({
@@ -176,8 +178,8 @@ export const useAppStore = create((set) => ({
                 query: DEFAULT_RECIPE_QUERY,
             });
             const recipes = data?.recipes ?? [];
-            const hero = recipes[0] ? recipeToSummaryView(recipes[0]) : null;
-            const others = recipes.slice(1).map(recipeToSummaryView);
+            const hero = recipes[0] ? recipeToSummaryView(recipes[0], nextIngredients) : null;
+            const others = recipes.slice(1).map((recipe) => recipeToSummaryView(recipe, nextIngredients));
 
             set({
                 recommendationHero: hero,
