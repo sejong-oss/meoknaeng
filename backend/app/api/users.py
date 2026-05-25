@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +19,7 @@ from app.db import get_db
 from app.models.recipe import Recipe, RecipeSave
 from app.models.schemas import ApiResponse
 from app.models.user import User, UserIngredient
+from app.service.users import delete_user_account
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -85,6 +86,24 @@ async def update_my_profile(
 
     await db.refresh(user)
     return ApiResponse(success=True, data=_to_user_profile_response(user))
+
+
+@router.delete(
+    "/me",
+    response_model=ApiResponse[None],
+    summary="회원 탈퇴",
+)
+async def delete_my_account(
+    request: Request,
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[None]:
+    user = await _get_current_user(user_id, db)
+    await delete_user_account(user, db)
+
+    request.session.clear()
+
+    return ApiResponse(success=True, data=None)
 
 
 @router.get(
