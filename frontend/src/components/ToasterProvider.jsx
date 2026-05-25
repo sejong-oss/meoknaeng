@@ -11,7 +11,7 @@ const toastIcons = {
 const toastOptions = {
     unstyled: true,
     classNames: {
-        toast: "flex items-center gap-3 px-4 py-3 rounded-card text-sm font-medium shadow-lg",
+        toast: "flex w-[var(--width)] items-center gap-3 px-4 py-3 rounded-card text-sm font-medium shadow-lg",
         default: "bg-gray-900 text-white",
         success: "bg-green-600 text-white",
         error: "bg-red-600 text-white",
