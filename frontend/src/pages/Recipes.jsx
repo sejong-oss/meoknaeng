@@ -143,7 +143,7 @@ export default function Recipes() {
                                 레시피를 추천하고 있어요
                             </h2>
                             <p className="text-sm leading-relaxed text-gray-600">
-                                입력한 재료 조합을 바탕으로 만들기 좋은 메뉴를 찾는 중이에요.
+                                입력한 재료 조합을 바탕으로 만들기 좋은 메뉴를 찾는 중이에요
                             </p>
                         </div>
                         <ProgressBar
@@ -171,7 +171,7 @@ export default function Recipes() {
                     <EmptyState
                         icon={<WarningAlt size={28} />}
                         title="추천을 불러오지 못했어요"
-                        description={recommendationError ?? "잠시 후 다시 시도해주세요."}
+                        description={recommendationError ?? "잠시 후 다시 시도해주세요"}
                         action="다시 추천 받기"
                         onAction={() => recommendRecipes(ingredients).catch(() => {})}
                     />

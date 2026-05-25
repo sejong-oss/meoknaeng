@@ -32,7 +32,7 @@ export async function request(path, options = {}) {
         const payload = response.data;
 
         if (payload?.success === false) {
-            throw new ApiError(payload?.message ?? "요청을 처리하지 못했어요.", {
+            throw new ApiError(payload?.message ?? "요청을 처리하지 못했어요", {
                 status: response.status,
                 response: payload,
             });
@@ -43,7 +43,7 @@ export async function request(path, options = {}) {
         if (error instanceof ApiError) throw error;
 
         throw new ApiError(
-            error.response?.data?.message ?? error.response?.data?.detail ?? "요청을 처리하지 못했어요.",
+            error.response?.data?.message ?? error.response?.data?.detail ?? "요청을 처리하지 못했어요",
             {
                 status: error.response?.status,
                 response: error.response?.data,

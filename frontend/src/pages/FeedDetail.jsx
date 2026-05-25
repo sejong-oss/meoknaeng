@@ -165,8 +165,8 @@ function buildRecipe(id) {
         },
         likes: fallback.likes,
         bookmarks: Math.max(18, Math.round(fallback.likes * 0.28)),
-        description: `${fallback.title}를 냉장고 재료로 간단하게 만드는 방법을 공유해요. 복잡한 준비 없이 바로 따라 하기 좋은 레시피입니다.`,
-        note: "간은 마지막에 한 번 더 확인하고 취향에 맞게 조절해주세요.",
+        description: `${fallback.title}를 냉장고 재료로 간단하게 만들 수 있고, 복잡한 준비 없이 바로 따라 하기 좋은 레시피입니다`,
+        note: "간은 마지막에 한 번 더 확인하고 취향에 맞게 조절해주세요",
     };
 }
 
@@ -182,7 +182,7 @@ export default function FeedDetail() {
     useEffect(() => {
         if (recipe) return;
 
-        toast.error("공유 레시피를 찾을 수 없어요.");
+        toast.error("공유 레시피를 찾을 수 없어요");
         navigate("/feed", { replace: true });
     }, [navigate, recipe]);
 

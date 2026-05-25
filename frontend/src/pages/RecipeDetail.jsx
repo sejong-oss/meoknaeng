@@ -183,7 +183,7 @@ export default function RecipeDetail() {
     useEffect(() => {
         if (!id) {
             setRecipe(null);
-            toast.error("레시피를 찾을 수 없어요.");
+            toast.error("레시피를 찾을 수 없어요");
             navigate("/recipes", { replace: true });
             return;
         }
@@ -198,7 +198,7 @@ export default function RecipeDetail() {
                 if (ignore) return;
 
                 if (!data) {
-                    toast.error("레시피를 찾을 수 없어요.");
+                    toast.error("레시피를 찾을 수 없어요");
                     navigate("/recipes", { replace: true });
                     return;
                 }
@@ -210,7 +210,7 @@ export default function RecipeDetail() {
                 if (ignore) return;
 
                 setRecipe(null);
-                toast.error("레시피를 찾을 수 없어요.");
+                toast.error("레시피를 찾을 수 없어요");
                 navigate("/recipes", { replace: true });
             });
 
@@ -313,7 +313,7 @@ export default function RecipeDetail() {
                                 <EmptyState
                                     icon={<Video size={28} />}
                                     title="관련 영상을 준비 중이에요"
-                                    description="추천 영상 정보가 연결되면 이곳에서 함께 확인할 수 있어요."
+                                    description="추천 영상 정보가 연결되면 이곳에서 함께 확인할 수 있어요"
                                     className="rounded-card border border-gray-100 bg-gray-50 !py-8 !px-4"
                                 />
                             )}

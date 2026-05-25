@@ -26,9 +26,9 @@ export default function AppLayout() {
     const handleLogin = async (credentials) => {
         try {
             await login(credentials);
-            toast.success("로그인했어요.");
+            toast.success("로그인했어요");
         } catch (error) {
-            toast.error(error.message ?? "로그인하지 못했어요.");
+            toast.error(error.message ?? "로그인하지 못했어요");
             throw error;
         }
     };
@@ -36,9 +36,9 @@ export default function AppLayout() {
     const handleSignup = async (credentials) => {
         try {
             await signup(credentials);
-            toast.success("회원가입하고 로그인했어요.");
+            toast.success("회원가입하고 로그인했어요");
         } catch (error) {
-            toast.error(error.message ?? "회원가입하지 못했어요.");
+            toast.error(error.message ?? "회원가입하지 못했어요");
             throw error;
         }
     };
@@ -46,10 +46,10 @@ export default function AppLayout() {
     const handleLogout = async () => {
         try {
             await logout();
-            toast.success("로그아웃했어요.");
+            toast.success("로그아웃했어요");
             navigate("/home", { replace: true });
         } catch (error) {
-            toast.error(error.message ?? "로그아웃하지 못했어요.");
+            toast.error(error.message ?? "로그아웃하지 못했어요");
         }
     };
 

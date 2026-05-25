@@ -33,7 +33,7 @@ export function RecipeSelectModal({
         <Modal open={open} onOpenChange={handleOpenChange}>
             <ModalContent
                 title="공유할 레시피 선택"
-                description="재료 입력 후 저장된 레시피 중 하나를 선택해 경험을 공유해보세요."
+                description="재료 입력 후 저장된 레시피 중 하나를 선택해 경험을 공유해보세요"
                 size="lg"
             >
                 {recipes.length > 0 ? (
@@ -62,7 +62,7 @@ export function RecipeSelectModal({
                                 </div>
                             ) : (
                                 <p className="min-h-8 text-xs font-medium leading-8 text-gray-500">
-                                    공유할 레시피를 고르면 주요 재료와 조리 시간이 표시돼요.
+                                    공유할 레시피를 고르면 주요 재료와 조리 시간이 표시돼요
                                 </p>
                             )}
                         </div>
@@ -78,7 +78,7 @@ export function RecipeSelectModal({
                 ) : (
                     <EmptyState
                         title="아직 저장된 레시피가 없어요"
-                        description="냉장고 재료를 입력하고 레시피를 먼저 확인해보세요."
+                        description="냉장고 재료를 입력하고 레시피를 먼저 확인해보세요"
                         action="재료 입력하러 가기"
                         onAction={onEmptyAction}
                     />

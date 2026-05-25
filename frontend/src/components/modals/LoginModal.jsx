@@ -14,8 +14,8 @@ export function LoginModal({
     const isSignup = mode === "signup";
     const title = isSignup ? "회원가입" : "로그인";
     const description = isSignup
-        ? "계정을 만들고 내 재료와 레시피를 저장해보세요."
-        : "로그인을 통해 레시피 저장과 공유 기능을 사용해보세요.";
+        ? "계정을 만들고 내 재료와 레시피를 저장해보세요"
+        : "로그인을 통해 레시피 저장과 공유 기능을 사용해보세요";
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [nickname, setNickname] = useState("");
@@ -66,7 +66,7 @@ export function LoginModal({
                             type="email"
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
-                            placeholder="이메일 주소를 입력해주세요."
+                            placeholder="이메일 주소를 입력해주세요"
                             autoComplete="email"
                             required
                         />
@@ -78,7 +78,7 @@ export function LoginModal({
                             type="password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
-                            placeholder="비밀번호를 입력해주세요."
+                            placeholder="비밀번호를 입력해주세요"
                             autoComplete="current-password"
                             required
                         />
@@ -91,7 +91,7 @@ export function LoginModal({
                                 type="text"
                                 value={nickname}
                                 onChange={(event) => setNickname(event.target.value)}
-                                placeholder="닉네임을 입력해주세요."
+                                placeholder="닉네임을 입력해주세요"
                                 autoComplete="nickname"
                                 required
                             />
