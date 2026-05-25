@@ -105,7 +105,6 @@ class PostResponse(BaseModel):
     category: str | None
     difficulty: str | None
     source_recipe_id: str | None
-    comment_count: int
     created_at: str
     updated_at: str
 
@@ -127,7 +126,6 @@ class PostListItem(BaseModel):
     category: str | None
     difficulty: str | None
     author_nickname: str
-    comment_count: int
     created_at: str
     source_recipe: RecipeSummary | None
 
@@ -150,7 +148,6 @@ class PostDetailResponse(BaseModel):
     category: str | None
     difficulty: str | None
     source_recipe_id: str | None
-    comment_count: int
     created_at: str
     updated_at: str
     source_recipe: RecipeDetail | None
