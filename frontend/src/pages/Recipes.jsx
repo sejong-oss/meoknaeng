@@ -118,7 +118,7 @@ export default function Recipes() {
         return (
             <>
                 <title>{`레시피 추천 | ${SITE_NAME}`}</title>
-                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] items-center justify-center px-4 py-10 text-center md:min-h-[28rem] md:px-6 md:py-14">
+                <div className="flex min-h-[calc(100dvh-10rem)] items-center justify-center px-4 py-10 text-center">
                     <div className="flex w-full max-w-md flex-col items-center gap-5">
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-center">
@@ -145,7 +145,7 @@ export default function Recipes() {
                             ))}
                         </div>
                     </div>
-                </Card>
+                </div>
             </>
         );
     }
@@ -154,7 +154,7 @@ export default function Recipes() {
         return (
             <>
                 <title>{`레시피 추천 | ${SITE_NAME}`}</title>
-                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
+                <div className="flex min-h-[calc(100dvh-10rem)] items-center justify-center">
                     <EmptyState
                         icon={<WarningAlt size={28} />}
                         title="추천을 불러오지 못했어요"
@@ -162,7 +162,7 @@ export default function Recipes() {
                         action="다시 추천 받기"
                         onAction={() => recommendRecipes(ingredients).catch(() => {})}
                     />
-                </Card>
+                </div>
             </>
         );
     }
