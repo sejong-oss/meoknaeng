@@ -197,7 +197,7 @@ export default function Recipes() {
                             </h1>
                             <Button variant="outline" size="sm" onClick={() => navigate("/home")} className="shrink-0 md:hidden">
                                 <Renew size={14} />
-                                다시 추천
+                                재료 다시 입력
                             </Button>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
@@ -209,7 +209,7 @@ export default function Recipes() {
                     <div className="hidden md:flex items-center gap-2 shrink-0">
                         <Button variant="outline" size="sm" onClick={() => navigate("/home")}>
                             <Renew size={14} />
-                            다시 추천
+                            재료 다시 입력
                         </Button>
                     </div>
                 </div>
