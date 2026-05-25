@@ -1,7 +1,8 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FEED_DETAIL_FALLBACKS, FEED_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/libs/constants.js";
+import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
@@ -23,7 +24,6 @@ import {
     Button,
     Card,
     Chip,
-    EmptyState,
     Input,
     PhotoPlaceholder,
     RecipeSectionTitle,
@@ -179,20 +179,16 @@ export default function FeedDetail() {
     const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
     const recipe = useMemo(() => FEED_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
 
+    useEffect(() => {
+        if (recipe) return;
+
+        toast.error("공유 레시피를 찾을 수 없어요.");
+        navigate("/feed", { replace: true });
+    }, [navigate, recipe]);
+
     if (!recipe) {
         return (
-            <>
-                <title>{`피드 | ${SITE_NAME}`}</title>
-                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
-                    <EmptyState
-                        icon={<Restaurant size={28} />}
-                        title="공유 레시피를 찾을 수 없어요"
-                        description="피드에서 다시 보고 싶은 레시피를 선택해주세요"
-                        action="공유 레시피로 돌아가기"
-                        onAction={() => navigate("/feed")}
-                    />
-                </Card>
-            </>
+            <title>{`피드 | ${SITE_NAME}`}</title>
         );
     }
 
