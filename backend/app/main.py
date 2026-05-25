@@ -60,7 +60,7 @@ async def request_validation_exception_handler(
 ) -> JSONResponse:
     return _error_response(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        message="Validation error",
+        message="입력값이 올바르지 않습니다.",
     )
 
 
@@ -71,7 +71,7 @@ async def unhandled_exception_handler(
 ) -> JSONResponse:
     return _error_response(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        message="Internal Server Error",
+        message="서버 오류가 발생했습니다.",
     )
 
 

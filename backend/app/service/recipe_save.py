@@ -16,7 +16,7 @@ class RecipeSaveError(Exception):
 async def save_recipe(user_id: str, recipe_id: str, db: AsyncSession) -> None:
     recipe = await db.get(Recipe, recipe_id)
     if not recipe:
-        raise RecipeSaveError(404, "Recipe not found")
+        raise RecipeSaveError(404, "레시피를 찾을 수 없습니다.")
 
     existing = await db.execute(
         select(RecipeSave).where(
@@ -25,7 +25,7 @@ async def save_recipe(user_id: str, recipe_id: str, db: AsyncSession) -> None:
         )
     )
     if existing.scalar_one_or_none():
-        raise RecipeSaveError(409, "Recipe already saved")
+        raise RecipeSaveError(409, "이미 저장된 레시피입니다.")
 
     db.add(RecipeSave(
         user_id=user_id,
@@ -43,7 +43,7 @@ async def unsave_recipe(user_id: str, recipe_id: str, db: AsyncSession) -> None:
         )
     )
     if result.rowcount == 0:
-        raise RecipeSaveError(404, "Saved recipe not found")
+        raise RecipeSaveError(404, "저장된 레시피를 찾을 수 없습니다.")
 
     await db.commit()
 
@@ -56,5 +56,5 @@ async def get_recipe(recipe_id: str, db: AsyncSession) -> Recipe:
     )
     recipe = result.scalar_one_or_none()
     if not recipe:
-        raise RecipeSaveError(404, "Recipe not found")
+        raise RecipeSaveError(404, "레시피를 찾을 수 없습니다.")
     return recipe

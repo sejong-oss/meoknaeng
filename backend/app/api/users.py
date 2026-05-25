@@ -33,7 +33,7 @@ async def _get_current_user(user_id: str, db: AsyncSession) -> User:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="로그인이 필요합니다.",
         )
     return user
 
@@ -81,7 +81,7 @@ async def update_my_profile(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Nickname already exists",
+            detail="이미 사용 중인 닉네임입니다.",
         ) from exc
 
     await db.refresh(user)

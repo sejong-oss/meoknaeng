@@ -41,7 +41,7 @@ async def signup(
     if existing_user is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Email or nickname already exists",
+            detail="이미 사용 중인 이메일 또는 닉네임입니다.",
         )
 
     user = User(
@@ -58,7 +58,7 @@ async def signup(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Email or nickname already exists",
+            detail="이미 사용 중인 이메일 또는 닉네임입니다.",
         ) from exc
 
     await db.refresh(user)
@@ -83,7 +83,7 @@ async def login(
     if user is None or not verify_password(payload.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+            detail="이메일 또는 비밀번호가 올바르지 않습니다.",
         )
 
     request.session["user_id"] = user.user_id
@@ -108,7 +108,7 @@ async def logout(request: Request) -> ApiResponse[None]:
     if "user_id" not in request.session:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="로그인이 필요합니다.",
         )
 
     request.session.clear()

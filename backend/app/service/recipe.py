@@ -27,17 +27,17 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession) -> RecipeRe
             }
         )
     except Exception as exc:
-        raise RecipeServiceError(502, f"LLM call failed: {exc}") from exc
+        raise RecipeServiceError(502, "레시피 생성에 실패했습니다.") from exc
 
     try:
         parsed = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise RecipeServiceError(502, f"LLM returned non-JSON: {exc}") from exc
+        raise RecipeServiceError(502, "레시피 생성에 실패했습니다.") from exc
 
     try:
         response = RecipeResponse.model_validate(parsed)
     except ValidationError as exc:
-        raise RecipeServiceError(502, f"LLM JSON did not match schema: {exc}") from exc
+        raise RecipeServiceError(502, "레시피 생성에 실패했습니다.") from exc
 
     now = datetime.now(timezone.utc)
     for recipe in response.recipes:
