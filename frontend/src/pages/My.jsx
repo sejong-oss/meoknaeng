@@ -8,9 +8,21 @@ import {
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
+import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+
+const INGREDIENT_SUGGESTION_LIMIT = 8;
+
+async function loadIngredientSuggestions(query) {
+    const result = await autocompleteIngredients({
+        query,
+        limit: INGREDIENT_SUGGESTION_LIMIT,
+    });
+
+    return result?.items?.map((item) => item.name) ?? [];
+}
 
 export default function My() {
     const navigate = useNavigate();
@@ -291,6 +303,7 @@ export default function My() {
                                 onAdd={addPantryIngredient}
                                 onRemove={removePantryIngredient}
                                 ingredientList={INGREDIENT_LIST}
+                                loadSuggestions={loadIngredientSuggestions}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2"
                                 inputClassName="!py-1 !text-sm"
                             />

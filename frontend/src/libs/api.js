@@ -79,3 +79,12 @@ export function logout() {
         method: "DELETE",
     });
 }
+
+export function autocompleteIngredients({ query, limit = 10 }) {
+    return request("/ingredients/autocomplete", {
+        params: {
+            q: query,
+            limit,
+        },
+    });
+}

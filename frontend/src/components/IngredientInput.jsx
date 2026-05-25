@@ -1,6 +1,73 @@
-import { useMemo, useState, useRef, forwardRef, useImperativeHandle } from "react";
+import { useEffect, useMemo, useState, useRef, forwardRef, useImperativeHandle } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Chip } from "@/components/Chip.jsx";
+
+const MAX_SUGGESTIONS = 4;
+const SUGGESTION_DEBOUNCE_MS = 160;
+const HANGUL_START_CODE = 0xac00;
+const HANGUL_END_CODE = 0xd7a3;
+const HANGUL_SYLLABLE_INTERVAL = 588;
+const CHOSEONG_LIST = [
+    "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ",
+    "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ",
+];
+const CHOSEONG_SET = new Set(CHOSEONG_LIST);
+
+function normalizeSuggestions(items) {
+    return Array.isArray(items)
+        ? items
+            .map((item) => typeof item === "string" ? item : item?.name)
+            .filter(Boolean)
+        : [];
+}
+
+function getChoseong(char) {
+    const code = char.charCodeAt(0);
+
+    if (code < HANGUL_START_CODE || code > HANGUL_END_CODE) {
+        return char;
+    }
+
+    const index = Math.floor((code - HANGUL_START_CODE) / HANGUL_SYLLABLE_INTERVAL);
+    return CHOSEONG_LIST[index];
+}
+
+function findSuggestionMatchRange(item, query) {
+    const trimmed = query.trim();
+    if (!trimmed) return null;
+
+    const matchIndex = item.indexOf(trimmed);
+    if (matchIndex >= 0) {
+        return [matchIndex, matchIndex + trimmed.length];
+    }
+
+    if (![...trimmed].every((char) => CHOSEONG_SET.has(char))) {
+        return null;
+    }
+
+    const choseongText = [...item].map(getChoseong).join("");
+    const choseongMatchIndex = choseongText.indexOf(trimmed);
+
+    return choseongMatchIndex >= 0
+        ? [choseongMatchIndex, choseongMatchIndex + trimmed.length]
+        : null;
+}
+
+function renderHighlightedSuggestion(item, query, highlightClassName) {
+    const matchRange = findSuggestionMatchRange(item, query);
+
+    if (!matchRange) return item;
+
+    return (
+        <>
+            {item.slice(0, matchRange[0])}
+            <span className={highlightClassName}>
+                {item.slice(matchRange[0], matchRange[1])}
+            </span>
+            {item.slice(matchRange[1])}
+        </>
+    );
+}
 
 export const IngredientInput = forwardRef(function IngredientInput({
     ingredients = [],
@@ -11,9 +78,11 @@ export const IngredientInput = forwardRef(function IngredientInput({
     className = "",
     inputClassName = "",
     suggestionsAnchorRef,
+    loadSuggestions,
 }, ref) {
     const [query, setQuery] = useState("");
     const [activeIdx, setActiveIdx] = useState(-1);
+    const [remoteSuggestions, setRemoteSuggestions] = useState({ query: "", items: null });
     const inputRef = useRef(null);
 
     useImperativeHandle(ref, () => ({
@@ -21,14 +90,58 @@ export const IngredientInput = forwardRef(function IngredientInput({
         focus: () => inputRef.current?.focus(),
     }));
 
+    useEffect(() => {
+        const trimmed = query.trim();
+        setActiveIdx(-1);
+
+        if (!trimmed || !loadSuggestions) {
+            setRemoteSuggestions({ query: trimmed, items: null });
+            return;
+        }
+
+        let ignore = false;
+        setRemoteSuggestions({ query: trimmed, items: null });
+
+        const timer = window.setTimeout(async () => {
+            try {
+                const items = await loadSuggestions(trimmed);
+                if (!ignore) {
+                    setRemoteSuggestions({
+                        query: trimmed,
+                        items: normalizeSuggestions(items),
+                    });
+                }
+            } catch {
+                if (!ignore) {
+                    setRemoteSuggestions({ query: trimmed, items: null });
+                }
+            }
+        }, SUGGESTION_DEBOUNCE_MS);
+
+        return () => {
+            ignore = true;
+            window.clearTimeout(timer);
+        };
+    }, [loadSuggestions, query]);
+
     const suggestions = useMemo(() => {
         const trimmed = query.trim();
-        return trimmed && ingredientList.length > 0
-            ? ingredientList.filter(
-                (item) => item.startsWith(trimmed) && !ingredients.includes(item)
-            ).slice(0, 4)
-            : [];
-    }, [query, ingredients, ingredientList]);
+        if (!trimmed) return [];
+
+        const localSuggestions = ingredientList.filter(
+            (item) => item.startsWith(trimmed) && !ingredients.includes(item)
+        );
+
+        const remoteItems =
+            remoteSuggestions.query === trimmed && remoteSuggestions.items
+                ? remoteSuggestions.items
+                : null;
+        const source = remoteItems ?? localSuggestions;
+
+        return [...new Set(source)]
+            .filter((item) => !ingredients.includes(item))
+            .slice(0, MAX_SUGGESTIONS);
+    }, [query, ingredients, ingredientList, remoteSuggestions]);
 
     function handleAdd(value) {
         const trimmed = value.trim();
@@ -117,8 +230,8 @@ export const IngredientInput = forwardRef(function IngredientInput({
                     className="z-50 w-[var(--radix-popover-trigger-width)] bg-white border border-gray-200 rounded-card overflow-hidden shadow-lg"
                 >
                     {suggestions.map((item, i) => {
-                        const matchLen = query.trim().length;
                         const isHighlighted = i === highlightIdx;
+                        const matchClassName = `font-semibold ${isHighlighted ? "text-primary-600" : "text-primary-500"}`;
                         return (
                             <button
                                 key={item}
@@ -136,10 +249,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
                                 ].join(" ")}
                             >
                                 <span>
-                                    <span className={`font-semibold ${isHighlighted ? "text-primary-600" : "text-primary-500"}`}>
-                                        {item.slice(0, matchLen)}
-                                    </span>
-                                    {item.slice(matchLen)}
+                                    {renderHighlightedSuggestion(item, query, matchClassName)}
                                 </span>
                                 {isHighlighted && (
                                     <span className="text-xs font-semibold text-primary-500 shrink-0 ml-2">ENTER ↵</span>
