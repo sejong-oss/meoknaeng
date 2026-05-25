@@ -32,7 +32,6 @@ def _to_response(post) -> PostResponse:
         category=post.category,
         difficulty=post.difficulty,
         source_recipe_id=post.source_recipe_id,
-        comment_count=post.comment_count,
         created_at=post.created_at.isoformat(),
         updated_at=post.updated_at.isoformat(),
     )
@@ -58,7 +57,6 @@ def _to_list_item(post) -> PostListItem:
         category=post.category,
         difficulty=post.difficulty,
         author_nickname=post.author.nickname,
-        comment_count=post.comment_count,
         created_at=post.created_at.isoformat(),
         source_recipe=recipe,
     )
@@ -93,7 +91,6 @@ def _to_detail(post) -> PostDetailResponse:
         category=post.category,
         difficulty=post.difficulty,
         source_recipe_id=post.source_recipe_id,
-        comment_count=post.comment_count,
         created_at=post.created_at.isoformat(),
         updated_at=post.updated_at.isoformat(),
         source_recipe=recipe,
@@ -107,10 +104,9 @@ async def get_post_list_handler(
     q: str | None = Query(None),
     category: str | None = Query(None),
     difficulty: str | None = Query(None),
-    sort: str = Query("latest"),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostListResponse]:
-    posts, total = await get_post_list(db, page, size, q, category, difficulty, sort)
+    posts, total = await get_post_list(db, page, size, q, category, difficulty)
     return ApiResponse(
         success=True,
         data=PostListResponse(

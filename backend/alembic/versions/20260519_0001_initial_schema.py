@@ -92,7 +92,6 @@ def upgrade() -> None:
         sa.Column("cook_time", sa.Integer(), nullable=True),
         sa.Column("category", sa.Text(), nullable=True),
         sa.Column("difficulty", sa.String(length=20), nullable=True),
-        sa.Column("comment_count", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.TIMESTAMP(), nullable=False),
         sa.Column("updated_at", sa.TIMESTAMP(), nullable=False),
         sa.ForeignKeyConstraint(["author_id"], ["user.user_id"]),

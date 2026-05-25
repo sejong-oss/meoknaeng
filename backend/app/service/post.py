@@ -82,7 +82,6 @@ async def get_post_list(
     q: str | None,
     category: str | None,
     difficulty: str | None,
-    sort: str,
 ) -> tuple[list[Post], int]:
     filters = []
     if q:
@@ -96,12 +95,11 @@ async def get_post_list(
         select(func.count(Post.post_id)).filter(*filters)
     )).scalar_one()
 
-    order_clause = Post.comment_count.desc() if sort == "popular" else Post.created_at.desc()
     stmt = (
         select(Post)
         .filter(*filters)
         .options(selectinload(Post.author), selectinload(Post.source_recipe))
-        .order_by(order_clause)
+        .order_by(Post.created_at.desc())
         .offset((page - 1) * size)
         .limit(size)
     )

@@ -26,7 +26,6 @@ class Post(Base):
     cook_time: Mapped[int | None] = mapped_column(Integer)
     category: Mapped[str | None] = mapped_column(Text)
     difficulty: Mapped[str | None] = mapped_column(String(20))
-    comment_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
 
