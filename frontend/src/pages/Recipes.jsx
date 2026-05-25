@@ -14,7 +14,7 @@ import {
     UserMultiple,
     WarningAlt,
 } from "@carbon/icons-react";
-import { Button, Card, Chip, EmptyState, PhotoPlaceholder, ProgressBar, RecipeCard } from "@/components/index.js";
+import { Breadcrumb, Button, Card, Chip, EmptyState, PhotoPlaceholder, ProgressBar, RecipeCard } from "@/components/index.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
@@ -58,6 +58,16 @@ export default function Recipes() {
     const isLoading = recommendationStatus === "loading";
     const showLoading = isLoading || isCompleting || (recommendationStatus === "success" && holdResult);
     const isError = recommendationStatus === "error";
+    const handleRecommendAgain = () => {
+        if (ingredients.length === 0) return;
+
+        completionStartedRef.current = false;
+        setProgress(0);
+        setTipIndex(0);
+        setIsCompleting(false);
+        setHoldResult(true);
+        recommendRecipes(ingredients).catch(() => {});
+    };
 
     useEffect(() => {
         if (recommendationStatus !== "success" || !holdResult || completionStartedRef.current) return;
@@ -69,6 +79,8 @@ export default function Recipes() {
         const timer = window.setTimeout(() => {
             setIsCompleting(false);
             setHoldResult(false);
+            setProgress(0);
+            setTipIndex(0);
             completionStartedRef.current = false;
         }, RECOMMENDATION_COMPLETE_DELAY_MS);
 
@@ -187,7 +199,14 @@ export default function Recipes() {
     return (
         <>
             <title>{`레시피 추천 | ${SITE_NAME}`}</title>
-            <div className="flex flex-col gap-6 py-4 md:py-6">
+            <div className="flex flex-col gap-6 py-4 md:gap-7 md:py-2">
+                <Breadcrumb
+                    className="hidden md:flex"
+                    items={[
+                        { label: "재료 입력", onClick: () => navigate("/home") },
+                        { label: "추천 결과" },
+                    ]}
+                />
 
                 <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div className="flex flex-col gap-3">
@@ -195,9 +214,9 @@ export default function Recipes() {
                             <h1 className="min-w-0 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
                                 오늘은 <span className="text-primary-500">이거</span> 어때요?
                             </h1>
-                            <Button variant="outline" size="sm" onClick={() => navigate("/home")} className="shrink-0 md:hidden">
+                            <Button variant="outline" size="sm" onClick={handleRecommendAgain} className="shrink-0 md:hidden">
                                 <Renew size={14} />
-                                재료 다시 입력
+                                레시피 다시 추천
                             </Button>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
@@ -207,9 +226,9 @@ export default function Recipes() {
                         </div>
                     </div>
                     <div className="hidden md:flex items-center gap-2 shrink-0">
-                        <Button variant="outline" size="sm" onClick={() => navigate("/home")}>
+                        <Button variant="outline" size="sm" onClick={handleRecommendAgain}>
                             <Renew size={14} />
-                            재료 다시 입력
+                            레시피 다시 추천
                         </Button>
                     </div>
                 </div>
