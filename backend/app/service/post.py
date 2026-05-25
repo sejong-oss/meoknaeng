@@ -41,9 +41,9 @@ async def create_post(user_id: str, payload: PostCreateRequest, db: AsyncSession
 async def update_post(post_id: str, user_id: str, payload: PostUpdateRequest, db: AsyncSession) -> Post:
     post = await db.get(Post, post_id)
     if not post:
-        raise PostError(404, "Post not found")
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
     if post.author_id != user_id:
-        raise PostError(403, "Not authorized")
+        raise PostError(403, "권한이 없습니다.")
 
     if payload.title is not None:
         post.title = payload.title
@@ -67,9 +67,9 @@ async def update_post(post_id: str, user_id: str, payload: PostUpdateRequest, db
 async def delete_post(post_id: str, user_id: str, db: AsyncSession) -> None:
     post = await db.get(Post, post_id)
     if not post:
-        raise PostError(404, "Post not found")
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
     if post.author_id != user_id:
-        raise PostError(403, "Not authorized")
+        raise PostError(403, "권한이 없습니다.")
 
     await db.delete(post)
     await db.commit()
@@ -119,5 +119,5 @@ async def get_post_detail(post_id: str, db: AsyncSession) -> Post:
     )
     post = (await db.execute(stmt)).scalar_one_or_none()
     if not post:
-        raise PostError(404, "Post not found")
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
     return post
