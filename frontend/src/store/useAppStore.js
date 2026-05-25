@@ -37,22 +37,7 @@ const recipeToSummaryView = (recipe) => ({
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     description: recipe.summary ?? recipe.description,
-});
-
-const recipeToDetailView = (recipe, ownedIngredients) => ({
-    ...recipeToSummaryView(recipe),
-    match: 98,
-    summary: recipe.summary ?? recipe.description,
-    ingredients: recipe.ingredients.map((ingredient) => ({
-        ...ingredient,
-        status: ownedIngredients.includes(ingredient.name) ? "owned" : "needed",
-    })),
-    steps: recipe.steps
-        .slice()
-        .sort((a, b) => a.order - b.order)
-        .map((step) => step.description)
-        .filter(Boolean),
-    videos: [],
+    ingredientCount: recipe.ingredients?.length ?? 0,
 });
 
 export const useAppStore = create((set) => ({
@@ -63,7 +48,6 @@ export const useAppStore = create((set) => ({
     recommendationIngredients: [],
     recommendationHero: null,
     recommendationOthers: [],
-    recommendationRecipeDetails: {},
     recommendationStatus: "idle",
     recommendationError: null,
     recommendationStartedAt: null,
@@ -181,7 +165,6 @@ export const useAppStore = create((set) => ({
             recommendationIngredients: nextIngredients,
             recommendationHero: null,
             recommendationOthers: [],
-            recommendationRecipeDetails: {},
             recommendationStatus: "loading",
             recommendationError: null,
             recommendationStartedAt: Date.now(),
@@ -195,14 +178,10 @@ export const useAppStore = create((set) => ({
             const recipes = data?.recipes ?? [];
             const hero = recipes[0] ? recipeToSummaryView(recipes[0]) : null;
             const others = recipes.slice(1).map(recipeToSummaryView);
-            const details = Object.fromEntries(
-                recipes.map((recipe) => [recipeId(recipe), recipeToDetailView(recipe, nextIngredients)])
-            );
 
             set({
                 recommendationHero: hero,
                 recommendationOthers: others,
-                recommendationRecipeDetails: details,
                 recommendationStatus: "success",
                 recommendationStartedAt: null,
             });
@@ -212,7 +191,6 @@ export const useAppStore = create((set) => ({
             set({
                 recommendationHero: null,
                 recommendationOthers: [],
-                recommendationRecipeDetails: {},
                 recommendationStatus: "error",
                 recommendationError: error.message,
                 recommendationStartedAt: null,

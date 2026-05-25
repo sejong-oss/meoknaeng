@@ -42,10 +42,13 @@ export async function request(path, options = {}) {
     } catch (error) {
         if (error instanceof ApiError) throw error;
 
-        throw new ApiError(error.response?.data?.message ?? "요청을 처리하지 못했어요.", {
-            status: error.response?.status,
-            response: error.response?.data,
-        });
+        throw new ApiError(
+            error.response?.data?.message ?? error.response?.data?.detail ?? "요청을 처리하지 못했어요.",
+            {
+                status: error.response?.status,
+                response: error.response?.data,
+            }
+        );
     }
 }
 
@@ -97,4 +100,8 @@ export function recommendRecipes({ ingredients, query }) {
             query,
         },
     });
+}
+
+export function getRecipe(recipeId) {
+    return request(`/recipes/${recipeId}`);
 }

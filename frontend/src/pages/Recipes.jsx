@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Bookmark, BookmarkFilled, Renew, Restaurant, Share, Star, Time, Video, WarningAlt } from "@carbon/icons-react";
+import {
+    ArrowRight,
+    Bookmark,
+    BookmarkFilled,
+    FruitBowl,
+    Growth,
+    Renew,
+    Restaurant,
+    Share,
+    Star,
+    Time,
+    UserMultiple,
+    WarningAlt,
+} from "@carbon/icons-react";
 import { Button, Card, Chip, EmptyState, PhotoPlaceholder, ProgressBar, RecipeCard } from "@/components/index.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -224,16 +237,21 @@ export default function Recipes() {
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                     <Chip variant="outline">
+                                        <FruitBowl size={12} />
+                                        {ingredients.length}/{hero.ingredientCount} 재료 보유
+                                    </Chip>
+                                    <Chip variant="outline">
                                         <Time size={12} />
                                         {hero.time}
                                     </Chip>
-                                    <Chip variant="outline">난이도 {hero.difficulty}</Chip>
-                                    <Chip variant="outline">{ingredients.length}/{ingredients.length} 재료 보유</Chip>
                                     <Chip variant="outline">
-                                        <Video size={12} />
-                                        유튜브 3개
+                                        <Growth size={12} />
+                                        난이도 {hero.difficulty}
                                     </Chip>
-                                    <Chip variant="outline">{hero.servings}</Chip>
+                                    <Chip variant="outline">
+                                        <UserMultiple size={12} />
+                                        {hero.servings}
+                                    </Chip>
                                 </div>
                             </div>
                             <div className="flex flex-wrap gap-2">

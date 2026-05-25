@@ -75,165 +75,6 @@ export const FLOW_ANIMATION_RECIPES = [
     { name: "파채 무침", match: 71 },
 ];
 
-export const RECIPE_RESULT_INGREDIENTS = ["양파", "계란", "두부", "대파", "간장"];
-
-const MOCK_RECIPE_RECOMMEND_RESPONSE = apiResponse({
-    recipes: [
-        {
-            recipe_id: "dubu-jorim",
-            name: "두부 간장조림",
-            summary: "냉장고 재료 그대로, 짭조름하고 부드러운 한 그릇. 양파의 단맛과 두부의 고소함이 잘 어울려요.",
-            cook_time_minutes: 20,
-            difficulty: "쉬움",
-            servings: 2,
-            ingredients: [
-                { name: "두부", amount: "1모" },
-                { name: "간장", amount: "3T" },
-                { name: "양파", amount: "1/2개" },
-                { name: "대파", amount: "약간" },
-                { name: "다진마늘", amount: "1T" },
-                { name: "참기름", amount: "1t" },
-            ],
-            steps: [
-                { order: 1, description: "두부는 키친타월로 물기를 닦고 먹기 좋은 두께로 썰어주세요." },
-                { order: 2, description: "달군 팬에 기름을 두르고 두부를 앞뒤로 노릇하게 구워주세요." },
-                { order: 3, description: "간장, 다진마늘, 물, 양파를 넣고 중약불에서 양념을 끼얹으며 졸여주세요." },
-                { order: 4, description: "대파와 참기름을 넣고 한 번 더 뒤적여 마무리해주세요." },
-            ],
-        },
-        {
-            recipe_id: "2",
-            name: "두부 계란말이",
-            summary: "계란과 두부로 부드럽게 말아내는 반찬",
-            cook_time_minutes: 15,
-            difficulty: "쉬움",
-            servings: 1,
-            ingredients: [
-                { name: "두부", amount: "1/2모" },
-                { name: "계란", amount: "2개" },
-                { name: "대파", amount: "약간" },
-            ],
-            steps: [
-                { order: 1, description: "두부를 으깨 계란과 섞어주세요." },
-                { order: 2, description: "팬에 얇게 부어 돌돌 말아주세요." },
-            ],
-        },
-        {
-            recipe_id: "3",
-            name: "두부김치",
-            summary: "매콤한 김치에 담백한 두부를 곁들인 조합",
-            cook_time_minutes: 12,
-            difficulty: "쉬움",
-            servings: 2,
-            ingredients: [
-                { name: "두부", amount: "1모" },
-                { name: "김치", amount: "1컵" },
-            ],
-            steps: [
-                { order: 1, description: "김치를 볶고 두부를 데쳐주세요." },
-                { order: 2, description: "볶은 김치와 두부를 함께 담아주세요." },
-            ],
-        },
-        {
-            recipe_id: "4",
-            name: "파 계란국",
-            summary: "대파 향을 살린 따뜻하고 가벼운 국물",
-            cook_time_minutes: 10,
-            difficulty: "쉬움",
-            servings: 2,
-            ingredients: [
-                { name: "계란", amount: "2개" },
-                { name: "대파", amount: "약간" },
-            ],
-            steps: [
-                { order: 1, description: "끓는 물에 대파를 넣어 향을 내주세요." },
-                { order: 2, description: "계란물을 둘러 익혀주세요." },
-            ],
-        },
-        {
-            recipe_id: "5",
-            name: "양파 두부 덮밥",
-            summary: "양파의 단맛을 살린 든든한 한 그릇",
-            cook_time_minutes: 18,
-            difficulty: "중간",
-            servings: 1,
-            ingredients: [
-                { name: "양파", amount: "1/2개" },
-                { name: "두부", amount: "1/2모" },
-                { name: "밥", amount: "1공기" },
-            ],
-            steps: [
-                { order: 1, description: "양파와 두부를 간장 양념에 졸여주세요." },
-                { order: 2, description: "밥 위에 올려 마무리해주세요." },
-            ],
-        },
-        {
-            recipe_id: "6",
-            name: "두부 스테이크",
-            summary: "겉은 노릇하고 속은 촉촉한 두부 메인",
-            cook_time_minutes: 22,
-            difficulty: "중간",
-            servings: 2,
-            ingredients: [
-                { name: "두부", amount: "1모" },
-                { name: "간장", amount: "2T" },
-            ],
-            steps: [
-                { order: 1, description: "두부를 두툼하게 썰어 노릇하게 구워주세요." },
-                { order: 2, description: "간장 소스를 끼얹어 졸여주세요." },
-            ],
-        },
-        {
-            recipe_id: "7",
-            name: "계란찜",
-            summary: "짧은 시간에 완성하는 폭신한 기본 반찬",
-            cook_time_minutes: 8,
-            difficulty: "쉬움",
-            servings: 2,
-            ingredients: [
-                { name: "계란", amount: "3개" },
-                { name: "대파", amount: "약간" },
-            ],
-            steps: [
-                { order: 1, description: "계란물을 풀어 체에 내려주세요." },
-                { order: 2, description: "약불에서 부드럽게 익혀주세요." },
-            ],
-        },
-        {
-            recipe_id: "8",
-            name: "파전",
-            summary: "대파를 넉넉히 넣어 바삭하게 부친 메뉴",
-            cook_time_minutes: 14,
-            difficulty: "중간",
-            servings: 2,
-            ingredients: [
-                { name: "대파", amount: "2대" },
-                { name: "부침가루", amount: "1컵" },
-            ],
-            steps: [
-                { order: 1, description: "반죽에 대파를 넣어 섞어주세요." },
-                { order: 2, description: "팬에서 바삭하게 부쳐주세요." },
-            ],
-        },
-        {
-            recipe_id: "9",
-            name: "두부조림",
-            summary: "간장 양념을 졸여 밥반찬으로 좋은 조림",
-            cook_time_minutes: 16,
-            difficulty: "쉬움",
-            servings: 2,
-            ingredients: [
-                { name: "두부", amount: "1모" },
-                { name: "간장", amount: "3T" },
-            ],
-            steps: [
-                { order: 1, description: "두부를 구워주세요." },
-                { order: 2, description: "양념장을 넣고 졸여주세요." },
-            ],
-        },
-    ],
-});
-
 const recipeSummaryToView = (recipe) => ({
     id: recipe.recipe_id,
     title: recipe.name,
@@ -242,77 +83,6 @@ const recipeSummaryToView = (recipe) => ({
     servings: formatServings(recipe.servings),
     description: recipe.summary ?? recipe.description,
 });
-
-const recommendedRecipes = MOCK_RECIPE_RECOMMEND_RESPONSE.data.recipes;
-
-export const RECIPE_RESULT_HERO = recipeSummaryToView(recommendedRecipes[0]);
-export const RECIPE_RESULT_OTHERS = recommendedRecipes.slice(1).map(recipeSummaryToView);
-
-const MOCK_RECIPE_DETAIL_RESPONSES = {
-    "dubu-jorim": apiResponse({
-        recipe_id: "dubu-jorim",
-        name: "두부 간장조림",
-        description: "짭조름한 양념이 두부에 잘 스며들어 밥이 술술 넘어가는 한 그릇. 양파의 단맛이 두부의 고소함과 어우러져 깊은 맛을 내요.",
-        category: "한식",
-        cook_time: 20,
-        difficulty: "쉬움",
-        servings: 2,
-        ingredients: [
-            { name: "두부", amount: "1모" },
-            { name: "간장", amount: "3T" },
-            { name: "양파", amount: "1/2개" },
-            { name: "대파", amount: "약간" },
-            { name: "다진마늘", amount: "1T" },
-            { name: "참기름", amount: "1t" },
-        ],
-        steps: [
-            { order: 1, description: "두부는 키친타월로 물기를 닦고 먹기 좋은 두께로 썰어주세요." },
-            { order: 2, description: "달군 팬에 기름을 두르고 두부를 앞뒤로 노릇하게 구워주세요." },
-            { order: 3, description: "간장, 다진마늘, 물, 양파를 넣고 중약불에서 양념을 끼얹으며 졸여주세요." },
-            { order: 4, description: "대파와 참기름을 넣고 한 번 더 뒤적여 마무리해주세요." },
-        ],
-    }),
-};
-
-const MOCK_RECIPE_VIDEOS_BY_ID = {
-    "dubu-jorim": [
-        { title: "[집밥백선생] 두부 간장조림 황금레시피", channel: "백선생", views: "조회 124만", duration: "4:32" },
-        { title: "밥도둑 두부조림, 냉장고 재료로 끝", channel: "오늘의 집밥", views: "조회 38만", duration: "6:18" },
-        { title: "부서지지 않는 두부조림 양념 비율", channel: "요리노트", views: "조회 21만", duration: "5:04" },
-    ],
-};
-
-const toRecipeDetailView = (recipe, recipeId = recipe.recipe_id) => ({
-    id: recipe.recipe_id,
-    title: recipe.name,
-    match: 98,
-    time: formatMinutes(recipe.cook_time),
-    difficulty: recipe.difficulty,
-    servings: formatServings(recipe.servings),
-    description: recipe.description,
-    summary: recipe.description,
-    ingredients: recipe.ingredients.map((ingredient) => ({
-        ...ingredient,
-        status: ingredient.name === "참기름"
-            ? "optional"
-            : RECIPE_RESULT_INGREDIENTS.includes(ingredient.name)
-                ? "owned"
-                : "needed",
-    })),
-    steps: recipe.steps
-        .slice()
-        .sort((a, b) => a.order - b.order)
-        .map((step) => step.description),
-    videos: MOCK_RECIPE_VIDEOS_BY_ID[recipeId] ?? [],
-});
-
-export const RECIPE_DETAIL_RECIPES = Object.fromEntries(
-    Object.entries(MOCK_RECIPE_DETAIL_RESPONSES).map(([id, response]) => [id, toRecipeDetailView(response.data, id)])
-);
-
-export const RECIPE_DETAIL_FALLBACKS = Object.fromEntries(
-    recommendedRecipes.slice(1, 3).map((recipe) => [recipe.recipe_id, recipeSummaryToView(recipe)])
-);
 
 const MOCK_POST_LIST_RESPONSE = apiResponse({
     posts: [
@@ -626,22 +396,62 @@ export const FEED_DETAIL_FALLBACKS = Object.fromEntries(
     ])
 );
 
-const recommendedRecipeToSourceRecipe = (recipe) => ({
-    id: recipe.recipe_id,
-    title: recipe.name,
-    description: recipe.summary,
-    category: "한식",
-    time: formatMinutes(recipe.cook_time_minutes),
-    difficulty: recipe.difficulty,
-    servings: formatServings(recipe.servings),
-    ingredients: recipe.ingredients,
-    steps: recipe.steps
-        .slice()
-        .sort((a, b) => a.order - b.order)
-        .map((step) => step.description),
-});
-
-export const RECOMMENDED_RECIPES = recommendedRecipes.slice(0, 3).map(recommendedRecipeToSourceRecipe);
+export const RECOMMENDED_RECIPES = [
+    {
+        id: "saved-dubu-jorim",
+        title: "두부 간장조림",
+        description: "짭조름한 양념이 두부에 잘 스며드는 집밥 반찬",
+        category: "한식",
+        time: "20분",
+        difficulty: "쉬움",
+        servings: "2인분",
+        ingredients: [
+            { name: "두부", amount: "1모" },
+            { name: "간장", amount: "3T" },
+            { name: "양파", amount: "1/2개" },
+            { name: "대파", amount: "약간" },
+        ],
+        steps: [
+            "두부는 물기를 닦고 먹기 좋은 크기로 썰어주세요.",
+            "팬에 두부를 노릇하게 굽고 양념장을 넣어 졸여주세요.",
+        ],
+    },
+    {
+        id: "saved-egg-roll",
+        title: "계란말이",
+        description: "부드럽게 말아낸 기본 집밥 반찬",
+        category: "한식",
+        time: "15분",
+        difficulty: "쉬움",
+        servings: "2인분",
+        ingredients: [
+            { name: "계란", amount: "3개" },
+            { name: "대파", amount: "약간" },
+        ],
+        steps: [
+            "계란물을 곱게 풀고 다진 대파를 섞어주세요.",
+            "약불에서 얇게 부어가며 돌돌 말아주세요.",
+        ],
+    },
+    {
+        id: "saved-kimchi-fried-rice",
+        title: "김치볶음밥",
+        description: "잘 익은 김치로 볶아낸 간단 한 그릇",
+        category: "한식",
+        time: "15분",
+        difficulty: "쉬움",
+        servings: "1인분",
+        ingredients: [
+            { name: "김치", amount: "1컵" },
+            { name: "밥", amount: "1공기" },
+            { name: "계란", amount: "1개" },
+        ],
+        steps: [
+            "김치를 잘게 썰어 기름에 볶아주세요.",
+            "밥을 넣고 고르게 볶은 뒤 계란을 올려 마무리해주세요.",
+        ],
+    },
+];
 
 export function getRecommendedRecipe(id) {
     return RECOMMENDED_RECIPES.find((recipe) => recipe.id === id);
