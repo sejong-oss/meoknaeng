@@ -12,6 +12,7 @@ import {
     login as loginRequest,
     logout as logoutRequest,
     signup as signupRequest,
+    updateMyProfile,
 } from "@/libs/api.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
@@ -114,6 +115,25 @@ export const useAppStore = create((set) => ({
                 pantryIngredients: [],
                 authStatus: "idle",
             });
+        }
+    },
+    updateNickname: async (nickname) => {
+        set({ authStatus: "loading" });
+
+        try {
+            const user = await updateMyProfile({ nickname });
+            const nextUser = authUserToView(user);
+
+            set((state) => ({
+                user: {
+                    ...state.user,
+                    ...nextUser,
+                },
+                authStatus: "success",
+            }));
+        } catch (error) {
+            set({ authStatus: "error" });
+            throw error;
         }
     },
     addPantryIngredient: (ingredient) => set((state) => ({

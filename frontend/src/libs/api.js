@@ -67,6 +67,13 @@ export function getMyProfile() {
     return request("/users/me");
 }
 
+export function updateMyProfile({ nickname }) {
+    return request("/users/me", {
+        method: "PATCH",
+        data: { nickname },
+    });
+}
+
 export function logout() {
     return request("/auth/logout", {
         method: "DELETE",

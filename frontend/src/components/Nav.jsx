@@ -69,7 +69,7 @@ export function TopNav({
                         <DropdownMenuTrigger>
                             <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-gray-50 cursor-pointer shrink-0 transition-colors">
                                 <Avatar size="sm" name={user.name} />
-                                <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                                <span className="max-w-32 truncate text-sm font-medium text-gray-700">{user.name}</span>
                                 <ChevronDown size={14} className="text-gray-400" />
                             </button>
                         </DropdownMenuTrigger>
