@@ -10,7 +10,7 @@ from app.api.post import router as post_router
 from app.api.recipe import router as recipe_router
 from app.api.recipe_save import router as recipe_save_router
 from app.api.users import router as users_router
-from app.config import ALLOWED_ORIGINS, HTTPS_ONLY, SESSION_SECRET_KEY
+from app.config import ALLOWED_ORIGIN_REGEX, ALLOWED_ORIGINS, HTTPS_ONLY, SESSION_SECRET_KEY
 from app.models.schemas import ErrorResponse
 
 app = FastAPI(title="Recipe Recommender API")
@@ -24,6 +24,7 @@ app.add_middleware(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
