@@ -49,6 +49,12 @@ const ingredientStatusStyles = {
     },
 };
 
+const ingredientStatusOrder = {
+    owned: 0,
+    needed: 1,
+    optional: 2,
+};
+
 const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
 const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 
@@ -219,6 +225,9 @@ export default function RecipeDetail() {
         return <RecipeDetailSkeleton />;
     }
 
+    const sortedIngredients = recipe.ingredients
+        .slice()
+        .sort((a, b) => ingredientStatusOrder[a.status] - ingredientStatusOrder[b.status]);
     const ownedIngredients = recipe.ingredients.filter((ingredient) => ingredient.status === "owned").length;
     const ingredientsMeta = `${ownedIngredients}/${recipe.ingredients.length} 보유`;
     const isSaved = savedRecipeIds.includes(recipe.id);
@@ -279,7 +288,7 @@ export default function RecipeDetail() {
                         <section className="flex flex-col gap-3 md:hidden">
                             <RecipeSectionTitle meta={ingredientsMeta}>재료</RecipeSectionTitle>
                             <div className="flex flex-col gap-1.5">
-                                {recipe.ingredients.map((ingredient) => (
+                                {sortedIngredients.map((ingredient) => (
                                     <IngredientRow key={ingredient.name} ingredient={ingredient} />
                                 ))}
                             </div>
@@ -325,7 +334,7 @@ export default function RecipeDetail() {
                             <div className="flex flex-col gap-2">
                                 <RecipeSectionTitle meta={ingredientsMeta}>재료</RecipeSectionTitle>
                                 <div className="flex flex-col gap-1.5">
-                                    {recipe.ingredients.map((ingredient) => (
+                                    {sortedIngredients.map((ingredient) => (
                                         <IngredientRow key={ingredient.name} ingredient={ingredient} />
                                     ))}
                                 </div>
