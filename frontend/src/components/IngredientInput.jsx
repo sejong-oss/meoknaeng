@@ -71,7 +71,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
         <div className={`relative flex flex-col ${className}`}>
             <div
                 onClick={() => inputRef.current?.focus()}
-                className="flex flex-wrap content-start items-center gap-2 md:gap-2.5 min-h-[2.5rem]"
+                className="flex min-h-9 flex-wrap content-center items-center gap-2 md:gap-2.5"
             >
                 {ingredients.map((item) => (
                     <Chip
@@ -89,7 +89,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={ingredients.length === 0 ? "재료를 입력하세요" : ""}
-                    className={`bg-transparent outline-none text-base text-gray-900 placeholder:text-gray-400 min-w-[2rem] flex-1 py-1.5 px-1 ${inputClassName}`}
+                    className={`min-w-[2rem] flex-1 bg-transparent px-1 py-1 text-base text-gray-900 outline-none placeholder:text-gray-400 ${inputClassName}`}
                 />
             </div>
         </div>

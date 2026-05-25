@@ -146,8 +146,8 @@ export default function My() {
                                 onAdd={addPantryIngredient}
                                 onRemove={removePantryIngredient}
                                 ingredientList={INGREDIENT_LIST}
-                                className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2.5"
-                                inputClassName="!text-sm"
+                                className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2"
+                                inputClassName="!py-1 !text-sm"
                             />
                         ) : hasIngredients ? (
                             <div className="relative mt-2 rounded-card border border-transparent bg-gray-50 px-3 py-2.5">
