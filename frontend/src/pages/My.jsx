@@ -7,13 +7,16 @@ import {
     Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
+import { useIsMobile } from "@/hooks/useIsMobile.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 export default function My() {
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
     const user = useAppStore((state) => state.user);
+    const authStatus = useAppStore((state) => state.authStatus);
     const ingredients = useAppStore((state) => state.pantryIngredients);
     const savedRecipes = useAppStore((state) => state.savedRecipes);
     const myPosts = useAppStore((state) => state.myPosts);
@@ -56,6 +59,15 @@ export default function My() {
             resizeObserver.disconnect();
         };
     }, [hasIngredients, ingredients.length, editingIngredients]);
+
+    useEffect(() => {
+        if (user || authStatus === "checking") return;
+        if (isMobile) return;
+
+        toast.info("로그인이 필요해요.");
+        openLoginModal();
+        navigate("/home", { replace: true });
+    }, [authStatus, isMobile, navigate, openLoginModal, user]);
 
     const handleNicknameEdit = () => {
         setNicknameDraft(user.name);

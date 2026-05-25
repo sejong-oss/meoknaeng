@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { TopNav } from "@/components/Nav.jsx";
 import { BottomTabBar } from "@/components/Nav.jsx";
 import { Container } from "@/components/Container.jsx";
@@ -8,6 +8,7 @@ import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 export default function AppLayout() {
+    const navigate = useNavigate();
     const user = useAppStore((state) => state.user);
     const loginModalOpen = useAppStore((state) => state.loginModalOpen);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
@@ -46,6 +47,7 @@ export default function AppLayout() {
         try {
             await logout();
             toast.success("로그아웃했어요.");
+            navigate("/home", { replace: true });
         } catch (error) {
             toast.error(error.message ?? "로그아웃하지 못했어요.");
         }
