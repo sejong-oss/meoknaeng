@@ -51,7 +51,8 @@ export function Input({
                     <button
                         type="button"
                         onClick={() => onChange?.({ target: { value: "" } })}
-                        className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors hidden peer-[:not(:placeholder-shown)]:block"
+                        disabled={disabled}
+                        className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors hidden peer-[:not(:placeholder-shown)]:block disabled:pointer-events-none"
                         tabIndex={-1}
                     >
                         <Close size={16} />
