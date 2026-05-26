@@ -4,7 +4,7 @@ import { Checkmark, ChevronDown, Close, Edit, Logout, UserAvatar } from "@carbon
 import {
     Avatar, Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
-    Tabs, TabsContent, TabsList, TabsTrigger,
+    Skeleton, Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
@@ -24,11 +24,73 @@ async function loadIngredientSuggestions(query) {
     return result?.items?.map((item) => item.name) ?? [];
 }
 
+function MySkeleton() {
+    return (
+        <>
+            <title>{`마이페이지 | ${SITE_NAME}`}</title>
+
+            <div className="md:hidden -mx-4 -mt-6 mb-5 bg-gradient-to-b from-primary-50 to-white px-5 pb-6 pt-7">
+                <div className="flex items-center gap-4">
+                    <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-4 w-28" />
+                    </div>
+                    <Skeleton className="h-9 w-20 rounded-btn" />
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-4 md:grid md:grid-cols-[21.25rem_1fr] md:items-start md:gap-10 md:py-2">
+                <aside className="flex flex-col gap-4 md:pt-10">
+                    <div className="hidden md:flex flex-col items-center gap-3 rounded-card border border-gray-100 bg-gradient-to-b from-primary-50 to-white px-4 py-10">
+                        <Skeleton className="h-24 w-24 rounded-full" />
+                        <Skeleton className="h-7 w-36" />
+                        <Skeleton className="h-4 w-28" />
+                    </div>
+
+                    <Card className="!p-5">
+                        <div className="flex items-center justify-between gap-3">
+                            <Skeleton className="h-7 w-24" />
+                            <Skeleton className="h-8 w-8 rounded-btn" />
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2.5 rounded-card bg-gray-50 px-3 py-3">
+                            <Skeleton className="h-7 w-14 rounded-full" />
+                            <Skeleton className="h-7 w-16 rounded-full" />
+                            <Skeleton className="h-7 w-12 rounded-full" />
+                            <Skeleton className="h-7 w-20 rounded-full" />
+                        </div>
+                    </Card>
+                </aside>
+
+                <div className="flex flex-col">
+                    <div className="mb-5 flex gap-6">
+                        <Skeleton className="h-10 w-24" />
+                        <Skeleton className="h-10 w-16" />
+                        <Skeleton className="h-10 w-20" />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {Array.from({ length: 4 }).map((_, index) => (
+                            <Card key={index} className="!p-4">
+                                <Skeleton className="h-32 w-full rounded-card" />
+                                <Skeleton className="mt-4 h-4 w-16 rounded-full" />
+                                <Skeleton className="mt-3 h-5 w-3/4" />
+                                <Skeleton className="mt-2 h-4 w-full" />
+                                <Skeleton className="mt-2 h-4 w-2/3" />
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+
 export default function My() {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const user = useAppStore((state) => state.user);
     const authStatus = useAppStore((state) => state.authStatus);
+    const authInitialized = useAppStore((state) => state.authInitialized);
     const ingredients = useAppStore((state) => state.pantryIngredients);
     const savedRecipes = useAppStore((state) => state.savedRecipes);
     const myPosts = useAppStore((state) => state.myPosts);
@@ -74,13 +136,13 @@ export default function My() {
     }, [hasIngredients, ingredients.length, editingIngredients]);
 
     useEffect(() => {
-        if (user || authStatus === "checking") return;
+        if (user || !authInitialized) return;
         if (isMobile) return;
 
         toast.info("로그인이 필요해요");
         openLoginModal();
         navigate("/home", { replace: true });
-    }, [authStatus, isMobile, navigate, openLoginModal, user]);
+    }, [authInitialized, isMobile, navigate, openLoginModal, user]);
 
     const handleNicknameEdit = () => {
         setNicknameDraft(user.name);
@@ -198,6 +260,10 @@ export default function My() {
             </div>
         );
     };
+
+    if (!user && !authInitialized) {
+        return <MySkeleton />;
+    }
 
     if (!user) {
         return (

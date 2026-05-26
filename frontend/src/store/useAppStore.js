@@ -45,6 +45,7 @@ const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
 export const useAppStore = create((set) => ({
     user: null,
     authStatus: "idle",
+    authInitialized: false,
     loginModalOpen: false,
     pantryIngredients: [],
     recommendationIngredients: [],
@@ -72,12 +73,14 @@ export const useAppStore = create((set) => ({
                 user: nextUser,
                 pantryIngredients: nextUser.ingredients,
                 authStatus: "success",
+                authInitialized: true,
             });
         } catch {
             set({
                 user: null,
                 pantryIngredients: [],
                 authStatus: "idle",
+                authInitialized: true,
             });
 
         }
@@ -94,6 +97,7 @@ export const useAppStore = create((set) => ({
                 pantryIngredients: nextUser.ingredients,
                 loginModalOpen: false,
                 authStatus: "success",
+                authInitialized: true,
             });
         } catch (error) {
             set({ authStatus: "error" });
@@ -116,6 +120,7 @@ export const useAppStore = create((set) => ({
                 pantryIngredients: nextUser.ingredients,
                 loginModalOpen: false,
                 authStatus: "success",
+                authInitialized: true,
             });
         } catch (error) {
             set({ authStatus: "error" });
@@ -132,6 +137,7 @@ export const useAppStore = create((set) => ({
                 user: null,
                 pantryIngredients: [],
                 authStatus: "idle",
+                authInitialized: true,
             });
         }
     },
