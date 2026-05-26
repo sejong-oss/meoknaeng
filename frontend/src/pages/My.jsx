@@ -1,18 +1,22 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Checkmark, ChevronDown, Edit, UserAvatar } from "@carbon/icons-react";
+import { Checkmark, ChevronDown, Close, Edit, Logout, UserAvatar } from "@carbon/icons-react";
 import {
     Avatar, Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard,
     Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { useIsMobile } from "@/hooks/useIsMobile.js";
+import { SITE_NAME } from "@/libs/constants.js";
+import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 export default function My() {
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
     const user = useAppStore((state) => state.user);
+    const authStatus = useAppStore((state) => state.authStatus);
     const ingredients = useAppStore((state) => state.pantryIngredients);
     const savedRecipes = useAppStore((state) => state.savedRecipes);
     const myPosts = useAppStore((state) => state.myPosts);
@@ -22,9 +26,14 @@ export default function My() {
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
+    const updateNickname = useAppStore((state) => state.updateNickname);
+    const logout = useAppStore((state) => state.logout);
     const [editingIngredients, setEditingIngredients] = useState(false);
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
+    const [editingNickname, setEditingNickname] = useState(false);
+    const [nicknameDraft, setNicknameDraft] = useState(user?.name ?? "");
+    const [savingNickname, setSavingNickname] = useState(false);
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
@@ -52,6 +61,132 @@ export default function My() {
         };
     }, [hasIngredients, ingredients.length, editingIngredients]);
 
+    useEffect(() => {
+        if (user || authStatus === "checking") return;
+        if (isMobile) return;
+
+        toast.info("로그인이 필요해요.");
+        openLoginModal();
+        navigate("/home", { replace: true });
+    }, [authStatus, isMobile, navigate, openLoginModal, user]);
+
+    const handleNicknameEdit = () => {
+        setNicknameDraft(user.name);
+        setEditingNickname(true);
+    };
+
+    const handleNicknameCancel = () => {
+        setNicknameDraft(user.name);
+        setEditingNickname(false);
+    };
+
+    const handleNicknameSubmit = async (event) => {
+        event.preventDefault();
+
+        const nextNickname = nicknameDraft.trim();
+        if (!nextNickname) {
+            toast.error("닉네임을 입력해주세요.");
+            return;
+        }
+
+        if (nextNickname === user.name) {
+            setEditingNickname(false);
+            return;
+        }
+
+        setSavingNickname(true);
+        try {
+            await updateNickname(nextNickname);
+            setEditingNickname(false);
+            toast.success("닉네임을 수정했어요.");
+        } catch (error) {
+            toast.error(error.message ?? "닉네임을 수정하지 못했어요.");
+        } finally {
+            setSavingNickname(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            toast.success("로그아웃했어요.");
+            navigate("/home", { replace: true });
+        } catch (error) {
+            toast.error(error.message ?? "로그아웃하지 못했어요.");
+        }
+    };
+
+    const renderNickname = ({ mobile = false } = {}) => {
+        if (editingNickname) {
+            return (
+                <form
+                    className={[
+                        "flex w-fit max-w-full min-w-0 items-center gap-1.5 rounded-btn border border-gray-200 bg-white/70 p-1 transition-colors focus-within:border-primary-300 focus-within:bg-white",
+                        mobile ? "" : "justify-center",
+                    ].join(" ")}
+                    onSubmit={handleNicknameSubmit}
+                >
+                    <input
+                        value={nicknameDraft}
+                        onChange={(event) => setNicknameDraft(event.target.value)}
+                        maxLength={50}
+                        autoFocus
+                        disabled={savingNickname}
+                        className={[
+                            "h-9 min-w-0 border-0 bg-transparent px-2 font-extrabold tracking-tight text-gray-900 outline-none disabled:cursor-not-allowed disabled:opacity-60",
+                            mobile ? "w-40 max-w-full text-lg" : "w-44 max-w-full text-left text-xl",
+                        ].join(" ")}
+                    />
+                    <div className="flex items-center gap-0.5 border-l border-gray-200 pl-1">
+                        <Button
+                            type="submit"
+                            variant="ghost"
+                            size="sm"
+                            aria-label="닉네임 저장"
+                            disabled={savingNickname}
+                            className="h-8 w-8 !px-0 !py-0"
+                        >
+                            <Checkmark size={16} />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label="닉네임 수정 취소"
+                            disabled={savingNickname}
+                            className="h-8 w-8 !px-0 !py-0"
+                            onClick={handleNicknameCancel}
+                        >
+                            <Close size={16} />
+                        </Button>
+                    </div>
+                </form>
+            );
+        }
+
+        return (
+            <div className={[
+                "flex min-w-0 items-center gap-1.5",
+                mobile ? "" : "justify-center",
+            ].join(" ")}>
+                <h1 className={[
+                    "min-w-0 truncate font-extrabold tracking-tight text-gray-900",
+                    mobile ? "max-w-48 text-xl" : "max-w-52 text-2xl",
+                ].join(" ")}>
+                    {user.name}
+                </h1>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="닉네임 수정"
+                    className="h-8 w-8 shrink-0 !px-0 !py-0"
+                    onClick={handleNicknameEdit}
+                >
+                    <Edit size={16} />
+                </Button>
+            </div>
+        );
+    };
+
     if (!user) {
         return (
             <>
@@ -78,12 +213,23 @@ export default function My() {
                 <div className="flex items-center gap-4">
                     <Avatar name={user.name} size="xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                     <div className="flex-1 min-w-0">
-                        <h1 className="text-xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
+                        {renderNickname({ mobile: true })}
                         <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
                             <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
                             <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
                         </div>
                     </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        aria-label="로그아웃"
+                        disabled={authStatus === "loading"}
+                        className="shrink-0"
+                        onClick={handleLogout}
+                    >
+                        <Logout size={16} />
+                        로그아웃
+                    </Button>
                 </div>
             </div>
 
@@ -95,13 +241,12 @@ export default function My() {
                     <div className="hidden md:flex flex-col items-center gap-3 rounded-card border border-gray-100 bg-gradient-to-b from-primary-50 to-white px-4 py-10">
                         <Avatar name={user.name} size="2xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                         <div className="text-center mt-1">
-                            <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">{user.name}</h1>
+                            {renderNickname()}
                             <div className="mt-2 flex items-center gap-3.5 justify-center text-xs text-gray-500">
                                 <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
                                 <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
                             </div>
                         </div>
-                        <Button variant="outline" size="sm">프로필 편집</Button>
                     </div>
 
                     {/* 내 재료 */}
@@ -146,8 +291,8 @@ export default function My() {
                                 onAdd={addPantryIngredient}
                                 onRemove={removePantryIngredient}
                                 ingredientList={INGREDIENT_LIST}
-                                className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2.5"
-                                inputClassName="!text-sm"
+                                className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2"
+                                inputClassName="!py-1 !text-sm"
                             />
                         ) : hasIngredients ? (
                             <div className="relative mt-2 rounded-card border border-transparent bg-gray-50 px-3 py-2.5">

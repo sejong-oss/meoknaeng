@@ -7,7 +7,7 @@ import {
 import { Avatar } from "@/components/Avatar.jsx";
 import { Button } from "@/components/Button.jsx";
 import { Container } from "@/components/Container.jsx";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 
 const NAV_ITEMS = [
     { key: "home", label: "홈", to: "/home" },
@@ -17,15 +17,13 @@ const NAV_ITEMS = [
 
 const DROPDOWN_ITEMS = [
     { label: "마이페이지", to: "/my" },
-    { label: "내 재료", to: "/my/ingredients" },
-    { label: "저장한 레시피", to: "/my/saved" },
-    { label: "내가 쓴 글", to: "/my/posts" },
-    { label: "설정", to: "/my/settings" },
 ];
 
 export function TopNav({
     user,
     onLoginClick,
+    onLogoutClick,
+    authPending = false,
     className = "",
     variant = "default",
     showItems = true,
@@ -64,12 +62,14 @@ export function TopNav({
                     </nav>
                 )}
                 {!showItems && <div className="flex-1" />}
-                {showAuth && user ? (
+                {showAuth && authPending ? (
+                    null
+                ) : showAuth && user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger>
-                            <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 cursor-pointer shrink-0">
+                            <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-gray-50 cursor-pointer shrink-0 transition-colors">
                                 <Avatar size="sm" name={user.name} />
-                                <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                                <span className="max-w-32 truncate text-sm font-medium text-gray-700">{user.name}</span>
                                 <ChevronDown size={14} className="text-gray-400" />
                             </button>
                         </DropdownMenuTrigger>
@@ -80,11 +80,11 @@ export function TopNav({
                                 </DropdownMenuItem>
                             ))}
                             <DropdownMenuSeparator />
-                            <DropdownMenuDangerItem>로그아웃</DropdownMenuDangerItem>
+                            <DropdownMenuDangerItem onSelect={onLogoutClick}>로그아웃</DropdownMenuDangerItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : showAuth ? (
-                    <Button variant="ghost" size="sm" onClick={onLoginClick} className="shrink-0">
+                    <Button variant="ghost" size="md" onClick={onLoginClick} className="shrink-0">
                         로그인
                     </Button>
                 ) : null}

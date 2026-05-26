@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RECIPE_DETAIL_FALLBACKS, RECIPE_DETAIL_RECIPES } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
@@ -233,7 +233,7 @@ export default function RecipeDetail() {
                                 </div>
                             </div>
                             <Button variant="primary" size="lg" fullWidth onClick={handleStartCooking}>
-                            요리 시작
+                                요리 시작
                                 <ArrowRight size={16} />
                             </Button>
                             <div className="grid grid-cols-2 gap-2">
@@ -243,11 +243,11 @@ export default function RecipeDetail() {
                                     onClick={() => toggleSavedRecipe(recipe.id)}
                                 >
                                     {isSaved ? <BookmarkFilled size={14} /> : <Bookmark size={14} />}
-                                저장
+                                    저장
                                 </Button>
                                 <Button variant="outline" size="sm">
                                     <Share size={14} />
-                                공유
+                                    공유
                                 </Button>
                             </div>
                         </Card>
@@ -256,7 +256,7 @@ export default function RecipeDetail() {
 
                 <div className="sticky bottom-0 z-20 -mx-0 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-xl md:hidden">
                     <Button variant="primary" size="lg" className="flex-1" onClick={handleStartCooking}>
-                    요리 시작
+                        요리 시작
                         <ArrowRight size={16} />
                     </Button>
                     <Button

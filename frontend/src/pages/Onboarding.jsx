@@ -2,9 +2,9 @@ import { useId, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button, Chip, Container } from "@/components/index.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { RECIPES, useFlowAnimation } from "@/hooks/useFlowAnimation.js";
-import { EMPTY_EDGE, computeSvgPaths } from "@/lib/utils.js";
+import { EMPTY_EDGE, computeSvgPaths } from "@/libs/utils.js";
 
 const SPRING = { type: "spring", stiffness: 380, damping: 26 };
 const FADE_OUT = { duration: 0.2, ease: "easeOut" };
@@ -224,19 +224,19 @@ export default function Onboarding() {
                         style={{ background: "radial-gradient(ellipse 90% 60% at 50% 50%, rgba(249,250,251,0.82) 30%, transparent 100%)" }}
                     />
 
-                    <div className="relative z-2 flex flex-col items-center text-center gap-5 px-7 py-8 lg:items-start lg:text-left lg:p-0">
-                        <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-none">
+                    <div className="relative z-2 flex flex-col items-center text-center gap-7 px-7 py-8 lg:items-start lg:text-left lg:p-0">
+                        <h1 className="text-4xl font-bold leading-none tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
                             오늘은 <span className="text-primary-500">뭐</span> 해먹지?
                         </h1>
-                        <p className="text-sm lg:text-base text-gray-600 leading-relaxed max-w-sm">
+                        <p className="max-w-sm text-sm leading-relaxed text-gray-600 sm:text-base">
                             냉장고에 있는 재료를 입력하면, AI가 만들 수 있는
                             요리 조합과 유튜브 영상까지 함께 추천해드려요.
                         </p>
-                        <div className="hidden lg:flex flex-col gap-5">
-                            <Button variant="primary" size="lg" className="w-fit" onClick={goHome}>
+                        <div className="flex flex-col items-center gap-5 lg:items-start">
+                            <Button variant="primary" size="lg" className="w-full rounded-full px-7 sm:text-lg lg:w-fit" onClick={goHome}>
                                 재료 담으면서 시작하기 →
                             </Button>
-                            <div className="flex gap-6 text-xs text-gray-500">
+                            <div className="hidden gap-6 text-xs text-gray-500 lg:flex">
                                 <span>· 가입 없이 사용 가능</span>
                                 <span>· 빠른 추천</span>
                             </div>
@@ -257,16 +257,6 @@ export default function Onboarding() {
                         }}
                     />
                     <FlowPreview />
-                </div>
-
-                <div className="px-7 pb-12 flex flex-col gap-3 lg:hidden">
-                    <Button variant="primary" size="lg" fullWidth onClick={goHome}>
-                        재료 담으면서 시작하기 →
-                    </Button>
-                    <p className="text-sm text-gray-500 text-center">
-                        이미 가입했나요?{" "}
-                        <span className="text-primary-500 font-semibold cursor-pointer">로그인</span>
-                    </p>
                 </div>
 
             </Container>

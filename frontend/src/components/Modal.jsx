@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Close } from "@carbon/icons-react";
-import { popoverAnim, modalContentAnim } from "@/lib/animations.js";
+import { popoverAnim, modalContentAnim } from "@/libs/animations.js";
 
 export function Modal({ open, onOpenChange, children }) {
     return (

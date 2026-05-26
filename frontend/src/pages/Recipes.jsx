@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Bookmark, BookmarkFilled, Renew, Share, Star, Time, Video } from "@carbon/icons-react";
 import { Button, Card, Chip, EmptyState, PhotoPlaceholder, RecipeCard } from "@/components/index.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 export default function Recipes() {
@@ -40,11 +40,11 @@ export default function Recipes() {
                     <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-between gap-3 md:block">
                             <h1 className="min-w-0 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
-                            오늘은 <span className="text-primary-500">이거</span> 어때요?
+                                오늘은 <span className="text-primary-500">이거</span> 어때요?
                             </h1>
                             <Button variant="outline" size="sm" onClick={() => navigate("/home")} className="shrink-0 md:hidden">
                                 <Renew size={14} />
-                            다시 추천
+                                다시 추천
                             </Button>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
@@ -56,7 +56,7 @@ export default function Recipes() {
                     <div className="hidden md:flex items-center gap-2 shrink-0">
                         <Button variant="outline" size="sm" onClick={() => navigate("/home")}>
                             <Renew size={14} />
-                        다시 추천
+                            다시 추천
                         </Button>
                     </div>
                 </div>
@@ -73,7 +73,7 @@ export default function Recipes() {
                                 <div className="flex items-center gap-2">
                                     <Chip variant="brand">
                                         <Star size={12} />
-                                    가장 잘 맞는 조합
+                                        가장 잘 맞는 조합
                                     </Chip>
                                 </div>
                                 <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 leading-tight">
@@ -91,7 +91,7 @@ export default function Recipes() {
                                     <Chip variant="outline">{ingredients.length}/{ingredients.length} 재료 보유</Chip>
                                     <Chip variant="outline">
                                         <Video size={12} />
-                                    유튜브 3개
+                                        유튜브 3개
                                     </Chip>
                                     <Chip variant="outline">{hero.servings}</Chip>
                                 </div>
@@ -103,7 +103,7 @@ export default function Recipes() {
                                     className="min-w-36 flex-1 lg:flex-none"
                                     onClick={() => navigate(`/recipes/${hero.id}`)}
                                 >
-                                레시피 보기
+                                    레시피 보기
                                     <ArrowRight size={16} />
                                 </Button>
                                 <div className="flex flex-1 gap-2 lg:flex-none">
@@ -130,7 +130,7 @@ export default function Recipes() {
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between">
                         <h3 className="flex items-center gap-2 text-lg md:text-2xl font-bold tracking-tight text-gray-900">
-                        다른 가능한 조합
+                            다른 가능한 조합
                             <Chip variant="brand-soft">{others.length}</Chip>
                         </h3>
                     </div>

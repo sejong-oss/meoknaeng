@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FEED_DETAIL_FALLBACKS, FEED_DETAIL_RECIPES } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
@@ -291,11 +291,11 @@ export default function FeedDetail() {
                             <RecipeSectionTitle
                                 action={(
                                     <Button variant="ghost" size="sm" onClick={() => navigate("/feed")}>
-                                    더보기
+                                        더보기
                                     </Button>
                                 )}
                             >
-                            같은 작성자의 다른 레시피
+                                같은 작성자의 다른 레시피
                             </RecipeSectionTitle>
                             <div className="flex flex-col overflow-hidden rounded-card border border-gray-200 bg-white">
                                 {recipe.related.map((item) => (
@@ -352,7 +352,7 @@ export default function FeedDetail() {
                             </div>
 
                             <Button variant="primary" size="lg" fullWidth onClick={handleStartCooking}>
-                            요리 시작
+                                요리 시작
                                 <ArrowRight size={16} />
                             </Button>
                         </Card>
@@ -361,7 +361,7 @@ export default function FeedDetail() {
 
                 <div className="sticky bottom-0 z-20 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-xl md:hidden">
                     <Button variant="primary" size="lg" fullWidth onClick={handleStartCooking}>
-                    요리 시작
+                        요리 시작
                         <ArrowRight size={16} />
                     </Button>
                 </div>

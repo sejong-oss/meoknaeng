@@ -1,4 +1,4 @@
-import { toast } from "@/lib/toast.js";
+import { toast } from "@/libs/toast.js";
 import { Button } from "@/components/index.js";
 
 export default { title: "Design System/Toast" };
@@ -8,7 +8,7 @@ export const Interactive = () => (
         <Button variant="primary" onClick={() => toast.success("레시피가 저장됐어요.")}>
             Success
         </Button>
-        <Button variant="danger" onClick={() => toast.error("불러오지 못했어요.", { action: { label: "다시 시도", onClick: () => {} } })}>
+        <Button variant="danger" onClick={() => toast.error("불러오지 못했어요.", { action: { label: "다시 시도", onClick: () => { } } })}>
             Error
         </Button>
         <Button variant="outline" onClick={() => toast.info("공유 링크가 복사됐어요.")}>

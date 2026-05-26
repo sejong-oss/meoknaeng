@@ -32,7 +32,7 @@ import {
     toast,
 } from "@/components/index.js";
 import { getRecommendedRecipe } from "@/data/mockData.js";
-import { SITE_NAME } from "@/lib/constants.js";
+import { SITE_NAME } from "@/libs/constants.js";
 
 function IngredientRow({ ingredient }) {
     return (
