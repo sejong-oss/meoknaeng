@@ -1,7 +1,8 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FEED_DETAIL_FALLBACKS, FEED_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/libs/constants.js";
+import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
@@ -23,7 +24,6 @@ import {
     Button,
     Card,
     Chip,
-    EmptyState,
     Input,
     PhotoPlaceholder,
     RecipeSectionTitle,
@@ -165,8 +165,8 @@ function buildRecipe(id) {
         },
         likes: fallback.likes,
         bookmarks: Math.max(18, Math.round(fallback.likes * 0.28)),
-        description: `${fallback.title}를 냉장고 재료로 간단하게 만드는 방법을 공유해요. 복잡한 준비 없이 바로 따라 하기 좋은 레시피입니다.`,
-        note: "간은 마지막에 한 번 더 확인하고 취향에 맞게 조절해주세요.",
+        description: `${fallback.title}를 냉장고 재료로 간단하게 만들 수 있고, 복잡한 준비 없이 바로 따라 하기 좋은 레시피입니다`,
+        note: "간은 마지막에 한 번 더 확인하고 취향에 맞게 조절해주세요",
     };
 }
 
@@ -179,20 +179,16 @@ export default function FeedDetail() {
     const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
     const recipe = useMemo(() => FEED_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
 
+    useEffect(() => {
+        if (recipe) return;
+
+        toast.error("공유 레시피를 찾을 수 없어요");
+        navigate("/feed", { replace: true });
+    }, [navigate, recipe]);
+
     if (!recipe) {
         return (
-            <>
-                <title>{`피드 | ${SITE_NAME}`}</title>
-                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
-                    <EmptyState
-                        icon="🍽️"
-                        title="공유 레시피를 찾을 수 없어요"
-                        description="피드에서 다시 보고 싶은 레시피를 선택해주세요"
-                        action="공유 레시피로 돌아가기"
-                        onAction={() => navigate("/feed")}
-                    />
-                </Card>
-            </>
+            <title>{`피드 | ${SITE_NAME}`}</title>
         );
     }
 

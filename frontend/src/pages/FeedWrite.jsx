@@ -210,7 +210,7 @@ export default function FeedWrite() {
                                     레시피 공유
                                 </h1>
                                 <p className="text-sm font-medium text-gray-500 md:text-base">
-                                    추천받은 레시피에 직접 만들어 본 경험을 더해 다른 사용자와 공유해보세요.
+                                    추천받은 레시피에 직접 만들어 본 경험을 더해 다른 사용자와 공유해보세요
                                 </p>
                             </div>
                         </div>

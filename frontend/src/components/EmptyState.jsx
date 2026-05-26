@@ -4,7 +4,7 @@ export function EmptyState({ icon, title, description, action, onAction, classNa
     return (
         <div className={`flex flex-col items-center gap-3 py-16 px-8 text-center ${className}`}>
             {icon && (
-                <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center text-2xl">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-500">
                     {icon}
                 </div>
             )}

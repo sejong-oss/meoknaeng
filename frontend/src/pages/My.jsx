@@ -8,9 +8,21 @@ import {
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
+import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+
+const INGREDIENT_SUGGESTION_LIMIT = 8;
+
+async function loadIngredientSuggestions(query) {
+    const result = await autocompleteIngredients({
+        query,
+        limit: INGREDIENT_SUGGESTION_LIMIT,
+    });
+
+    return result?.items?.map((item) => item.name) ?? [];
+}
 
 export default function My() {
     const navigate = useNavigate();
@@ -65,7 +77,7 @@ export default function My() {
         if (user || authStatus === "checking") return;
         if (isMobile) return;
 
-        toast.info("로그인이 필요해요.");
+        toast.info("로그인이 필요해요");
         openLoginModal();
         navigate("/home", { replace: true });
     }, [authStatus, isMobile, navigate, openLoginModal, user]);
@@ -85,7 +97,7 @@ export default function My() {
 
         const nextNickname = nicknameDraft.trim();
         if (!nextNickname) {
-            toast.error("닉네임을 입력해주세요.");
+            toast.error("닉네임을 입력해주세요");
             return;
         }
 
@@ -98,9 +110,9 @@ export default function My() {
         try {
             await updateNickname(nextNickname);
             setEditingNickname(false);
-            toast.success("닉네임을 수정했어요.");
+            toast.success("닉네임을 수정했어요");
         } catch (error) {
-            toast.error(error.message ?? "닉네임을 수정하지 못했어요.");
+            toast.error(error.message ?? "닉네임을 수정하지 못했어요");
         } finally {
             setSavingNickname(false);
         }
@@ -195,7 +207,7 @@ export default function My() {
                     <EmptyState
                         icon={<UserAvatar size={28} />}
                         title="로그인이 필요해요"
-                        description="로그인을 통해 레시피 저장과 공유 기능을 사용해보세요."
+                        description="로그인을 통해 레시피 저장과 공유 기능을 사용해보세요"
                         action="로그인"
                         onAction={openLoginModal}
                     />
@@ -291,6 +303,7 @@ export default function My() {
                                 onAdd={addPantryIngredient}
                                 onRemove={removePantryIngredient}
                                 ingredientList={INGREDIENT_LIST}
+                                loadSuggestions={loadIngredientSuggestions}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2"
                                 inputClassName="!py-1 !text-sm"
                             />
@@ -316,7 +329,7 @@ export default function My() {
                         ) : (
                             <EmptyState
                                 title="아직 등록한 재료가 없어요"
-                                description="편집을 눌러 냉장고 재료를 추가해보세요."
+                                description="편집을 눌러 냉장고 재료를 추가해보세요"
                                 className="mt-2 rounded-card border border-transparent bg-gray-50 !py-6 !px-4"
                             />
                         )}

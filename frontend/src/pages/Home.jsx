@@ -3,11 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { Button, Chip, EmptyState, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
+import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 const RECENT_INGREDIENTS_STORAGE_KEY = "meoknaeng:recent-ingredients";
 const MAX_RECENT_INGREDIENTS = 8;
+const INGREDIENT_SUGGESTION_LIMIT = 8;
+
+async function loadIngredientSuggestions(query) {
+    const result = await autocompleteIngredients({
+        query,
+        limit: INGREDIENT_SUGGESTION_LIMIT,
+    });
+
+    return result?.items?.map((item) => item.name) ?? [];
+}
 
 function getStoredRecentIngredients() {
     if (typeof window === "undefined") return [];
@@ -27,10 +38,12 @@ export default function Home() {
     const [ingredients, setIngredients] = useState([]);
     const [recentIngredients, setRecentIngredients] = useState(getStoredRecentIngredients);
     const pantryIngredients = useAppStore((state) => state.pantryIngredients);
-    const setRecommendationIngredients = useAppStore((state) => state.setRecommendationIngredients);
+    const recommendRecipes = useAppStore((state) => state.recommendRecipes);
+    const recommendationStatus = useAppStore((state) => state.recommendationStatus);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const inputPanelRef = useRef(null);
     const ingredientInputRef = useRef(null);
+    const isRecommending = recommendationStatus === "loading";
 
     function handleAdd(value) {
         if (ingredients.includes(value)) return;
@@ -67,7 +80,9 @@ export default function Home() {
     }
 
     function handleRecommend() {
-        setRecommendationIngredients(ingredients);
+        if (isRecommending) return;
+
+        recommendRecipes(ingredients).catch(() => {});
         navigate("/recipes");
     }
 
@@ -95,7 +110,7 @@ export default function Home() {
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-600">
-                                재료를 입력하면 AI가 가능한 요리 조합을 찾아드려요.
+                                재료를 입력하면 AI가 가능한 요리 조합을 찾아드려요
                             </p>
                         </div>
                         <div
@@ -115,6 +130,7 @@ export default function Home() {
                                 onAdd={handleAdd}
                                 onRemove={handleRemove}
                                 ingredientList={INGREDIENT_LIST}
+                                loadSuggestions={loadIngredientSuggestions}
                                 suggestionsAnchorRef={inputPanelRef}
                                 chipClassName="!px-4 !py-2 !text-sm !gap-1.5"
                             />
@@ -130,10 +146,10 @@ export default function Home() {
                                 <Button
                                     variant="primary"
                                     size="lg"
-                                    disabled={ingredients.length === 0}
+                                    disabled={ingredients.length === 0 || isRecommending}
                                     onClick={(e) => { e.stopPropagation(); handleRecommend(); }}
                                 >
-                                    레시피 추천 받기
+                                    {isRecommending ? "추천 중..." : "레시피 추천 받기"}
                                     <ArrowRight size={16} />
                                 </Button>
                             </div>
@@ -156,7 +172,7 @@ export default function Home() {
                                 {!user ? (
                                     <EmptyState
                                         title="내 재료를 저장해둘 수 있어요"
-                                        description="로그인하면 내 재료를 불러와 바로 추천에 사용할 수 있어요."
+                                        description="로그인하면 내 재료를 불러와 바로 추천에 사용할 수 있어요"
                                         action="로그인하기"
                                         onAction={openLoginModal}
                                         className="w-full !py-5 !px-3"
@@ -170,7 +186,7 @@ export default function Home() {
                                 ) : (
                                     <EmptyState
                                         title="등록한 재료가 없어요"
-                                        description="마이페이지에서 냉장고 재료를 추가해보세요."
+                                        description="마이페이지에서 냉장고 재료를 추가해보세요"
                                         action="내 재료 관리"
                                         onAction={() => navigate("/my")}
                                         className="w-full !py-5 !px-3"
@@ -179,7 +195,7 @@ export default function Home() {
                                 {user && pantryIngredients.length > 0 && pantryIngredients.every((i) => ingredients.includes(i)) && (
                                     <div className="w-full flex flex-col items-center gap-1.5 py-3 text-center">
                                         <CheckmarkFilled size={24} className="text-primary-400" />
-                                        <p className="text-sm text-gray-600">재료를 모두 추가했어요.</p>
+                                        <p className="text-sm text-gray-600">재료를 모두 추가했어요</p>
                                     </div>
                                 )}
                             </div>
@@ -196,7 +212,7 @@ export default function Home() {
                                 ) : (
                                     <EmptyState
                                         title="최근 입력한 재료가 없어요"
-                                        description="재료를 입력하면 다음에 다시 고를 수 있도록 저장돼요."
+                                        description="재료를 입력하면 다음에 다시 고를 수 있도록 저장돼요"
                                         className="w-full !py-5 !px-3"
                                     />
                                 )}
@@ -210,10 +226,10 @@ export default function Home() {
                         variant="primary"
                         size="lg"
                         className="flex-1"
-                        disabled={ingredients.length === 0}
+                        disabled={ingredients.length === 0 || isRecommending}
                         onClick={handleRecommend}
                     >
-                        레시피 추천 받기
+                        {isRecommending ? "추천 중..." : "레시피 추천 받기"}
                         <ArrowRight size={16} />
                     </Button>
                 </div>

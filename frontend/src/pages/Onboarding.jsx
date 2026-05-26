@@ -41,7 +41,7 @@ const InputMock = ({ chips, typingText }) => (
                     transition={{ duration: 0.15 }}
                     className="h-7 inline-flex items-center text-sm text-gray-300"
                 >
-                    재료를 입력하세요.
+                    재료를 입력하세요
                 </motion.span>
             ) : null}
         </AnimatePresence>
@@ -230,16 +230,12 @@ export default function Onboarding() {
                         </h1>
                         <p className="max-w-sm text-sm leading-relaxed text-gray-600 sm:text-base">
                             냉장고에 있는 재료를 입력하면, AI가 만들 수 있는
-                            요리 조합과 유튜브 영상까지 함께 추천해드려요.
+                            요리 조합과 조리 영상까지 함께 추천해드려요
                         </p>
                         <div className="flex flex-col items-center gap-5 lg:items-start">
                             <Button variant="primary" size="lg" className="w-full rounded-full px-7 sm:text-lg lg:w-fit" onClick={goHome}>
                                 재료 담으면서 시작하기 →
                             </Button>
-                            <div className="hidden gap-6 text-xs text-gray-500 lg:flex">
-                                <span>· 가입 없이 사용 가능</span>
-                                <span>· 빠른 추천</span>
-                            </div>
                         </div>
                     </div>
                 </div>

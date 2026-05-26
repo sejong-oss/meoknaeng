@@ -10,7 +10,7 @@ export function LeaveWriteModal({
         <Modal open={open} onOpenChange={onOpenChange}>
             <ModalContent
                 title="작성 중인 글에서 나갈까요?"
-                description="페이지를 이동하면 작성 중인 내용이 사라져요."
+                description="페이지를 이동하면 작성 중인 내용이 사라져요"
             >
                 <ModalFooter>
                     <Button variant="ghost" onClick={onStay}>

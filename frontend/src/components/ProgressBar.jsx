@@ -1,6 +1,13 @@
-export function ProgressBar({ value = 0, max = 100, label, showValue = true, className = "" }) {
+export function ProgressBar({
+    value = 0,
+    max = 100,
+    label,
+    showValue = true,
+    className = "",
+    indicatorClassName = "",
+}) {
     const pct = Math.min(100, Math.round((value / max) * 100));
-    const barColor = pct >= 80 ? "bg-primary-500" : pct >= 50 ? "bg-primary-300" : "bg-gray-300";
+    const barColor = indicatorClassName || (pct >= 80 ? "bg-primary-500" : pct >= 50 ? "bg-primary-300" : "bg-gray-300");
 
     return (
         <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -12,7 +19,7 @@ export function ProgressBar({ value = 0, max = 100, label, showValue = true, cla
             )}
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                    className={`h-full rounded-full transition-all ${barColor}`}
+                    className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
                     style={{ width: `${pct}%` }}
                 />
             </div>

@@ -32,7 +32,7 @@ export async function request(path, options = {}) {
         const payload = response.data;
 
         if (payload?.success === false) {
-            throw new ApiError(payload?.message ?? "요청을 처리하지 못했어요.", {
+            throw new ApiError(payload?.message ?? "요청을 처리하지 못했어요", {
                 status: response.status,
                 response: payload,
             });
@@ -42,10 +42,13 @@ export async function request(path, options = {}) {
     } catch (error) {
         if (error instanceof ApiError) throw error;
 
-        throw new ApiError(error.response?.data?.message ?? "요청을 처리하지 못했어요.", {
-            status: error.response?.status,
-            response: error.response?.data,
-        });
+        throw new ApiError(
+            error.response?.data?.message ?? error.response?.data?.detail ?? "요청을 처리하지 못했어요",
+            {
+                status: error.response?.status,
+                response: error.response?.data,
+            }
+        );
     }
 }
 
@@ -78,4 +81,27 @@ export function logout() {
     return request("/auth/logout", {
         method: "DELETE",
     });
+}
+
+export function autocompleteIngredients({ query, limit = 10 }) {
+    return request("/ingredients/autocomplete", {
+        params: {
+            q: query,
+            limit,
+        },
+    });
+}
+
+export function recommendRecipes({ ingredients, query }) {
+    return request("/recipe/recommend", {
+        method: "POST",
+        data: {
+            ingredients,
+            query,
+        },
+    });
+}
+
+export function getRecipe(recipeId) {
+    return request(`/recipes/${recipeId}`);
 }

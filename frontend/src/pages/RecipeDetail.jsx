@@ -1,7 +1,9 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { RECIPE_DETAIL_FALLBACKS, RECIPE_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/libs/constants.js";
+import { getRecipe } from "@/libs/api.js";
+import { addRecipeIngredientStatuses } from "@/libs/recipeIngredients.js";
+import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     ArrowLeft,
@@ -12,6 +14,7 @@ import {
     PlayFilledAlt,
     Share,
     Time,
+    Video,
     UserMultiple,
 } from "@carbon/icons-react";
 import {
@@ -23,6 +26,7 @@ import {
     RecipeSectionTitle,
     RecipeStat,
     RecipeStepRow,
+    Skeleton,
 } from "@/components/index.js";
 
 const ingredientStatusStyles = {
@@ -45,6 +49,31 @@ const ingredientStatusStyles = {
         label: "있으면 좋아요",
     },
 };
+
+const ingredientStatusOrder = {
+    owned: 0,
+    needed: 1,
+    optional: 2,
+};
+
+const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
+const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
+
+const recipeToDetailView = (recipe, ownedIngredients) => ({
+    id: recipe.recipe_id,
+    title: recipe.name,
+    description: recipe.description,
+    time: formatMinutes(recipe.cook_time),
+    difficulty: recipe.difficulty,
+    servings: formatServings(recipe.servings),
+    ingredients: addRecipeIngredientStatuses(recipe.ingredients, ownedIngredients),
+    steps: (recipe.steps ?? [])
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((step) => step.description)
+        .filter(Boolean),
+    videos: recipe.videos ?? [],
+});
 
 function IngredientRow({ ingredient }) {
     const status = ingredientStatusStyles[ingredient.status];
@@ -69,68 +98,134 @@ function IngredientRow({ ingredient }) {
 const VideoCard = ({ video }) => (
     <Card className="gap-0 overflow-hidden rounded-btn p-0">
         <div className="relative">
-            <PhotoPlaceholder label="youtube" tone="soft" className="h-32 w-full md:h-36" />
+            <PhotoPlaceholder label={video.title ?? "video"} tone="soft" className="h-32 w-full md:h-36" />
             <div className="absolute inset-0 flex items-center justify-center">
                 <span className="inline-flex size-11 items-center justify-center rounded-full bg-white text-primary-500 shadow-lg">
                     <PlayFilledAlt size={22} />
                 </span>
             </div>
-            <span className="absolute bottom-2 right-2 rounded bg-gray-900 px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
-                {video.duration}
-            </span>
+            {video.duration && (
+                <span className="absolute bottom-2 right-2 rounded bg-gray-900 px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
+                    {video.duration}
+                </span>
+            )}
         </div>
         <div className="flex flex-col gap-1 px-3 py-2.5">
             <p className="line-clamp-2 text-sm font-bold leading-snug text-gray-900">{video.title}</p>
-            <span className="text-xs font-medium text-gray-500">{video.channel} · {video.views}</span>
+            {(video.channel || video.views) && (
+                <span className="text-xs font-medium text-gray-500">
+                    {[video.channel, video.views].filter(Boolean).join(" · ")}
+                </span>
+            )}
         </div>
     </Card>
 );
 
-function buildRecipe(id) {
-    const fallback = RECIPE_DETAIL_FALLBACKS[id];
+function RecipeDetailSkeleton() {
+    return (
+        <>
+            <title>{`레시피 추천 | ${SITE_NAME}`}</title>
+            <div className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0 md:gap-7 md:py-2">
+                <Skeleton className="hidden h-4 w-40 rounded-full md:block" />
 
-    if (!fallback) {
-        return null;
-    }
+                <div className="relative md:hidden">
+                    <Skeleton className="h-60 w-full rounded-none" />
+                </div>
 
-    return {
-        ...RECIPE_DETAIL_RECIPES["dubu-jorim"],
-        id,
-        match: 92,
-        title: fallback.title,
-        time: fallback.time,
-        difficulty: fallback.difficulty,
-        servings: fallback.servings,
-        description: fallback.description,
-        summary: fallback.description,
-    };
+                <div className="relative z-10 -mt-8 grid gap-7 md:mt-0 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
+                    <article className="flex flex-col gap-7 rounded-t-[2rem] bg-white px-5 pb-8 pt-8 shadow-xl md:rounded-none md:px-0 md:pb-0 md:pt-0 md:shadow-none">
+                        <section className="flex flex-col gap-5">
+                            <div className="flex flex-col gap-3">
+                                <Skeleton className="h-9 w-3/4 md:h-12 md:w-1/2" />
+                                <div className="flex max-w-3xl flex-col gap-2">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-5/6" />
+                                </div>
+                            </div>
+
+                            <Skeleton className="hidden h-[23.75rem] w-full rounded-card md:flex" />
+                        </section>
+
+                        <section className="grid gap-4 md:hidden">
+                            <div className="grid grid-cols-3 gap-2">
+                                <Skeleton className="h-12 rounded-btn" />
+                                <Skeleton className="h-12 rounded-btn" />
+                                <Skeleton className="h-12 rounded-btn" />
+                            </div>
+                            <Skeleton className="h-40 w-full rounded-card" />
+                        </section>
+                    </article>
+
+                    <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
+                        <Card className="gap-5 p-5 shadow-md">
+                            <Skeleton className="h-5 w-20" />
+                            <Skeleton className="h-16 w-full rounded-btn" />
+                            <Skeleton className="h-52 w-full rounded-card" />
+                            <Skeleton className="h-12 w-full rounded-btn" />
+                        </Card>
+                    </aside>
+                </div>
+            </div>
+        </>
+    );
 }
 
 export default function RecipeDetail() {
-    const { id = "dubu-jorim" } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const stepsRef = useRef(null);
     const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
-    const recipe = useMemo(() => RECIPE_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
+    const recommendationIngredients = useAppStore((state) => state.recommendationIngredients);
+    const [recipe, setRecipe] = useState(null);
+    const [status, setStatus] = useState("loading");
 
-    if (!recipe) {
-        return (
-            <>
-                <title>{`레시피 추천 | ${SITE_NAME}`}</title>
-                <Card variant="muted" className="min-h-[calc(100dvh-8.5rem)] justify-center px-4 py-10 md:min-h-[28rem] md:px-6 md:py-14">
-                    <EmptyState
-                        icon="🍽️"
-                        title="레시피를 찾을 수 없어요"
-                        description="추천 결과에서 다시 보고 싶은 레시피를 선택해주세요"
-                        action="추천 결과로 돌아가기"
-                        onAction={() => navigate("/recipes")}
-                    />
-                </Card>
-            </>
-        );
+    useEffect(() => {
+        if (!id) {
+            setRecipe(null);
+            toast.error("레시피를 찾을 수 없어요");
+            navigate("/recipes", { replace: true });
+            return;
+        }
+
+        let ignore = false;
+
+        setRecipe(null);
+        setStatus("loading");
+
+        getRecipe(id)
+            .then((data) => {
+                if (ignore) return;
+
+                if (!data) {
+                    toast.error("레시피를 찾을 수 없어요");
+                    navigate("/recipes", { replace: true });
+                    return;
+                }
+
+                setRecipe(recipeToDetailView(data, recommendationIngredients));
+                setStatus("success");
+            })
+            .catch(() => {
+                if (ignore) return;
+
+                setRecipe(null);
+                toast.error("레시피를 찾을 수 없어요");
+                navigate("/recipes", { replace: true });
+            });
+
+        return () => {
+            ignore = true;
+        };
+    }, [id, navigate, recommendationIngredients]);
+
+    if (status === "loading") {
+        return <RecipeDetailSkeleton />;
     }
 
+    const sortedIngredients = recipe.ingredients
+        .slice()
+        .sort((a, b) => ingredientStatusOrder[a.status] - ingredientStatusOrder[b.status]);
     const ownedIngredients = recipe.ingredients.filter((ingredient) => ingredient.status === "owned").length;
     const ingredientsMeta = `${ownedIngredients}/${recipe.ingredients.length} 보유`;
     const isSaved = savedRecipeIds.includes(recipe.id);
@@ -191,7 +286,7 @@ export default function RecipeDetail() {
                         <section className="flex flex-col gap-3 md:hidden">
                             <RecipeSectionTitle meta={ingredientsMeta}>재료</RecipeSectionTitle>
                             <div className="flex flex-col gap-1.5">
-                                {recipe.ingredients.map((ingredient) => (
+                                {sortedIngredients.map((ingredient) => (
                                     <IngredientRow key={ingredient.name} ingredient={ingredient} />
                                 ))}
                             </div>
@@ -208,12 +303,22 @@ export default function RecipeDetail() {
 
                         <section className="flex flex-col gap-3">
                             <RecipeSectionTitle>관련 영상</RecipeSectionTitle>
-                            <div className="grid gap-3 md:grid-cols-3">
-                                {recipe.videos.map((video) => (
-                                    <VideoCard key={video.title} video={video} />
-                                ))}
-                            </div>
+                            {recipe.videos.length > 0 ? (
+                                <div className="grid gap-3 md:grid-cols-3">
+                                    {recipe.videos.map((video) => (
+                                        <VideoCard key={video.id ?? video.url ?? video.title} video={video} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <EmptyState
+                                    icon={<Video size={28} />}
+                                    title="관련 영상을 준비 중이에요"
+                                    description="추천 영상 정보가 연결되면 이곳에서 함께 확인할 수 있어요"
+                                    className="rounded-card border border-gray-100 bg-gray-50 !py-8 !px-4"
+                                />
+                            )}
                         </section>
+
                     </article>
 
                     <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
@@ -227,7 +332,7 @@ export default function RecipeDetail() {
                             <div className="flex flex-col gap-2">
                                 <RecipeSectionTitle meta={ingredientsMeta}>재료</RecipeSectionTitle>
                                 <div className="flex flex-col gap-1.5">
-                                    {recipe.ingredients.map((ingredient) => (
+                                    {sortedIngredients.map((ingredient) => (
                                         <IngredientRow key={ingredient.name} ingredient={ingredient} />
                                     ))}
                                 </div>

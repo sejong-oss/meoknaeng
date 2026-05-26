@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, Add, Filter } from "@carbon/icons-react";
+import { Search, Add, Filter, Restaurant } from "@carbon/icons-react";
 import {
     Button,
     Chip,
@@ -160,7 +160,7 @@ export default function Feed() {
 
                 {filteredItems.length === 0 ? (
                     <EmptyState
-                        icon="🍽️"
+                        icon={<Restaurant size={28} />}
                         title="검색 결과가 없어요"
                         description="다른 키워드나 필터를 시도해보세요"
                         action="필터 초기화"
