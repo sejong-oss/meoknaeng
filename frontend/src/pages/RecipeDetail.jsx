@@ -176,9 +176,15 @@ export default function RecipeDetail() {
     const stepsRef = useRef(null);
     const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
+    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
+    const user = useAppStore((state) => state.user);
     const recommendationIngredients = useAppStore((state) => state.recommendationIngredients);
     const [recipe, setRecipe] = useState(null);
     const [status, setStatus] = useState("loading");
+
+    useEffect(() => {
+        fetchSavedRecipes();
+    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         if (!id) {

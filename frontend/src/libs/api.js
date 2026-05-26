@@ -107,11 +107,15 @@ export function getRecipe(recipeId) {
 }
 
 export function saveRecipe(recipeId) {
-    return request(`/recipes/${recipeId}`, { method: "POST" });
+    return request(`/recipes/${recipeId}`, { 
+        method: "POST" 
+    });
 }
 
 export function unsaveRecipe(recipeId) {
-    return request(`/recipes/${recipeId}`, { method: "DELETE" });
+    return request(`/recipes/${recipeId}`, { 
+        method: "DELETE" 
+    });
 }
 
 export function getSavedRecipes() {

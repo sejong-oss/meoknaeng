@@ -8,7 +8,7 @@ import {
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
-import { autocompleteIngredients, getSavedRecipes } from "@/libs/api.js";
+import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -95,7 +95,8 @@ export default function My() {
     const myPosts = useAppStore((state) => state.myPosts);
     const likedPosts = useAppStore((state) => state.likedPosts);
     const likedPostIds = useAppStore((state) => state.likedPostIds);
-    const [savedRecipes, setSavedRecipes] = useState([]);
+    const savedRecipes = useAppStore((state) => state.savedRecipes);
+    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
@@ -113,20 +114,8 @@ export default function My() {
     const visibleLikedPosts = likedPosts.filter((post) => likedPostIds.includes(post.id));
 
     useEffect(() => {
-        if (!user) return;
-        getSavedRecipes().then((data) => {
-            setSavedRecipes(
-                (data?.recipes ?? []).map((r) => ({
-                    id: r.recipeId,
-                    title: r.name,
-                    time: r.cookTime != null ? `${r.cookTime}분` : "",
-                    difficulty: r.difficulty,
-                    servings: r.servings != null ? `${r.servings}인분` : "",
-                    description: r.description,
-                }))
-            );
-        }).catch(() => {});
-    }, [user]);
+        fetchSavedRecipes();
+    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         const el = ingredientsRef.current;

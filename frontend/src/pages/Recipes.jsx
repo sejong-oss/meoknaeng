@@ -48,6 +48,8 @@ export default function Recipes() {
     const recommendRecipes = useAppStore((state) => state.recommendRecipes);
     const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
+    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
+    const user = useAppStore((state) => state.user);
     const [progress, setProgress] = useState(0);
     const [tipIndex, setTipIndex] = useState(0);
     const [isCompleting, setIsCompleting] = useState(false);
@@ -69,6 +71,10 @@ export default function Recipes() {
         setHoldResult(true);
         recommendRecipes(ingredients).catch(() => {});
     };
+
+    useEffect(() => {
+        fetchSavedRecipes();
+    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         if (recommendationStatus !== "success" || !holdResult || completionStartedRef.current) return;
