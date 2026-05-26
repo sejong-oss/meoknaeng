@@ -15,10 +15,13 @@ export function FormField({ label, required = false, children, hint, error }) {
     );
 }
 
+import { Close } from "@carbon/icons-react";
+
 export function Input({
     placeholder,
     value,
     onChange,
+    clearable = false,
     error,
     errorMessage,
     disabled = false,
@@ -41,9 +44,19 @@ export function Input({
                     value={value}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className="bg-transparent outline-none w-full text-gray-900 placeholder:text-gray-400 disabled:cursor-not-allowed"
+                    className="peer bg-transparent outline-none w-full text-gray-900 placeholder:text-gray-400 disabled:cursor-not-allowed"
                     {...props}
                 />
+                {clearable && (
+                    <button
+                        type="button"
+                        onClick={() => onChange?.({ target: { value: "" } })}
+                        className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors hidden peer-[:not(:placeholder-shown)]:block"
+                        tabIndex={-1}
+                    >
+                        <Close size={16} />
+                    </button>
+                )}
             </div>
             {error && errorMessage && (
                 <p className="text-xs text-red-500">{errorMessage}</p>

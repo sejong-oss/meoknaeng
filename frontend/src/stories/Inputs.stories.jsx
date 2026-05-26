@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { FormField, IngredientInput as IngredientInputComponent, Input, Textarea } from "@/components/index.js";
 import { Search } from "@carbon/icons-react";
 
@@ -11,8 +12,8 @@ export default { title: "Design System/Inputs" };
 
 export const AllInputs = () => (
     <div className="p-8 bg-white font-sans flex flex-col gap-6 max-w-sm">
-        <Input placeholder="재료를 입력하세요" icon={<Search size={16} />} />
-        <Input placeholder="포커스 상태" icon={<Search size={16} />} defaultValue="두부" />
+        <Input placeholder="재료를 입력하세요" icon={<Search size={16} />} clearable />
+        <Input placeholder="포커스 상태" icon={<Search size={16} />} defaultValue="두부" clearable />
         <Input placeholder="오류 상태" error errorMessage="올바른 재료명을 입력해주세요." />
         <Input placeholder="비활성 입력" disabled />
     </div>

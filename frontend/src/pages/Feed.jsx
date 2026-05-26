@@ -90,6 +90,7 @@ export default function Feed() {
                         icon={<Search size={16} />}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        clearable
                         placeholder="레시피, 재료, 작성자 검색..."
                     />
 
