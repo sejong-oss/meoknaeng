@@ -105,3 +105,15 @@ export function recommendRecipes({ ingredients, query }) {
 export function getRecipe(recipeId) {
     return request(`/recipes/${recipeId}`);
 }
+
+export function saveRecipe(recipeId) {
+    return request(`/recipes/${recipeId}`, { method: "POST" });
+}
+
+export function unsaveRecipe(recipeId) {
+    return request(`/recipes/${recipeId}`, { method: "DELETE" });
+}
+
+export function getSavedRecipes() {
+    return request("/users/me/saved-recipes");
+}

@@ -8,7 +8,7 @@ import {
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
-import { autocompleteIngredients } from "@/libs/api.js";
+import { autocompleteIngredients, getSavedRecipes } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -92,11 +92,10 @@ export default function My() {
     const authStatus = useAppStore((state) => state.authStatus);
     const authInitialized = useAppStore((state) => state.authInitialized);
     const ingredients = useAppStore((state) => state.pantryIngredients);
-    const savedRecipes = useAppStore((state) => state.savedRecipes);
     const myPosts = useAppStore((state) => state.myPosts);
     const likedPosts = useAppStore((state) => state.likedPosts);
-    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const likedPostIds = useAppStore((state) => state.likedPostIds);
+    const [savedRecipes, setSavedRecipes] = useState([]);
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
@@ -111,8 +110,23 @@ export default function My() {
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
-    const visibleSavedRecipes = savedRecipes.filter((recipe) => savedRecipeIds.includes(recipe.id));
     const visibleLikedPosts = likedPosts.filter((post) => likedPostIds.includes(post.id));
+
+    useEffect(() => {
+        if (!user) return;
+        getSavedRecipes().then((data) => {
+            setSavedRecipes(
+                (data?.recipes ?? []).map((r) => ({
+                    id: r.recipeId,
+                    title: r.name,
+                    time: r.cookTime != null ? `${r.cookTime}분` : "",
+                    difficulty: r.difficulty,
+                    servings: r.servings != null ? `${r.servings}인분` : "",
+                    description: r.description,
+                }))
+            );
+        }).catch(() => {});
+    }, [user]);
 
     useEffect(() => {
         const el = ingredientsRef.current;
@@ -408,7 +422,7 @@ export default function My() {
                     <Tabs defaultValue="saved" variant="line">
                         <TabsList variant="line">
                             <TabsTrigger value="saved" variant="line">
-                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{visibleSavedRecipes.length}</span>
+                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{savedRecipes.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="mine" variant="line">
                                 내 글 <span className="ml-1 text-xs opacity-60">{myPosts.length}</span>
@@ -420,7 +434,7 @@ export default function My() {
 
                         <TabsContent value="saved">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {visibleSavedRecipes.map((recipe) => (
+                                {savedRecipes.map((recipe) => (
                                     <RecipeCard
                                         key={recipe.id}
                                         title={recipe.title}

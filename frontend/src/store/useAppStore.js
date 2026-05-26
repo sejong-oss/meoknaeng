@@ -2,16 +2,19 @@ import { create } from "zustand";
 import {
     MY_LIKED_POSTS,
     MY_POSTS,
-    MY_SAVED_RECIPES,
 } from "@/data/mockData.js";
 import {
     getMyProfile,
+    getSavedRecipes as getSavedRecipesRequest,
     login as loginRequest,
     logout as logoutRequest,
     recommendRecipes as recommendRecipesRequest,
+    saveRecipe as saveRecipeRequest,
     signup as signupRequest,
+    unsaveRecipe as unsaveRecipeRequest,
     updateMyProfile,
 } from "@/libs/api.js";
+import { toast } from "@/libs/toast.js";
 import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
@@ -54,10 +57,9 @@ export const useAppStore = create((set) => ({
     recommendationStatus: "idle",
     recommendationError: null,
     recommendationStartedAt: null,
-    savedRecipes: MY_SAVED_RECIPES,
     myPosts: MY_POSTS,
     likedPosts: MY_LIKED_POSTS,
-    savedRecipeIds: MY_SAVED_RECIPES.map((recipe) => recipe.id),
+    savedRecipeIds: [],
     likedPostIds: MY_LIKED_POSTS.map((post) => post.id),
 
     openLoginModal: () => set({ loginModalOpen: true }),
@@ -66,12 +68,15 @@ export const useAppStore = create((set) => ({
         set({ authStatus: "checking" });
 
         try {
-            const user = await getMyProfile();
+            const [user, savedData] = await Promise.all([getMyProfile(), getSavedRecipesRequest()]);
             const nextUser = authUserToView(user);
+            const ids = (savedData?.recipes ?? []).map((r) => r.recipeId);
+
 
             set({
                 user: nextUser,
                 pantryIngredients: nextUser.ingredients,
+                savedRecipeIds: ids,
                 authStatus: "success",
                 authInitialized: true,
             });
@@ -79,6 +84,7 @@ export const useAppStore = create((set) => ({
             set({
                 user: null,
                 pantryIngredients: [],
+                savedRecipeIds: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -91,10 +97,12 @@ export const useAppStore = create((set) => ({
         try {
             const user = await loginRequest(credentials);
             const nextUser = authUserToView(user);
+            const savedData = await getSavedRecipesRequest();
 
             set({
                 user: nextUser,
                 pantryIngredients: nextUser.ingredients,
+                savedRecipeIds: (savedData?.recipes ?? []).map((r) => r.recipeId),
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -118,6 +126,7 @@ export const useAppStore = create((set) => ({
             set({
                 user: nextUser,
                 pantryIngredients: nextUser.ingredients,
+                savedRecipeIds: [],
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -206,11 +215,30 @@ export const useAppStore = create((set) => ({
             throw error;
         }
     },
-    toggleSavedRecipe: (recipeId) => set((state) => ({
-        savedRecipeIds: state.savedRecipeIds.includes(recipeId)
-            ? state.savedRecipeIds.filter((id) => id !== recipeId)
-            : [...state.savedRecipeIds, recipeId],
-    })),
+    toggleSavedRecipe: async (recipeId) => {
+        const { user, savedRecipeIds, openLoginModal } = useAppStore.getState();
+
+        if (!user) {
+            openLoginModal();
+            return;
+        }
+
+        const isSaved = savedRecipeIds.includes(recipeId);
+        set({ savedRecipeIds: isSaved ? savedRecipeIds.filter((id) => id !== recipeId) : [...savedRecipeIds, recipeId] });
+
+        try {
+            if (isSaved) {
+                await unsaveRecipeRequest(recipeId);
+                toast.success("저장한 레시피에서 삭제했어요");
+            } else {
+                await saveRecipeRequest(recipeId);
+                toast.success("저장한 레시피에 추가했어요");
+            }
+        } catch {
+            set({ savedRecipeIds });
+            toast.error(isSaved ? "저장 취소에 실패했어요" : "저장에 실패했어요");
+        }
+    },
     toggleLikedPost: (postId) => set((state) => ({
         likedPostIds: state.likedPostIds.includes(postId)
             ? state.likedPostIds.filter((id) => id !== postId)
