@@ -219,6 +219,7 @@ export const useAppStore = create((set) => ({
         const { user, savedRecipeIds, openLoginModal } = useAppStore.getState();
 
         if (!user) {
+            toast.info("로그인이 필요해요");
             openLoginModal();
             return;
         }
