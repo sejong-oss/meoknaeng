@@ -179,7 +179,11 @@ async def delete_post_handler(
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
 
 
-@router.post("/{post_id}/likes", response_model=ApiResponse[None])
+@router.post(
+    "/{post_id}/likes",
+    response_model=ApiResponse[None],
+    status_code=status.HTTP_201_CREATED,
+)
 async def like_post_handler(
     post_id: str,
     user_id: str = Depends(get_current_user_id),
