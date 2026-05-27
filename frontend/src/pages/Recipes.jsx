@@ -16,6 +16,7 @@ import {
 } from "@carbon/icons-react";
 import { Breadcrumb, Button, Card, Chip, EmptyState, PhotoPlaceholder, ProgressBar, RecipeCard } from "@/components/index.js";
 import { SITE_NAME } from "@/libs/constants.js";
+import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
 const RECOMMENDATION_PROGRESS_DURATION_MS = 20000;
@@ -48,6 +49,9 @@ export default function Recipes() {
     const recommendRecipes = useAppStore((state) => state.recommendRecipes);
     const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
+    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
+    const user = useAppStore((state) => state.user);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
     const [progress, setProgress] = useState(0);
     const [tipIndex, setTipIndex] = useState(0);
     const [isCompleting, setIsCompleting] = useState(false);
@@ -59,6 +63,20 @@ export default function Recipes() {
     const isLoading = recommendationStatus === "loading";
     const showLoading = isLoading || isCompleting || (recommendationStatus === "success" && holdResult);
     const isError = recommendationStatus === "error";
+    const handleToggleSaved = async (id) => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+        try {
+            await toggleSavedRecipe(id);
+            toast.success(savedRecipeIds.includes(id) ? "저장한 레시피에서 삭제했어요" : "저장한 레시피에 추가했어요");
+        } catch {
+            toast.error(savedRecipeIds.includes(id) ? "저장 취소에 실패했어요" : "레시피를 저장하지 못했어요");
+        }
+    };
+
     const handleRecommendAgain = () => {
         if (ingredients.length === 0) return;
 
@@ -69,6 +87,10 @@ export default function Recipes() {
         setHoldResult(true);
         recommendRecipes(ingredients).catch(() => {});
     };
+
+    useEffect(() => {
+        fetchSavedRecipes();
+    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         if (recommendationStatus !== "success" || !holdResult || completionStartedRef.current) return;
@@ -290,7 +312,7 @@ export default function Recipes() {
                                         size="lg"
                                         className="flex-1 px-4 md:px-5 lg:flex-none"
                                         aria-label={isHeroSaved ? "저장 취소" : "저장"}
-                                        onClick={() => toggleSavedRecipe(hero.id)}
+                                        onClick={() => handleToggleSaved(hero.id)}
                                     >
                                         {isHeroSaved ? <BookmarkFilled size={18} /> : <Bookmark size={18} />}
                                         <span className="hidden md:inline">저장</span>

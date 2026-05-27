@@ -176,9 +176,30 @@ export default function RecipeDetail() {
     const stepsRef = useRef(null);
     const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
+    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
+    const user = useAppStore((state) => state.user);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
     const recommendationIngredients = useAppStore((state) => state.recommendationIngredients);
     const [recipe, setRecipe] = useState(null);
     const [status, setStatus] = useState("loading");
+
+    const handleToggleSaved = async () => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+        try {
+            await toggleSavedRecipe(recipe.id);
+            toast.success(savedRecipeIds.includes(recipe.id) ? "저장한 레시피에서 삭제했어요" : "저장한 레시피에 추가했어요");
+        } catch {
+            toast.error(savedRecipeIds.includes(recipe.id) ? "저장 취소에 실패했어요" : "레시피를 저장하지 못했어요");
+        }
+    };
+
+    useEffect(() => {
+        fetchSavedRecipes();
+    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         if (!id) {
@@ -345,7 +366,7 @@ export default function RecipeDetail() {
                                 <Button
                                     variant={isSaved ? "primary" : "outline"}
                                     size="sm"
-                                    onClick={() => toggleSavedRecipe(recipe.id)}
+                                    onClick={handleToggleSaved}
                                 >
                                     {isSaved ? <BookmarkFilled size={14} /> : <Bookmark size={14} />}
                                     저장
@@ -369,7 +390,7 @@ export default function RecipeDetail() {
                         size="lg"
                         className="px-4"
                         aria-label={isSaved ? "저장 취소" : "저장"}
-                        onClick={() => toggleSavedRecipe(recipe.id)}
+                        onClick={handleToggleSaved}
                     >
                         {isSaved ? <BookmarkFilled size={18} /> : <Bookmark size={18} />}
                     </Button>

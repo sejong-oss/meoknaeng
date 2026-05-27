@@ -92,11 +92,11 @@ export default function My() {
     const authStatus = useAppStore((state) => state.authStatus);
     const authInitialized = useAppStore((state) => state.authInitialized);
     const ingredients = useAppStore((state) => state.pantryIngredients);
-    const savedRecipes = useAppStore((state) => state.savedRecipes);
     const myPosts = useAppStore((state) => state.myPosts);
     const likedPosts = useAppStore((state) => state.likedPosts);
-    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
     const likedPostIds = useAppStore((state) => state.likedPostIds);
+    const savedRecipes = useAppStore((state) => state.savedRecipes);
+    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
@@ -111,8 +111,11 @@ export default function My() {
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
-    const visibleSavedRecipes = savedRecipes.filter((recipe) => savedRecipeIds.includes(recipe.id));
     const visibleLikedPosts = likedPosts.filter((post) => likedPostIds.includes(post.id));
+
+    useEffect(() => {
+        fetchSavedRecipes();
+    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         const el = ingredientsRef.current;
@@ -408,7 +411,7 @@ export default function My() {
                     <Tabs defaultValue="saved" variant="line">
                         <TabsList variant="line">
                             <TabsTrigger value="saved" variant="line">
-                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{visibleSavedRecipes.length}</span>
+                                저장한 레시피 <span className="ml-1 text-xs opacity-60">{savedRecipes.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="mine" variant="line">
                                 내 글 <span className="ml-1 text-xs opacity-60">{myPosts.length}</span>
@@ -420,7 +423,7 @@ export default function My() {
 
                         <TabsContent value="saved">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {visibleSavedRecipes.map((recipe) => (
+                                {savedRecipes.map((recipe) => (
                                     <RecipeCard
                                         key={recipe.id}
                                         title={recipe.title}
