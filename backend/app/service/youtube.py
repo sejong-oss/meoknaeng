@@ -17,7 +17,7 @@ class YouTubeServiceError(Exception):
 
 
 async def get_recipe_videos(recipe_id: str, recipe_name: str, db: AsyncSession) -> YouTubeVideosResponse:
-    # DB 캐시 확인
+    """단건 조회용 — DB 캐시 확인 후 없으면 YouTube API 호출 및 저장"""
     result = await db.execute(
         select(RecipeVideo).where(RecipeVideo.recipe_id == recipe_id)
     )
@@ -36,10 +36,8 @@ async def get_recipe_videos(recipe_id: str, recipe_name: str, db: AsyncSession) 
             ]
         )
 
-    # 캐시 없으면 YouTube API 호출
     videos = await _fetch_from_youtube(recipe_name)
 
-    # DB에 저장
     for video in videos.videos:
         db.add(RecipeVideo(
             recipe_id=recipe_id,
@@ -51,6 +49,46 @@ async def get_recipe_videos(recipe_id: str, recipe_name: str, db: AsyncSession) 
     await db.commit()
 
     return videos
+
+
+async def fetch_and_save_videos_bulk(
+    recipes: list[tuple[str, str]],
+    db: AsyncSession,
+) -> dict[str, YouTubeVideosResponse]:
+    """추천 응답용 — YouTube API를 동시 호출 후 DB에 일괄 저장
+
+    Args:
+        recipes: [(recipe_id, recipe_name), ...] 리스트
+    Returns:
+        {recipe_id: YouTubeVideosResponse} 딕셔너리
+    """
+    import asyncio
+
+    # YouTube API 동시 호출 (DB 접근 없음)
+    results = await asyncio.gather(
+        *[_fetch_from_youtube(name) for _, name in recipes],
+        return_exceptions=True,
+    )
+
+    video_map: dict[str, YouTubeVideosResponse] = {}
+
+    for (recipe_id, _), result in zip(recipes, results):
+        if isinstance(result, YouTubeVideosResponse):
+            video_map[recipe_id] = result
+            # DB 일괄 저장
+            for video in result.videos:
+                db.add(RecipeVideo(
+                    recipe_id=recipe_id,
+                    video_id=video.video_id,
+                    title=video.title,
+                    thumbnail_url=video.thumbnail_url,
+                    video_url=video.video_url,
+                ))
+        else:
+            video_map[recipe_id] = YouTubeVideosResponse(videos=[])
+
+    await db.commit()
+    return video_map
 
 
 async def _fetch_from_youtube(recipe_name: str) -> YouTubeVideosResponse:

@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +6,7 @@ from app.db import get_db
 from app.models.recipe import Recipe
 from app.models.schemas import ApiResponse, RecipeRequest, RecipeResponse, YouTubeVideosResponse
 from app.service.recipe import RecipeServiceError, recommend_recipe
-from app.service.youtube import YouTubeServiceError, get_recipe_videos
+from app.service.youtube import YouTubeServiceError, fetch_and_save_videos_bulk, get_recipe_videos
 
 router = APIRouter(prefix="/recipe", tags=["recipe"])
 
@@ -23,15 +21,14 @@ async def recommend_recipe_handler(
     except RecipeServiceError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
 
-    # 레시피 이름이 확정된 후 YouTube 영상 3개 동시 검색
-    video_results = await asyncio.gather(
-        *[get_recipe_videos(r.recipe_id, r.name, db) for r in data.recipes],
-        return_exceptions=True,
+    # 레시피 이름이 확정된 후 YouTube 영상 3개 동시 검색 + 일괄 저장
+    video_map = await fetch_and_save_videos_bulk(
+        [(r.recipe_id, r.name) for r in data.recipes],
+        db,
     )
 
-    for recipe, result in zip(data.recipes, video_results):
-        if isinstance(result, YouTubeVideosResponse):
-            recipe.videos = result.videos
+    for recipe in data.recipes:
+        recipe.videos = video_map[recipe.recipe_id].videos
 
     return ApiResponse(success=True, data=data)
 
