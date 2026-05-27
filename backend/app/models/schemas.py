@@ -151,3 +151,14 @@ class PostDetailResponse(BaseModel):
     created_at: str
     updated_at: str
     source_recipe: RecipeDetail | None
+
+
+class YouTubeVideoItem(BaseModel):
+    video_id: str = Field(..., description="YouTube 영상 ID")
+    title: str = Field(..., description="영상 제목")
+    thumbnail_url: str = Field(..., description="썸네일 이미지 URL")
+    video_url: str = Field(..., description="YouTube 영상 링크")
+
+
+class YouTubeVideosResponse(BaseModel):
+    videos: list[YouTubeVideoItem] = Field(..., description="관련 YouTube 영상 목록")
