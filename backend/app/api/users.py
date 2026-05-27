@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user_id
 from app.api.users_schemas import (
+    LikedPostItem,
+    LikedPostsResponse,
     SavedRecipeItem,
     SavedRecipesResponse,
     UserIngredientItem,
@@ -19,7 +21,7 @@ from app.db import get_db
 from app.models.recipe import Recipe, RecipeSave
 from app.models.schemas import ApiResponse
 from app.models.user import User, UserIngredient
-from app.service.users import delete_user_account
+from app.service.users import delete_user_account, get_liked_posts as get_liked_posts_service
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -204,3 +206,33 @@ async def get_my_saved_recipes(
         success=True,
         data=SavedRecipesResponse(recipes=recipes),
     )
+
+
+@router.get(
+    "/me/liked-posts",
+    response_model=ApiResponse[LikedPostsResponse],
+    summary="좋아요한 게시글 조회",
+)
+async def get_my_liked_posts(
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[LikedPostsResponse]:
+    await _get_current_user(user_id, db)
+
+    rows = await get_liked_posts_service(user_id, db)
+    posts = [
+        LikedPostItem(
+            post_id=post.post_id,
+            title=post.title,
+            description=post.description,
+            cook_time=post.cook_time,
+            category=post.category,
+            difficulty=post.difficulty,
+            author_nickname=post.author.nickname,
+            created_at=post.created_at,
+            liked_at=liked_at,
+        )
+        for post, liked_at in rows
+    ]
+
+    return ApiResponse(success=True, data=LikedPostsResponse(posts=posts))

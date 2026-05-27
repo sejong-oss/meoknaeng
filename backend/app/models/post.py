@@ -32,6 +32,7 @@ class Post(Base):
     author: Mapped[User] = relationship(back_populates="posts")
     source_recipe: Mapped[Recipe | None] = relationship(back_populates="posts")
     comments: Mapped[list[Comment]] = relationship(back_populates="post", cascade="all, delete-orphan")
+    likes: Mapped[list[PostLike]] = relationship(back_populates="post", cascade="all, delete-orphan")
 
 
 class Comment(Base):
@@ -45,3 +46,14 @@ class Comment(Base):
 
     post: Mapped[Post] = relationship(back_populates="comments")
     author: Mapped[User] = relationship(back_populates="comments")
+
+
+class PostLike(Base):
+    __tablename__ = "post_like"
+
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("user.user_id"), primary_key=True)
+    post_id: Mapped[str] = mapped_column(String(36), ForeignKey("post.post_id"), primary_key=True)
+    liked_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
+
+    user: Mapped[User] = relationship(back_populates="post_likes")
+    post: Mapped[Post] = relationship(back_populates="likes")

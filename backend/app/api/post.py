@@ -16,7 +16,16 @@ from app.models.schemas import (
     RecipeDetailStep,
     RecipeSummary,
 )
-from app.service.post import PostError, create_post, delete_post, get_post_detail, get_post_list, update_post
+from app.service.post import (
+    PostError,
+    create_post,
+    delete_post,
+    get_post_detail,
+    get_post_list,
+    like_post,
+    unlike_post,
+    update_post,
+)
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -165,6 +174,32 @@ async def delete_post_handler(
 ) -> ApiResponse[None]:
     try:
         await delete_post(post_id, user_id, db)
+        return ApiResponse(success=True, data=None)
+    except PostError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+@router.post("/{post_id}/likes", response_model=ApiResponse[None])
+async def like_post_handler(
+    post_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[None]:
+    try:
+        await like_post(post_id, user_id, db)
+        return ApiResponse(success=True, data=None)
+    except PostError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+@router.delete("/{post_id}/likes", response_model=ApiResponse[None])
+async def unlike_post_handler(
+    post_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[None]:
+    try:
+        await unlike_post(post_id, user_id, db)
         return ApiResponse(success=True, data=None)
     except PostError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
