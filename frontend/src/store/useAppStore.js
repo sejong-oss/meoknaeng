@@ -14,7 +14,7 @@ import {
     unsaveRecipe as unsaveRecipeRequest,
     updateMyProfile,
 } from "@/libs/api.js";
-import { toast } from "@/libs/toast.js";
+
 import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
@@ -45,7 +45,16 @@ const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     ownedIngredientCount: countOwnedRecipeIngredients(recipe.ingredients, ownedIngredients),
 });
 
-export const useAppStore = create((set) => ({
+const savedApiToSummaryView = (recipe) => ({
+    id: recipe.recipeId,
+    title: recipe.name,
+    time: formatMinutes(recipe.cookTime),
+    difficulty: recipe.difficulty,
+    servings: formatServings(recipe.servings),
+    description: recipe.description,
+});
+
+export const useAppStore = create((set, get) => ({
     user: null,
     authStatus: "idle",
     authInitialized: false,
@@ -89,32 +98,24 @@ export const useAppStore = create((set) => ({
             });
         }
     },
-    fetchSavedRecipes: () => {
-        const { user, savedRecipesLoaded } = useAppStore.getState();
+    fetchSavedRecipes: async () => {
+        const { user, savedRecipesLoaded } = get();
 
         if (!user || savedRecipesLoaded) return;
 
         set({ savedRecipesLoaded: true });
 
-        getSavedRecipesRequest()
-            .then((savedData) => {
-                const recipes = savedData?.recipes ?? [];
+        try {
+            const data = await getSavedRecipesRequest();
+            const recipes = data?.recipes ?? [];
 
-                set({
-                    savedRecipeIds: recipes.map((r) => r.recipeId),
-                    savedRecipes: recipes.map((r) => ({
-                        id: r.recipeId,
-                        title: r.name,
-                        time: r.cookTime != null ? `${r.cookTime}분` : "",
-                        difficulty: r.difficulty,
-                        servings: r.servings != null ? `${r.servings}인분` : "",
-                        description: r.description,
-                    })),
-                });
-            })
-            .catch(() => {
-                set({ savedRecipesLoaded: false });
+            set({
+                savedRecipeIds: recipes.map((r) => r.recipeId),
+                savedRecipes: recipes.map(savedApiToSummaryView),
             });
+        } catch {
+            set({ savedRecipesLoaded: false });
+        }
     },
     login: async (credentials) => {
         set({ authStatus: "loading" });
@@ -149,7 +150,6 @@ export const useAppStore = create((set) => ({
             set({
                 user: nextUser,
                 pantryIngredients: nextUser.ingredients,
-                savedRecipeIds: [],
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -229,7 +229,6 @@ export const useAppStore = create((set) => ({
                 recommendationStartedAt: null,
             });
 
-            return { hero, others };
         } catch (error) {
             set({
                 recommendationHero: null,
@@ -242,38 +241,30 @@ export const useAppStore = create((set) => ({
         }
     },
     toggleSavedRecipe: async (recipeId) => {
-        const { user, savedRecipeIds, savedRecipes, savedRecipesLoaded, openLoginModal } = useAppStore.getState();
+        const { user, savedRecipeIds, savedRecipes } = get();
 
-        if (!user) {
-            toast.info("로그인이 필요해요");
-            openLoginModal();
-            return;
-        }
+        if (!user) return;
 
         const isSaved = savedRecipeIds.includes(recipeId);
 
-        set({
-            savedRecipeIds: isSaved
-                ? savedRecipeIds.filter((id) => id !== recipeId)
-                : [...savedRecipeIds, recipeId],
-            savedRecipes: isSaved
-                ? savedRecipes.filter((r) => r.id !== recipeId)
-                : savedRecipes,
-            savedRecipesLoaded: isSaved ? savedRecipesLoaded : false,
-        });
-
-        try {
-            if (isSaved) {
-                await unsaveRecipeRequest(recipeId);
-                toast.success("저장한 레시피에서 삭제했어요");
-            } else {
-                await saveRecipeRequest(recipeId);
-                toast.success("저장한 레시피에 추가했어요");
-            }
-        } catch {
-            set({ savedRecipeIds, savedRecipes, savedRecipesLoaded });
-            toast.error(isSaved ? "저장 취소에 실패했어요" : "저장에 실패했어요");
+        if (isSaved) {
+            await unsaveRecipeRequest(recipeId);
+        } else {
+            await saveRecipeRequest(recipeId);
         }
+
+        const nextSavedRecipeIds = isSaved
+            ? savedRecipeIds.filter((id) => id !== recipeId)
+            : [...savedRecipeIds, recipeId];
+        const nextSavedRecipes = isSaved
+            ? savedRecipes.filter((r) => r.id !== recipeId)
+            : savedRecipes;
+
+        set({
+            savedRecipeIds: nextSavedRecipeIds,
+            savedRecipes: nextSavedRecipes,
+            savedRecipesLoaded: false,
+        });
     },
     toggleLikedPost: (postId) => set((state) => ({
         likedPostIds: state.likedPostIds.includes(postId)
