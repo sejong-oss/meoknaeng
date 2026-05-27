@@ -6,7 +6,7 @@ from app.db import get_db
 from app.models.recipe import Recipe
 from app.models.schemas import ApiResponse, RecipeRequest, RecipeResponse, YouTubeVideosResponse
 from app.service.recipe import RecipeServiceError, recommend_recipe
-from app.service.youtube import YouTubeServiceError, search_recipe_videos
+from app.service.youtube import YouTubeServiceError, get_recipe_videos
 
 router = APIRouter(prefix="/recipe", tags=["recipe"])
 
@@ -34,7 +34,7 @@ async def get_recipe_videos_handler(
         raise HTTPException(status_code=404, detail="레시피를 찾을 수 없습니다.")
 
     try:
-        data = await search_recipe_videos(recipe.name)
+        data = await get_recipe_videos(recipe_id, recipe.name, db)
         return ApiResponse(success=True, data=data)
     except YouTubeServiceError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc

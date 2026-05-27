@@ -30,6 +30,7 @@ class Recipe(Base):
     ingredients: Mapped[list[RecipeIngredient]] = relationship(back_populates="recipe", cascade="all, delete-orphan")
     steps: Mapped[list[RecipeStep]] = relationship(back_populates="recipe", cascade="all, delete-orphan")
     saves: Mapped[list[RecipeSave]] = relationship(back_populates="recipe", cascade="all, delete-orphan")
+    videos: Mapped[list[RecipeVideo]] = relationship(back_populates="recipe", cascade="all, delete-orphan")
     posts: Mapped[list[Post]] = relationship(back_populates="source_recipe")
 
 
@@ -65,3 +66,15 @@ class RecipeSave(Base):
 
     user: Mapped[User] = relationship(back_populates="recipe_saves")
     recipe: Mapped[Recipe] = relationship(back_populates="saves")
+
+
+class RecipeVideo(Base):
+    __tablename__ = "recipe_video"
+
+    recipe_id: Mapped[str] = mapped_column(String(36), ForeignKey("recipe.recipe_id"), primary_key=True)
+    video_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    thumbnail_url: Mapped[str] = mapped_column(Text, nullable=False)
+    video_url: Mapped[str] = mapped_column(Text, nullable=False)
+
+    recipe: Mapped[Recipe] = relationship(back_populates="videos")

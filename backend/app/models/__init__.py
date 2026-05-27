@@ -1,5 +1,5 @@
 from app.models.user import User, UserIngredient
-from app.models.recipe import Recipe, RecipeIngredient, RecipeStep, RecipeSave
+from app.models.recipe import Recipe, RecipeIngredient, RecipeStep, RecipeSave, RecipeVideo
 from app.models.post import Post, Comment, PostLike
 
 __all__ = [
@@ -9,6 +9,7 @@ __all__ = [
     "RecipeIngredient",
     "RecipeStep",
     "RecipeSave",
+    "RecipeVideo",
     "Post",
     "Comment",
     "PostLike",
