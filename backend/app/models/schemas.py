@@ -24,6 +24,17 @@ class Difficulty(str, Enum):
     HARD = "어려움"
 
 
+class YouTubeVideoItem(BaseModel):
+    video_id: str = Field(..., description="YouTube 영상 ID")
+    title: str = Field(..., description="영상 제목")
+    thumbnail_url: str = Field(..., description="썸네일 이미지 URL")
+    video_url: str = Field(..., description="YouTube 영상 링크")
+
+
+class YouTubeVideosResponse(BaseModel):
+    videos: list[YouTubeVideoItem] = Field(..., description="관련 YouTube 영상 목록")
+
+
 class RecipeIngredient(BaseModel):
     name: str = Field(..., description="재료 이름")
     amount: str | None = Field(None, description="분량 표기 (예: '200g', '1큰술'). 모르면 null")
@@ -43,6 +54,7 @@ class Recipe(BaseModel):
     servings: int = Field(..., ge=1, description="인분")
     ingredients: list[RecipeIngredient] = Field(..., description="재료 목록")
     steps: list[RecipeStep] = Field(..., description="조리 절차")
+    videos: list[YouTubeVideoItem] = Field(default_factory=list, description="관련 YouTube 영상 목록")
 
 
 class RecipeRequest(BaseModel):
