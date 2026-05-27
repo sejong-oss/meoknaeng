@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.post import Post
+from app.models.post import Post, PostLike
 from app.models.recipe import Recipe
 from app.models.schemas import PostCreateRequest, PostUpdateRequest
 
@@ -71,7 +71,34 @@ async def delete_post(post_id: str, user_id: str, db: AsyncSession) -> None:
     if post.author_id != user_id:
         raise PostError(403, "권한이 없습니다.")
 
+    await db.execute(delete(PostLike).where(PostLike.post_id == post_id))
     await db.delete(post)
+    await db.commit()
+
+
+async def like_post(post_id: str, user_id: str, db: AsyncSession) -> None:
+    post = await db.get(Post, post_id)
+    if not post:
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
+
+    existing_like = await db.get(PostLike, {"user_id": user_id, "post_id": post_id})
+    if existing_like:
+        raise PostError(409, "이미 좋아요한 게시글입니다.")
+
+    db.add(PostLike(user_id=user_id, post_id=post_id, liked_at=_utc_now()))
+    await db.commit()
+
+
+async def unlike_post(post_id: str, user_id: str, db: AsyncSession) -> None:
+    post = await db.get(Post, post_id)
+    if not post:
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
+
+    post_like = await db.get(PostLike, {"user_id": user_id, "post_id": post_id})
+    if not post_like:
+        raise PostError(404, "좋아요한 게시글을 찾을 수 없습니다.")
+
+    await db.delete(post_like)
     await db.commit()
 
 

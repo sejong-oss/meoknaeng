@@ -61,3 +61,19 @@ class SavedRecipeItem(UsersBaseModel):
 
 class SavedRecipesResponse(UsersBaseModel):
     recipes: list[SavedRecipeItem] = Field(..., description="저장한 레시피 목록")
+
+
+class LikedPostItem(UsersBaseModel):
+    post_id: str = Field(..., alias="postId", description="게시글 ID")
+    title: str = Field(..., description="게시글 제목")
+    description: str | None = Field(None, description="게시글 설명")
+    cook_time: int | None = Field(None, alias="cookTime", description="조리 시간")
+    category: str | None = Field(None, description="카테고리")
+    difficulty: str | None = Field(None, description="난이도")
+    author_nickname: str = Field(..., alias="authorNickname", description="작성자 닉네임")
+    created_at: datetime = Field(..., alias="createdAt", description="게시글 작성 일시")
+    liked_at: datetime = Field(..., alias="likedAt", description="좋아요 누른 일시")
+
+
+class LikedPostsResponse(UsersBaseModel):
+    posts: list[LikedPostItem] = Field(..., description="좋아요한 게시글 목록")

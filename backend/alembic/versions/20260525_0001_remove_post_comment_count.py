@@ -18,7 +18,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.drop_column("post", "comment_count")
+    bind = op.get_bind()
+    column_names = {column["name"] for column in sa.inspect(bind).get_columns("post")}
+    if "comment_count" in column_names:
+        op.drop_column("post", "comment_count")
 
 
 def downgrade() -> None:

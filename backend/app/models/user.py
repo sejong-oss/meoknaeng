@@ -11,7 +11,7 @@ from app.db import Base
 
 if TYPE_CHECKING:
     from app.models.recipe import RecipeSave
-    from app.models.post import Comment, Post
+    from app.models.post import Comment, Post, PostLike
 
 
 class User(Base):
@@ -27,6 +27,7 @@ class User(Base):
     recipe_saves: Mapped[list[RecipeSave]] = relationship(back_populates="user", cascade="all, delete-orphan")
     posts: Mapped[list[Post]] = relationship(back_populates="author")
     comments: Mapped[list[Comment]] = relationship(back_populates="author")
+    post_likes: Mapped[list[PostLike]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class UserIngredient(Base):
