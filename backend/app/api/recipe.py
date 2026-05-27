@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,9 +20,20 @@ async def recommend_recipe_handler(
 ) -> ApiResponse[RecipeResponse]:
     try:
         data = await recommend_recipe(payload, db)
-        return ApiResponse(success=True, data=data)
     except RecipeServiceError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+    # 레시피 이름이 확정된 후 YouTube 영상 3개 동시 검색
+    video_results = await asyncio.gather(
+        *[get_recipe_videos(r.recipe_id, r.name, db) for r in data.recipes],
+        return_exceptions=True,
+    )
+
+    for recipe, result in zip(data.recipes, video_results):
+        if isinstance(result, YouTubeVideosResponse):
+            recipe.videos = result.videos
+
+    return ApiResponse(success=True, data=data)
 
 
 @router.get("/{recipe_id}/videos", response_model=ApiResponse[YouTubeVideosResponse])
