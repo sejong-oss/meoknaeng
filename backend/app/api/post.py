@@ -5,6 +5,10 @@ from app.api.deps import get_current_user_id
 from app.db import get_db
 from app.models.schemas import (
     ApiResponse,
+    CommentCreateRequest,
+    CommentListResponse,
+    CommentResponse,
+    CommentUpdateRequest,
     PostCreateRequest,
     PostDetailResponse,
     PostListItem,
@@ -18,12 +22,16 @@ from app.models.schemas import (
 )
 from app.service.post import (
     PostError,
+    create_comment,
     create_post,
+    delete_comment,
     delete_post,
+    get_comments,
     get_post_detail,
     get_post_list,
     like_post,
     unlike_post,
+    update_comment,
     update_post,
 )
 
@@ -106,6 +114,17 @@ def _to_detail(post) -> PostDetailResponse:
     )
 
 
+def _to_comment_response(comment) -> CommentResponse:
+    return CommentResponse(
+        comment_id=comment.comment_id,
+        post_id=comment.post_id,
+        author_id=comment.author_id,
+        author_nickname=comment.author.nickname,
+        content=comment.content,
+        created_at=comment.created_at.isoformat(),
+    )
+
+
 @router.get("", response_model=ApiResponse[PostListResponse])
 async def get_post_list_handler(
     page: int = Query(1, ge=1),
@@ -135,6 +154,73 @@ async def get_post_detail_handler(
     try:
         post = await get_post_detail(post_id, db)
         return ApiResponse(success=True, data=_to_detail(post))
+    except PostError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+@router.get("/{post_id}/comments", response_model=ApiResponse[CommentListResponse])
+async def get_comments_handler(
+    post_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[CommentListResponse]:
+    try:
+        comments = await get_comments(post_id, db)
+        return ApiResponse(
+            success=True,
+            data=CommentListResponse(
+                comments=[_to_comment_response(comment) for comment in comments]
+            ),
+        )
+    except PostError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+@router.post(
+    "/{post_id}/comments",
+    response_model=ApiResponse[CommentResponse],
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_comment_handler(
+    post_id: str,
+    payload: CommentCreateRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[CommentResponse]:
+    try:
+        comment = await create_comment(post_id, user_id, payload, db)
+        return ApiResponse(success=True, data=_to_comment_response(comment))
+    except PostError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+@router.patch(
+    "/{post_id}/comments/{comment_id}",
+    response_model=ApiResponse[CommentResponse],
+)
+async def update_comment_handler(
+    post_id: str,
+    comment_id: str,
+    payload: CommentUpdateRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[CommentResponse]:
+    try:
+        comment = await update_comment(post_id, comment_id, user_id, payload, db)
+        return ApiResponse(success=True, data=_to_comment_response(comment))
+    except PostError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+@router.delete("/{post_id}/comments/{comment_id}", response_model=ApiResponse[None])
+async def delete_comment_handler(
+    post_id: str,
+    comment_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[None]:
+    try:
+        await delete_comment(post_id, comment_id, user_id, db)
+        return ApiResponse(success=True, data=None)
     except PostError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
 
