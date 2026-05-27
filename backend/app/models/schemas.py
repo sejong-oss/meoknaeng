@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -47,7 +47,7 @@ class Recipe(BaseModel):
 
 class RecipeRequest(BaseModel):
     ingredients: list[str] = Field(..., min_length=1, description="보유한 재료 목록")
-    query: str = Field(..., min_length=1, description="사용자가 원하는 레시피 요구사항")
+    query: Optional[str] = Field(None, description="사용자가 원하는 레시피 요구사항 (없으면 재료 기반으로만 추천)")
 
 
 class RecipeResponse(BaseModel):

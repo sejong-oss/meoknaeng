@@ -23,7 +23,7 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession) -> RecipeRe
         raw = await recipe_chain.ainvoke(
             {
                 "ingredients": ", ".join(payload.ingredients),
-                "query": payload.query,
+                "query": payload.query or "특별한 요구사항 없음. 보유 재료로 만들 수 있는 최선의 레시피를 추천해주세요.",
             }
         )
     except Exception as exc:
