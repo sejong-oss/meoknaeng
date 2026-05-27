@@ -9,6 +9,8 @@ from app.api.deps import get_current_user_id
 from app.api.users_schemas import (
     LikedPostItem,
     LikedPostsResponse,
+    MyPostItem,
+    MyPostsResponse,
     SavedRecipeItem,
     SavedRecipesResponse,
     UserIngredientItem,
@@ -21,7 +23,11 @@ from app.db import get_db
 from app.models.recipe import Recipe, RecipeSave
 from app.models.schemas import ApiResponse
 from app.models.user import User, UserIngredient
-from app.service.users import delete_user_account, get_liked_posts as get_liked_posts_service
+from app.service.users import (
+    delete_user_account,
+    get_liked_posts as get_liked_posts_service,
+    get_my_posts as get_my_posts_service,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -206,6 +212,36 @@ async def get_my_saved_recipes(
         success=True,
         data=SavedRecipesResponse(recipes=recipes),
     )
+
+
+@router.get(
+    "/me/posts",
+    response_model=ApiResponse[MyPostsResponse],
+    summary="내가 쓴 글 조회",
+)
+async def get_my_posts(
+    user_id: str = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[MyPostsResponse]:
+    await _get_current_user(user_id, db)
+
+    rows = await get_my_posts_service(user_id, db)
+    posts = [
+        MyPostItem(
+            post_id=post.post_id,
+            title=post.title,
+            description=post.description,
+            cook_time=post.cook_time,
+            category=post.category,
+            difficulty=post.difficulty,
+            created_at=post.created_at,
+            updated_at=post.updated_at,
+            source_recipe_id=post.source_recipe_id,
+        )
+        for post in rows
+    ]
+
+    return ApiResponse(success=True, data=MyPostsResponse(posts=posts))
 
 
 @router.get(
