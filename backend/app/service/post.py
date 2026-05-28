@@ -4,9 +4,14 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.post import Post, PostLike
+from app.models.post import Comment, Post, PostLike
 from app.models.recipe import Recipe
-from app.models.schemas import PostCreateRequest, PostUpdateRequest
+from app.models.schemas import (
+    CommentCreateRequest,
+    CommentUpdateRequest,
+    PostCreateRequest,
+    PostUpdateRequest,
+)
 
 
 class PostError(Exception):
@@ -100,6 +105,92 @@ async def unlike_post(post_id: str, user_id: str, db: AsyncSession) -> None:
 
     await db.delete(post_like)
     await db.commit()
+
+
+async def get_comments(post_id: str, db: AsyncSession) -> list[Comment]:
+    post = await db.get(Post, post_id)
+    if not post:
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
+
+    result = await db.execute(
+        select(Comment)
+        .where(Comment.post_id == post_id)
+        .options(selectinload(Comment.author))
+        .order_by(Comment.created_at.asc())
+    )
+    return list(result.scalars().all())
+
+
+async def create_comment(
+    post_id: str,
+    user_id: str,
+    payload: CommentCreateRequest,
+    db: AsyncSession,
+) -> Comment:
+    post = await db.get(Post, post_id)
+    if not post:
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
+
+    comment = Comment(
+        post_id=post_id,
+        author_id=user_id,
+        content=payload.content,
+        created_at=_utc_now(),
+    )
+    db.add(comment)
+    await db.commit()
+
+    return await get_comment(post_id, comment.comment_id, db)
+
+
+async def update_comment(
+    post_id: str,
+    comment_id: str,
+    user_id: str,
+    payload: CommentUpdateRequest,
+    db: AsyncSession,
+) -> Comment:
+    post = await db.get(Post, post_id)
+    if not post:
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
+
+    comment = await get_comment(post_id, comment_id, db)
+    if comment.author_id != user_id:
+        raise PostError(403, "권한이 없습니다.")
+
+    comment.content = payload.content
+    await db.commit()
+    return await get_comment(post_id, comment.comment_id, db)
+
+
+async def delete_comment(
+    post_id: str,
+    comment_id: str,
+    user_id: str,
+    db: AsyncSession,
+) -> None:
+    post = await db.get(Post, post_id)
+    if not post:
+        raise PostError(404, "게시글을 찾을 수 없습니다.")
+
+    comment = await get_comment(post_id, comment_id, db)
+    if comment.author_id != user_id:
+        raise PostError(403, "권한이 없습니다.")
+
+    await db.delete(comment)
+    await db.commit()
+
+
+async def get_comment(post_id: str, comment_id: str, db: AsyncSession) -> Comment:
+    result = await db.execute(
+        select(Comment)
+        .where(Comment.comment_id == comment_id, Comment.post_id == post_id)
+        .options(selectinload(Comment.author))
+    )
+    comment = result.scalar_one_or_none()
+    if not comment:
+        raise PostError(404, "댓글을 찾을 수 없습니다.")
+    return comment
 
 
 async def get_post_list(

@@ -171,3 +171,24 @@ class PostDetailResponse(BaseModel):
     created_at: str
     updated_at: str
     source_recipe: RecipeDetail | None
+
+
+class CommentCreateRequest(BaseModel):
+    content: str = Field(..., min_length=1)
+
+
+class CommentUpdateRequest(BaseModel):
+    content: str = Field(..., min_length=1)
+
+
+class CommentResponse(BaseModel):
+    comment_id: str
+    post_id: str
+    author_id: str
+    author_nickname: str
+    content: str
+    created_at: str
+
+
+class CommentListResponse(BaseModel):
+    comments: list[CommentResponse]
