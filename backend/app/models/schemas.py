@@ -163,10 +163,6 @@ class PostDetailResponse(BaseModel):
     title: str
     description: str | None
     tip: str | None
-    cook_time: int | None
-    category: str | None
-    difficulty: str | None
-    source_recipe_id: str | None
     created_at: str
     updated_at: str
     source_recipe: RecipeDetail | None
