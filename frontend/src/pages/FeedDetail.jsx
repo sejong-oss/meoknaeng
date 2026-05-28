@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
-import { formatRelativeTime } from "@/libs/utils.js";
+import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
 import { createComment, getPost, getPostComments } from "@/libs/api.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -146,8 +146,6 @@ const RelatedRecipeRow = ({ recipe, onClick }) => {
     );
 };
 
-const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
-const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 
 
 const postDetailToView = (post) => ({

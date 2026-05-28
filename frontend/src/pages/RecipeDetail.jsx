@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
+import { formatMinutes, formatServings } from "@/libs/utils.js";
 import { getRecipe } from "@/libs/api.js";
 import { addRecipeIngredientStatuses } from "@/libs/recipeIngredients.js";
 import { toast } from "@/libs/toast.js";
@@ -56,8 +57,6 @@ const ingredientStatusOrder = {
     optional: 2,
 };
 
-const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
-const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 
 const recipeToDetailView = (recipe, ownedIngredients) => ({
     id: recipe.recipe_id,

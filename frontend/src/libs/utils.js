@@ -25,6 +25,9 @@ export function computeSvgPaths(containerRef, stepRefs) {
     };
 }
 
+export const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
+export const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
+
 const rtf = new Intl.RelativeTimeFormat("ko", { numeric: "auto" });
 
 export const formatRelativeTime = (isoString) => {
