@@ -138,7 +138,7 @@ async def get_post_list(
         .limit(size)
     )
     rows = (await db.execute(stmt)).all()
-    return [(row.Post, row.like_count) for row in rows], total
+    return [(post, like_count) for post, like_count in rows], total
 
 
 async def get_post_detail(post_id: str, db: AsyncSession) -> Post:
