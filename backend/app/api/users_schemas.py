@@ -16,7 +16,7 @@ class UserProfileResponse(UsersBaseModel):
 
 class UserProfileUpdateRequest(UsersBaseModel):
     nickname: str | None = Field(
-        None, min_length=1, max_length=50, description="변경할 사용자 닉네임"
+        None, min_length=1, max_length=15, description="변경할 사용자 닉네임"
     )
 
 

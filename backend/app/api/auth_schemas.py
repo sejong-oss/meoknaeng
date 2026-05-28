@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-NICKNAME_MAX_LENGTH = 50
+NICKNAME_MAX_LENGTH = 15
 
 
 class AuthBaseModel(BaseModel):
