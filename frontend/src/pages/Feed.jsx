@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Search, Add, Filter, Restaurant, WarningAlt } from "@carbon/icons-react";
 import {
     Button,
@@ -24,7 +24,6 @@ import { SITE_NAME } from "@/libs/constants.js";
 
 export default function Feed() {
     const navigate = useNavigate();
-    const location = useLocation();
     const posts = useAppStore((state) => state.posts);
     const postsStatus = useAppStore((state) => state.postsStatus);
     const fetchPosts = useAppStore((state) => state.fetchPosts);
@@ -38,13 +37,7 @@ export default function Feed() {
     };
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
-    const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
-
-    useEffect(() => {
-        if (location.state?.openRecipeSelect) {
-            navigate(location.pathname, { replace: true, state: { ...location.state, openRecipeSelect: false } });
-        }
-    }, []);
+    const [recipeSelectOpen, setRecipeSelectOpen] = useState(false);
 
     const categoryParam = useMemo(
         () => activeFilters.find((f) => f.group === "category")?.value,
