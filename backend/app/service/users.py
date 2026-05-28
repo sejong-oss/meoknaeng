@@ -42,3 +42,12 @@ async def get_liked_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, da
         .order_by(PostLike.liked_at.desc())
     )
     return list(result.all())
+
+
+async def get_my_posts(user_id: str, db: AsyncSession) -> list[Post]:
+    result = await db.scalars(
+        select(Post)
+        .where(Post.author_id == user_id)
+        .order_by(Post.created_at.desc())
+    )
+    return list(result.all())
