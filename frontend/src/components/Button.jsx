@@ -1,10 +1,10 @@
 const variants = {
-    primary: "bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700",
-    ink: "bg-gray-900 text-white hover:bg-gray-700 active:bg-gray-800",
-    outline: "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
-    ghost: "bg-transparent text-gray-600 hover:bg-gray-100",
-    danger: "bg-red-500 text-white hover:bg-red-600",
-    "danger-outline": "bg-white text-red-600 border border-red-200 hover:bg-red-50",
+    primary: "bg-primary-500 text-white enabled:hover:bg-primary-600 active:bg-primary-700",
+    ink: "bg-gray-900 text-white enabled:hover:bg-gray-700 active:bg-gray-800",
+    outline: "bg-white text-gray-700 border border-gray-200 enabled:hover:bg-gray-50",
+    ghost: "bg-transparent text-gray-600 enabled:hover:bg-gray-100",
+    danger: "bg-red-500 text-white enabled:hover:bg-red-600",
+    "danger-outline": "bg-white text-red-600 border border-red-200 enabled:hover:bg-red-50",
 };
 
 const sizes = {
