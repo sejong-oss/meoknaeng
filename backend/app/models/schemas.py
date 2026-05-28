@@ -141,13 +141,12 @@ class RecipeSummary(BaseModel):
 class PostListItem(BaseModel):
     post_id: str
     title: str
-    description: str | None
     cook_time: int | None
     category: str | None
     difficulty: str | None
     author_nickname: str
+    like_count: int
     created_at: str
-    source_recipe: RecipeSummary | None
 
 
 class PostListResponse(BaseModel):

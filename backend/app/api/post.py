@@ -14,7 +14,6 @@ from app.models.schemas import (
     RecipeDetail,
     RecipeDetailIngredient,
     RecipeDetailStep,
-    RecipeSummary,
 )
 from app.service.post import (
     PostError,
@@ -46,28 +45,16 @@ def _to_response(post) -> PostResponse:
     )
 
 
-def _to_list_item(post) -> PostListItem:
-    recipe = None
-    if post.source_recipe:
-        r = post.source_recipe
-        recipe = RecipeSummary(
-            recipe_id=r.recipe_id,
-            name=r.name,
-            description=r.description,
-            cook_time=r.cook_time,
-            difficulty=r.difficulty,
-            servings=r.servings,
-        )
+def _to_list_item(post, like_count: int) -> PostListItem:
     return PostListItem(
         post_id=post.post_id,
         title=post.title,
-        description=post.description,
         cook_time=post.cook_time,
         category=post.category,
         difficulty=post.difficulty,
         author_nickname=post.author.nickname,
+        like_count=like_count,
         created_at=post.created_at.isoformat(),
-        source_recipe=recipe,
     )
 
 
@@ -115,11 +102,11 @@ async def get_post_list_handler(
     difficulty: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostListResponse]:
-    posts, total = await get_post_list(db, page, size, q, category, difficulty)
+    posts_with_counts, total = await get_post_list(db, page, size, q, category, difficulty)
     return ApiResponse(
         success=True,
         data=PostListResponse(
-            posts=[_to_list_item(p) for p in posts],
+            posts=[_to_list_item(p, c) for p, c in posts_with_counts],
             total=total,
             page=page,
             size=size,
