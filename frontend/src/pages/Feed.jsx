@@ -19,25 +19,43 @@ import {
 } from "@/components/index.js";
 import { FEED_FILTER_OPTIONS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import { getLikedPosts, getPosts, likePost, unlikePost } from "@/libs/api.js";
+import { formatMinutes } from "@/libs/utils.js";
 import { toast } from "@/libs/toast.js";
 import { SITE_NAME } from "@/libs/constants.js";
 
+const postToFeedItem = (post) => ({
+    id: post.post_id,
+    title: post.title,
+    time: formatMinutes(post.cook_time),
+    category: post.category,
+    difficulty: post.difficulty,
+    author: post.author_nickname,
+    likes: post.like_count ?? 0,
+});
+
 export default function Feed() {
     const navigate = useNavigate();
-    const posts = useAppStore((state) => state.posts);
-    const postsStatus = useAppStore((state) => state.postsStatus);
-    const fetchPosts = useAppStore((state) => state.fetchPosts);
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const likedPostIds = useAppStore((state) => state.likedPostIds);
-    const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
-    const handleLike = (id) => {
-        if (!user) { toast.info("로그인이 필요해요"); openLoginModal(); return; }
-        toggleLikedPost(id);
-    };
+    const [posts, setPosts] = useState([]);
+    const [postsStatus, setPostsStatus] = useState("idle");
+    const [retryKey, setRetryKey] = useState(0);
+    const [likedPostIds, setLikedPostIds] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
     const [recipeSelectOpen, setRecipeSelectOpen] = useState(false);
+    const handleLike = (id) => {
+        if (!user) { toast.info("로그인이 필요해요"); openLoginModal(); return; }
+        const isLiked = likedPostIds.includes(id);
+        setLikedPostIds((prev) => isLiked ? prev.filter((p) => p !== id) : [...prev, id]);
+        setPosts((prev) => prev.map((p) => p.id === id ? { ...p, likes: p.likes + (isLiked ? -1 : 1) } : p));
+        (isLiked ? unlikePost(id) : likePost(id)).catch((error) => {
+            if (error?.status === 409) return;
+            setLikedPostIds((prev) => isLiked ? [...prev, id] : prev.filter((p) => p !== id));
+            setPosts((prev) => prev.map((p) => p.id === id ? { ...p, likes: p.likes + (isLiked ? 1 : -1) } : p));
+        });
+    };
 
     const categoryParam = useMemo(
         () => activeFilters.find((f) => f.group === "category")?.value,
@@ -50,8 +68,27 @@ export default function Feed() {
     );
 
     useEffect(() => {
-        fetchPosts({ category: categoryParam, difficulty: difficultyParam });
-    }, [fetchPosts, categoryParam, difficultyParam]);
+        if (!user) return;
+        getLikedPosts()
+            .then((data) => setLikedPostIds((data?.posts ?? []).map((p) => p.postId)))
+            .catch(() => {});
+    }, [user]);
+
+    useEffect(() => {
+        let cancelled = false;
+        setPosts((prev) => { if (prev.length === 0) setPostsStatus("loading"); return prev; });
+        getPosts({ category: categoryParam, difficulty: difficultyParam })
+            .then((data) => {
+                if (cancelled) return;
+                setPosts((data?.posts ?? []).map(postToFeedItem));
+                setPostsStatus("success");
+            })
+            .catch(() => {
+                if (cancelled) return;
+                setPosts((prev) => { if (prev.length === 0) setPostsStatus("error"); return prev; });
+            });
+        return () => { cancelled = true; };
+    }, [categoryParam, difficultyParam, retryKey]);
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
@@ -195,7 +232,7 @@ export default function Feed() {
                         title="피드를 불러오지 못했어요"
                         description="잠시 후 다시 시도해주세요"
                         action="다시 불러오기"
-                        onAction={fetchPosts}
+                        onAction={() => setRetryKey((k) => k + 1)}
                     />
                 ) : filteredItems.length === 0 ? (
                     <EmptyState

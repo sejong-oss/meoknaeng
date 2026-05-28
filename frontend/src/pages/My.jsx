@@ -8,7 +8,7 @@ import {
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
-import { autocompleteIngredients } from "@/libs/api.js";
+import { autocompleteIngredients, getLikedPosts } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -94,7 +94,7 @@ export default function My() {
     const ingredients = useAppStore((state) => state.pantryIngredients);
     const myPosts = useAppStore((state) => state.myPosts);
     const likedPosts = useAppStore((state) => state.likedPosts);
-    const likedPostIds = useAppStore((state) => state.likedPostIds);
+    const [likedPostIds, setLikedPostIds] = useState([]);
     const savedRecipes = useAppStore((state) => state.savedRecipes);
     const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
@@ -116,6 +116,13 @@ export default function My() {
     useEffect(() => {
         fetchSavedRecipes();
     }, [fetchSavedRecipes, user]);
+
+    useEffect(() => {
+        if (!user) return;
+        getLikedPosts()
+            .then((data) => setLikedPostIds((data?.posts ?? []).map((p) => p.postId)))
+            .catch(() => {});
+    }, [user]);
 
     useEffect(() => {
         const el = ingredientsRef.current;

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
 import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
-import { createComment, getPost, getPostComments } from "@/libs/api.js";
+import { createComment, getLikedPosts, getPost, getPostComments, likePost, unlikePost } from "@/libs/api.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
@@ -158,6 +158,7 @@ const postDetailToView = (post) => ({
     category: post.source_recipe?.category,
     servings: formatServings(post.source_recipe?.servings),
     createdAt: formatRelativeTime(post.created_at),
+    likes: post.like_count ?? 0,
     author: {
         name: post.author_nickname,
     },
@@ -207,20 +208,32 @@ export default function FeedDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const stepsRef = useRef(null);
-    const likedPostIds = useAppStore((state) => state.likedPostIds);
-    const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
-    const posts = useAppStore((state) => state.posts);
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const [likedPostIds, setLikedPostIds] = useState([]);
     const handleLike = (id) => {
         if (!user) { toast.info("로그인이 필요해요"); openLoginModal(); return; }
-        toggleLikedPost(id);
+        const isLiked = likedPostIds.includes(id);
+        setLikedPostIds((prev) => isLiked ? prev.filter((p) => p !== id) : [...prev, id]);
+        setPost((prev) => prev ? { ...prev, likes: prev.likes + (isLiked ? -1 : 1) } : prev);
+        (isLiked ? unlikePost(id) : likePost(id)).catch((error) => {
+            if (error?.status === 409) return;
+            setLikedPostIds((prev) => isLiked ? [...prev, id] : prev.filter((p) => p !== id));
+            setPost((prev) => prev ? { ...prev, likes: prev.likes + (isLiked ? 1 : -1) } : prev);
+        });
     };
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
     const [status, setStatus] = useState("loading");
     const [commentInput, setCommentInput] = useState("");
     const [commentSubmitting, setCommentSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!user) return;
+        getLikedPosts()
+            .then((data) => setLikedPostIds((data?.posts ?? []).map((p) => p.postId)))
+            .catch(() => {});
+    }, [user]);
 
     useEffect(() => {
         if (!id) {
@@ -283,7 +296,7 @@ export default function FeedDetail() {
     }
 
     const liked = likedPostIds.includes(post.id);
-    const likeCount = posts.find((p) => p.id === post.id)?.likes ?? 0;
+    const likeCount = post.likes ?? 0;
     const handleCommentSubmit = async () => {
         if (!commentInput.trim() || commentSubmitting) return;
         setCommentSubmitting(true);
