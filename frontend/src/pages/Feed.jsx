@@ -46,9 +46,19 @@ export default function Feed() {
         }
     }, []);
 
+    const categoryParam = useMemo(
+        () => activeFilters.find((f) => f.group === "category")?.value,
+        [activeFilters]
+    );
+
+    const difficultyParam = useMemo(
+        () => activeFilters.find((f) => f.group === "difficulty")?.value,
+        [activeFilters]
+    );
+
     useEffect(() => {
-        fetchPosts();
-    }, [fetchPosts]);
+        fetchPosts({ category: categoryParam, difficulty: difficultyParam });
+    }, [fetchPosts, categoryParam, difficultyParam]);
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
@@ -72,11 +82,8 @@ export default function Feed() {
         return posts.filter((item) => {
             if (searchQuery.trim()) {
                 const q = searchQuery.toLowerCase();
-                if (
-                    !item.title.toLowerCase().includes(q) &&
-                    !item.author.toLowerCase().includes(q) &&
-                    !item.category?.toLowerCase().includes(q)
-                ) return false;
+                const searchable = [item.title, item.author, item.category].filter(Boolean).join(" ").toLowerCase();
+                if (!searchable.includes(q)) return false;
             }
             const catFilters = activeFilters.filter((f) => f.group === "category");
             const timeFilters = activeFilters.filter((f) => f.group === "time");

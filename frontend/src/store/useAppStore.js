@@ -119,7 +119,7 @@ export const useAppStore = create((set, get) => ({
             });
         }
     },
-    fetchPosts: async () => {
+    fetchPosts: async ({ q, category, difficulty } = {}) => {
         const { posts } = get();
 
         if (posts.length === 0) {
@@ -127,7 +127,7 @@ export const useAppStore = create((set, get) => ({
         }
 
         try {
-            const data = await getPostsRequest();
+            const data = await getPostsRequest({ q, category, difficulty });
             set({
                 posts: (data?.posts ?? []).map(postToFeedItem),
                 postsStatus: "success",
