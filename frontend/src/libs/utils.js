@@ -24,3 +24,24 @@ export function computeSvgPaths(containerRef, stepRefs) {
         edge2: { d: curve(s2.cx, s2.bottom, s3.cx, s3.top + INTO), x1: s2.cx, y1: s2.bottom, x2: s3.cx, y2: s3.top + INTO },
     };
 }
+
+const rtf = new Intl.RelativeTimeFormat("ko", { numeric: "auto" });
+
+export const formatRelativeTime = (isoString) => {
+    if (!isoString) return "";
+    const normalized = /Z|[+-]\d{2}:\d{2}$/.test(isoString) ? isoString : `${isoString}Z`;
+    const diffMs = new Date(normalized).getTime() - Date.now();
+    const diffSec = Math.round(diffMs / 1000);
+    const diffMin = Math.round(diffSec / 60);
+    const diffHour = Math.round(diffMin / 60);
+    const diffDay = Math.round(diffHour / 24);
+    const diffMonth = Math.round(diffDay / 30);
+    const diffYear = Math.round(diffDay / 365);
+
+    if (Math.abs(diffSec) < 60) return "방금 전";
+    if (Math.abs(diffMin) < 60) return rtf.format(diffMin, "minute");
+    if (Math.abs(diffHour) < 24) return rtf.format(diffHour, "hour");
+    if (Math.abs(diffDay) < 30) return rtf.format(diffDay, "day");
+    if (Math.abs(diffMonth) < 12) return rtf.format(diffMonth, "month");
+    return rtf.format(diffYear, "year");
+};

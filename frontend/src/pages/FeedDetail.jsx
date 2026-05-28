@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
+import { formatRelativeTime } from "@/libs/utils.js";
 import { createComment, getPost, getPostComments } from "@/libs/api.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -148,22 +149,6 @@ const RelatedRecipeRow = ({ recipe, onClick }) => {
 const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
 const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 
-const formatRelativeTime = (isoString) => {
-    if (!isoString) return "";
-    const normalized = /Z|[+-]\d{2}:\d{2}$/.test(isoString) ? isoString : `${isoString}Z`;
-    const diff = Date.now() - new Date(normalized).getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "방금 전";
-    if (minutes < 60) return `${minutes}분 전`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}시간 전`;
-    const days = Math.floor(hours / 24);
-    if (days === 1) return "어제";
-    if (days < 30) return `${days}일 전`;
-    const months = Math.floor(days / 30);
-    if (months < 12) return `${months}개월 전`;
-    return `${Math.floor(months / 12)}년 전`;
-};
 
 const postDetailToView = (post) => ({
     id: post.post_id,
