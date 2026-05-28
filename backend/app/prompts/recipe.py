@@ -10,6 +10,7 @@ RECIPE_SYSTEM_PROMPT = """당신은 한국어 요리 추천 도우미입니다.
     {{
       "name": "요리 이름 (한국어)",
       "summary": "요리 한줄 설명 (40자 내외)",
+      "category": "한식",
       "cook_time_minutes": 30,
       "difficulty": "쉬움",
       "servings": 2,
@@ -27,6 +28,7 @@ RECIPE_SYSTEM_PROMPT = """당신은 한국어 요리 추천 도우미입니다.
 
 필수 규칙:
 - recipes 배열 길이는 반드시 {recipe_count}.
+- category는 정확히 "한식", "중식", "일식", "양식" 중 하나의 문자열.
 - difficulty는 정확히 "쉬움", "중간", "어려움" 중 하나의 문자열.
 - cook_time_minutes는 양의 정수(분 단위, 1 이상).
 - servings는 양의 정수(1 이상).

@@ -24,6 +24,13 @@ class Difficulty(str, Enum):
     HARD = "어려움"
 
 
+class Category(str, Enum):
+    KOREAN = "한식"
+    CHINESE = "중식"
+    JAPANESE = "일식"
+    WESTERN = "양식"
+
+
 class YouTubeVideoItem(BaseModel):
     video_id: str = Field(..., description="YouTube 영상 ID")
     title: str = Field(..., description="영상 제목")
@@ -49,6 +56,7 @@ class Recipe(BaseModel):
     recipe_id: str | None = Field(None, description="저장된 레시피 ID")
     name: str = Field(..., description="요리 이름")
     summary: str = Field(..., description="요리 한줄 설명")
+    category: Category = Field(..., description="카테고리")
     cook_time_minutes: int = Field(..., ge=1, description="조리 시간(분)")
     difficulty: Difficulty = Field(..., description="난이도")
     servings: int = Field(..., ge=1, description="인분")
