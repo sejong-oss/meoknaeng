@@ -200,7 +200,7 @@ async def get_post_list(
     q: str | None,
     category: str | None,
     difficulty: str | None,
-) -> tuple[list[Post], int]:
+) -> tuple[list[tuple[Post, int]], int]:
     filters = []
     if q:
         filters.append(Post.title.ilike(f"%{q}%"))
@@ -213,16 +213,23 @@ async def get_post_list(
         select(func.count(Post.post_id)).filter(*filters)
     )).scalar_one()
 
+    like_count_subq = (
+        select(func.count(PostLike.post_id))
+        .where(PostLike.post_id == Post.post_id)
+        .correlate(Post)
+        .scalar_subquery()
+    )
+
     stmt = (
-        select(Post)
+        select(Post, like_count_subq.label("like_count"))
         .filter(*filters)
-        .options(selectinload(Post.author), selectinload(Post.source_recipe))
+        .options(selectinload(Post.author))
         .order_by(Post.created_at.desc())
         .offset((page - 1) * size)
         .limit(size)
     )
-    posts = (await db.execute(stmt)).scalars().all()
-    return list(posts), total
+    rows = (await db.execute(stmt)).all()
+    return [(post, like_count) for post, like_count in rows], total
 
 
 async def get_post_detail(post_id: str, db: AsyncSession) -> Post:
