@@ -62,7 +62,6 @@ class Recipe(BaseModel):
     servings: int = Field(..., ge=1, description="인분")
     ingredients: list[RecipeIngredient] = Field(..., description="재료 목록")
     steps: list[RecipeStep] = Field(..., description="조리 절차")
-    videos: list[YouTubeVideoItem] = Field(default_factory=list, description="관련 YouTube 영상 목록")
 
 
 class RecipeRequest(BaseModel):
@@ -94,6 +93,7 @@ class RecipeDetail(BaseModel):
     servings: int | None
     ingredients: list[RecipeDetailIngredient]
     steps: list[RecipeDetailStep]
+    videos: list[YouTubeVideoItem] = Field(default_factory=list)
 
 
 class PostCreateRequest(BaseModel):
