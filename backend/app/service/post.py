@@ -160,7 +160,7 @@ async def update_comment(
 
     comment.content = payload.content
     await db.commit()
-    return comment
+    return await get_comment(post_id, comment.comment_id, db)
 
 
 async def delete_comment(
