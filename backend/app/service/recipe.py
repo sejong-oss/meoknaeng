@@ -45,6 +45,7 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession) -> RecipeRe
             recipe_id=str(uuid.uuid4()),
             name=recipe.name,
             description=recipe.summary,
+            category=recipe.category.value,
             cook_time=recipe.cook_time_minutes,
             difficulty=recipe.difficulty.value,
             servings=recipe.servings,
