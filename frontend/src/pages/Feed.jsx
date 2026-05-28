@@ -19,6 +19,7 @@ import {
 } from "@/components/index.js";
 import { FEED_FILTER_OPTIONS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import { toast } from "@/libs/toast.js";
 import { SITE_NAME } from "@/libs/constants.js";
 
 export default function Feed() {
@@ -27,6 +28,14 @@ export default function Feed() {
     const posts = useAppStore((state) => state.posts);
     const postsStatus = useAppStore((state) => state.postsStatus);
     const fetchPosts = useAppStore((state) => state.fetchPosts);
+    const user = useAppStore((state) => state.user);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const likedPostIds = useAppStore((state) => state.likedPostIds);
+    const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
+    const handleLike = (id) => {
+        if (!user) { toast.info("로그인이 필요해요"); openLoginModal(); return; }
+        toggleLikedPost(id);
+    };
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
     const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
@@ -206,6 +215,9 @@ export default function Feed() {
                                 category={item.category}
                                 difficulty={item.difficulty}
                                 author={item.author}
+                                likes={item.likes}
+                                defaultLiked={likedPostIds.includes(item.id)}
+                                onLike={() => handleLike(item.id)}
                                 onClick={() => navigate(`/feed/${item.id}`)}
                             />
                         ))}

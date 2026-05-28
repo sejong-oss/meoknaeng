@@ -5,13 +5,16 @@ import {
 } from "@/data/mockData.js";
 import {
     getMyProfile,
+    getLikedPosts as getLikedPostsRequest,
     getPosts as getPostsRequest,
     getSavedRecipes as getSavedRecipesRequest,
+    likePost as likePostRequest,
     login as loginRequest,
     logout as logoutRequest,
     recommendRecipes as recommendRecipesRequest,
     saveRecipe as saveRecipeRequest,
     signup as signupRequest,
+    unlikePost as unlikePostRequest,
     unsaveRecipe as unsaveRecipeRequest,
     updateMyProfile,
 } from "@/libs/api.js";
@@ -23,10 +26,11 @@ const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filt
 const postToFeedItem = (post) => ({
     id: post.post_id,
     title: post.title,
-    time: formatMinutes(post.source_recipe?.cook_time),
-    category: post.source_recipe?.category,
-    difficulty: post.source_recipe?.difficulty,
+    time: formatMinutes(post.cook_time),
+    category: post.category,
+    difficulty: post.difficulty,
     author: post.author_nickname,
+    likes: post.like_count ?? 0,
 });
 const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
 const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
@@ -83,7 +87,7 @@ export const useAppStore = create((set, get) => ({
     savedRecipeIds: [],
     savedRecipes: [],
     savedRecipesLoaded: false,
-    likedPostIds: MY_LIKED_POSTS.map((post) => post.id),
+    likedPostIds: [],
 
     openLoginModal: () => set({ loginModalOpen: true }),
     setLoginModalOpen: (loginModalOpen) => set({ loginModalOpen }),
@@ -91,12 +95,16 @@ export const useAppStore = create((set, get) => ({
         set({ authStatus: "checking" });
 
         try {
-            const user = await getMyProfile();
+            const [user, likedData] = await Promise.all([
+                getMyProfile(),
+                getLikedPostsRequest(),
+            ]);
             const nextUser = authUserToView(user);
 
             set({
                 user: nextUser,
                 pantryIngredients: nextUser.ingredients,
+                likedPostIds: (likedData?.posts ?? []).map((p) => p.postId),
                 authStatus: "success",
                 authInitialized: true,
             });
@@ -105,6 +113,7 @@ export const useAppStore = create((set, get) => ({
                 user: null,
                 pantryIngredients: [],
                 savedRecipeIds: [],
+                likedPostIds: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -154,10 +163,12 @@ export const useAppStore = create((set, get) => ({
         try {
             const user = await loginRequest(credentials);
             const nextUser = authUserToView(user);
+            const likedData = await getLikedPostsRequest();
 
             set({
                 user: nextUser,
                 pantryIngredients: nextUser.ingredients,
+                likedPostIds: (likedData?.posts ?? []).map((p) => p.postId),
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -202,6 +213,7 @@ export const useAppStore = create((set, get) => ({
                 savedRecipeIds: [],
                 savedRecipes: [],
                 savedRecipesLoaded: false,
+                likedPostIds: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -297,9 +309,31 @@ export const useAppStore = create((set, get) => ({
             savedRecipesLoaded: false,
         });
     },
-    toggleLikedPost: (postId) => set((state) => ({
-        likedPostIds: state.likedPostIds.includes(postId)
-            ? state.likedPostIds.filter((id) => id !== postId)
-            : [...state.likedPostIds, postId],
-    })),
+    toggleLikedPost: async (postId) => {
+        const { likedPostIds, posts } = get();
+
+        const isLiked = likedPostIds.includes(postId);
+        const delta = isLiked ? -1 : 1;
+
+        set({
+            likedPostIds: isLiked
+                ? likedPostIds.filter((id) => id !== postId)
+                : [...likedPostIds, postId],
+            posts: posts.map((p) => p.id === postId ? { ...p, likes: p.likes + delta } : p),
+        });
+
+        try {
+            if (isLiked) {
+                await unlikePostRequest(postId);
+            } else {
+                await likePostRequest(postId);
+            }
+        } catch (error) {
+            if (error.status === 409) return;
+            set({
+                likedPostIds,
+                posts: posts.map((p) => p.id === postId ? { ...p, likes: p.likes - delta } : p),
+            });
+        }
+    },
 }));

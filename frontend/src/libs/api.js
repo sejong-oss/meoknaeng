@@ -131,3 +131,15 @@ export function getPosts({ page = 1, size = 100, q, category, difficulty } = {})
 export function getPost(postId) {
     return request(`/posts/${postId}`);
 }
+
+export function getLikedPosts() {
+    return request("/users/me/liked-posts");
+}
+
+export function likePost(postId) {
+    return request(`/posts/${postId}/likes`, { method: "POST" });
+}
+
+export function unlikePost(postId) {
+    return request(`/posts/${postId}/likes`, { method: "DELETE" });
+}

@@ -231,6 +231,13 @@ export default function FeedDetail() {
     const stepsRef = useRef(null);
     const likedPostIds = useAppStore((state) => state.likedPostIds);
     const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
+    const posts = useAppStore((state) => state.posts);
+    const user = useAppStore((state) => state.user);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const handleLike = (id) => {
+        if (!user) { toast.info("로그인이 필요해요"); openLoginModal(); return; }
+        toggleLikedPost(id);
+    };
     const [post, setPost] = useState(null);
     const [status, setStatus] = useState("loading");
 
@@ -280,7 +287,7 @@ export default function FeedDetail() {
     }
 
     const liked = likedPostIds.includes(post.id);
-    const likeCount = liked ? 1 : 0;
+    const likeCount = posts.find((p) => p.id === post.id)?.likes ?? 0;
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
@@ -328,7 +335,7 @@ export default function FeedDetail() {
                                 recipe={post}
                                 likeCount={likeCount}
                                 liked={liked}
-                                onLike={() => toggleLikedPost(post.id)}
+                                onLike={() => handleLike(post.id)}
                             />
 
                             <p className="max-w-3xl text-sm leading-relaxed text-gray-600 md:text-base">
