@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
-import { getPost } from "@/libs/api.js";
+import { createComment, getPost, getPostComments } from "@/libs/api.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
@@ -96,10 +96,6 @@ const CommentRow = ({ comment }) => (
                 <span className="text-xs font-medium text-gray-500">{comment.time}</span>
             </div>
             <p className="mt-1 text-sm leading-relaxed text-gray-700">{comment.body}</p>
-            <button type="button" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-primary-600">
-                <Favorite size={12} />
-                {comment.likes}
-            </button>
         </div>
     </div>
 );
@@ -187,7 +183,6 @@ const postDetailToView = (post) => ({
         .slice()
         .sort((a, b) => a.order - b.order)
         .map((step) => step.description),
-    comments: [],
     related: [],
 });
 
@@ -239,7 +234,10 @@ export default function FeedDetail() {
         toggleLikedPost(id);
     };
     const [post, setPost] = useState(null);
+    const [comments, setComments] = useState([]);
     const [status, setStatus] = useState("loading");
+    const [commentInput, setCommentInput] = useState("");
+    const [commentSubmitting, setCommentSubmitting] = useState(false);
 
     useEffect(() => {
         if (!id) {
@@ -251,18 +249,33 @@ export default function FeedDetail() {
         let ignore = false;
 
         setPost(null);
+        setComments([]);
         setStatus("loading");
 
         getPost(id)
-            .then((data) => {
+            .then((postData) => {
                 if (ignore) return;
-                setPost(postDetailToView(data));
+                setPost(postDetailToView(postData));
                 setStatus("success");
             })
             .catch(() => {
                 if (ignore) return;
                 setStatus("error");
             });
+
+        getPostComments(id)
+            .then((commentsData) => {
+                if (ignore) return;
+                setComments(
+                    (commentsData?.comments ?? []).map((c) => ({
+                        id: c.comment_id,
+                        author: c.author_nickname,
+                        body: c.content,
+                        time: formatRelativeTime(c.created_at),
+                    }))
+                );
+            })
+            .catch(() => {});
 
         return () => { ignore = true; };
     }, [id, navigate]);
@@ -288,6 +301,24 @@ export default function FeedDetail() {
 
     const liked = likedPostIds.includes(post.id);
     const likeCount = posts.find((p) => p.id === post.id)?.likes ?? 0;
+    const handleCommentSubmit = async () => {
+        if (!commentInput.trim() || commentSubmitting) return;
+        setCommentSubmitting(true);
+        try {
+            const data = await createComment(post.id, commentInput.trim());
+            setComments((prev) => [{
+                id: data.comment_id,
+                author: data.author_nickname,
+                body: data.content,
+                time: formatRelativeTime(data.created_at),
+            }, ...prev]);
+            setCommentInput("");
+        } catch {
+            toast.error("댓글 등록에 실패했어요");
+        } finally {
+            setCommentSubmitting(false);
+        }
+    };
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
@@ -407,21 +438,34 @@ export default function FeedDetail() {
                             <div className="flex items-center gap-2">
                                 <h2 className="text-xl font-extrabold tracking-tight text-gray-900 md:text-2xl">댓글</h2>
                                 <Chip variant="neutral" className="px-2.5 py-1">
-                                    {post.comments.length}
+                                    {comments.length}
                                 </Chip>
                             </div>
                             <div className="flex items-center gap-2 rounded-card border border-gray-200 bg-white p-2.5 md:gap-3 md:p-3">
                                 <div className="hidden md:block">
                                     <Avatar name="나" size="md" color="neutral" />
                                 </div>
-                                <Input className="flex-1 [&>div]:h-11" placeholder="댓글을 남겨보세요" />
-                                <Button variant="primary" size="md" className="h-11 px-3 md:px-4">
+                                <Input
+                                    className="flex-1 [&>div]:h-11"
+                                    placeholder={user ? "댓글을 남겨보세요" : "댓글을 작성하려면 로그인하세요"}
+                                    value={commentInput}
+                                    onChange={(e) => setCommentInput(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") handleCommentSubmit(); }}
+                                    disabled={!user}
+                                />
+                                <Button
+                                    variant="primary"
+                                    size="md"
+                                    className="h-11 px-3 md:px-4"
+                                    onClick={handleCommentSubmit}
+                                    disabled={!user || commentSubmitting}
+                                >
                                     <Send size={14} />
                                     <span className="hidden sm:inline">등록</span>
                                 </Button>
                             </div>
                             <div className="flex flex-col">
-                                {post.comments.map((comment) => (
+                                {comments.map((comment) => (
                                     <CommentRow key={comment.id} comment={comment} />
                                 ))}
                             </div>

@@ -132,6 +132,17 @@ export function getPost(postId) {
     return request(`/posts/${postId}`);
 }
 
+export function getPostComments(postId) {
+    return request(`/posts/${postId}/comments`);
+}
+
+export function createComment(postId, content) {
+    return request(`/posts/${postId}/comments`, {
+        method: "POST",
+        data: { content },
+    });
+}
+
 export function getLikedPosts() {
     return request("/users/me/liked-posts");
 }
