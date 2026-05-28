@@ -18,7 +18,6 @@ import {
     Time,
     UserFollow,
     UserMultiple,
-    WarningAlt,
 } from "@carbon/icons-react";
 import {
     Avatar,
@@ -26,7 +25,6 @@ import {
     Button,
     Card,
     Chip,
-    EmptyState,
     Input,
     PhotoPlaceholder,
     RecipeSectionTitle,
@@ -252,7 +250,8 @@ export default function FeedDetail() {
                 setStatus("success");
             })
             .catch(() => {
-                setStatus("error");
+                toast.error("공유 레시피를 불러오지 못했어요");
+                navigate("/feed", { replace: true });
             });
 
         getPostComments(id)
@@ -271,22 +270,6 @@ export default function FeedDetail() {
 
     if (status === "loading") return <FeedDetailSkeleton />;
 
-    if (status === "error" || !post) {
-        return (
-            <>
-                <title>{`피드 | ${SITE_NAME}`}</title>
-                <div className="flex min-h-[calc(100dvh-10rem)] items-center justify-center">
-                    <EmptyState
-                        icon={<WarningAlt size={28} />}
-                        title="공유 레시피를 불러오지 못했어요"
-                        description="잠시 후 다시 시도해주세요"
-                        action="피드로 돌아가기"
-                        onAction={() => navigate("/feed")}
-                    />
-                </div>
-            </>
-        );
-    }
 
     const liked = likedPostIds.includes(post.id);
     const likeCount = post.likes ?? 0;
