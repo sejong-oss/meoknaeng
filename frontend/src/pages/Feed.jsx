@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Add, Filter, Restaurant, WarningAlt } from "@carbon/icons-react";
 import {
@@ -38,9 +38,8 @@ export default function Feed() {
     const navigate = useNavigate();
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const [posts, setPosts] = useState([]);
-    const [postsStatus, setPostsStatus] = useState("idle");
-    const [retryKey, setRetryKey] = useState(0);
+    const [posts, setPosts] = useState(null);
+    const [error, setError] = useState(false);
     const [likedPostIds, setLikedPostIds] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
@@ -74,17 +73,17 @@ export default function Feed() {
             .catch(() => {});
     }, [user]);
 
-    useEffect(() => {
-        setPosts((prev) => { if (prev.length === 0) setPostsStatus("loading"); return prev; });
+    const fetchPosts = useCallback(() => {
+        setPosts(null);
+        setError(false);
         getPosts({ category: categoryParam, difficulty: difficultyParam })
-            .then((data) => {
-                setPosts((data?.posts ?? []).map(postToFeedItem));
-                setPostsStatus("success");
-            })
-            .catch(() => {
-                setPosts((prev) => { if (prev.length === 0) setPostsStatus("error"); return prev; });
-            });
-    }, [categoryParam, difficultyParam, retryKey]);
+            .then((data) => setPosts((data?.posts ?? []).map(postToFeedItem)))
+            .catch(() => setError(true));
+    }, [categoryParam, difficultyParam]);
+
+    useEffect(() => {
+        fetchPosts();
+    }, [fetchPosts]);
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
@@ -105,7 +104,7 @@ export default function Feed() {
     };
 
     const filteredItems = useMemo(() => {
-        return posts.filter((item) => {
+        return (posts ?? []).filter((item) => {
             if (searchQuery.trim()) {
                 const q = searchQuery.toLowerCase();
                 const searchable = [item.title, item.author, item.category].filter(Boolean).join(" ").toLowerCase();
@@ -216,19 +215,19 @@ export default function Feed() {
                     </div>
                 )}
 
-                {postsStatus === "loading" ? (
+                {posts === null ? (
                     <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <Skeleton key={i} className="h-52 rounded-card" />
                         ))}
                     </div>
-                ) : postsStatus === "error" ? (
+                ) : error ? (
                     <EmptyState
                         icon={<WarningAlt size={28} />}
                         title="피드를 불러오지 못했어요"
                         description="잠시 후 다시 시도해주세요"
                         action="다시 불러오기"
-                        onAction={() => setRetryKey((k) => k + 1)}
+                        onAction={fetchPosts}
                     />
                 ) : filteredItems.length === 0 ? (
                     <EmptyState
