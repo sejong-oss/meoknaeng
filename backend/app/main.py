@@ -45,6 +45,17 @@ def _error_response(status_code: int, message: str) -> JSONResponse:
     )
 
 
+def _validation_error_message(exc: RequestValidationError) -> str:
+    errors = exc.errors()
+    if not errors:
+        return "입력값이 올바르지 않습니다."
+
+    message = errors[0].get("msg")
+    if isinstance(message, str):
+        return message.removeprefix("Value error, ")
+    return "입력값이 올바르지 않습니다."
+
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(
     request: Request,
@@ -61,7 +72,7 @@ async def request_validation_exception_handler(
 ) -> JSONResponse:
     return _error_response(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        message="입력값이 올바르지 않습니다.",
+        message=_validation_error_message(exc),
     )
 
 
