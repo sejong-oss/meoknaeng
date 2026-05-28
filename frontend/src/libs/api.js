@@ -121,3 +121,13 @@ export function unsaveRecipe(recipeId) {
 export function getSavedRecipes() {
     return request("/users/me/saved-recipes");
 }
+
+export function getPosts({ page = 1, size = 100, q, category, difficulty } = {}) {
+    return request("/posts", {
+        params: { page, size, q, category, difficulty },
+    });
+}
+
+export function getPost(postId) {
+    return request(`/posts/${postId}`);
+}

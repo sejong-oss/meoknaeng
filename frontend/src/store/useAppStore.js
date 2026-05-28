@@ -5,6 +5,7 @@ import {
 } from "@/data/mockData.js";
 import {
     getMyProfile,
+    getPosts as getPostsRequest,
     getSavedRecipes as getSavedRecipesRequest,
     login as loginRequest,
     logout as logoutRequest,
@@ -18,6 +19,15 @@ import {
 import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
+
+const postToFeedItem = (post) => ({
+    id: post.post_id,
+    title: post.title,
+    time: formatMinutes(post.source_recipe?.cook_time),
+    category: post.source_recipe?.category,
+    difficulty: post.source_recipe?.difficulty,
+    author: post.author_nickname,
+});
 const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
 const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 const DEFAULT_RECIPE_QUERY = "냉장고 재료로 만들 수 있는 레시피를 추천해줘.";
@@ -68,6 +78,8 @@ export const useAppStore = create((set, get) => ({
     recommendationStartedAt: null,
     myPosts: MY_POSTS,
     likedPosts: MY_LIKED_POSTS,
+    posts: [],
+    postsStatus: "idle",
     savedRecipeIds: [],
     savedRecipes: [],
     savedRecipesLoaded: false,
@@ -96,6 +108,25 @@ export const useAppStore = create((set, get) => ({
                 authStatus: "idle",
                 authInitialized: true,
             });
+        }
+    },
+    fetchPosts: async () => {
+        const { posts } = get();
+
+        if (posts.length === 0) {
+            set({ postsStatus: "loading" });
+        }
+
+        try {
+            const data = await getPostsRequest();
+            set({
+                posts: (data?.posts ?? []).map(postToFeedItem),
+                postsStatus: "success",
+            });
+        } catch {
+            if (get().posts.length === 0) {
+                set({ postsStatus: "error" });
+            }
         }
     },
     fetchSavedRecipes: async () => {

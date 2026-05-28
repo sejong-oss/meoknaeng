@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, Add, Filter, Restaurant } from "@carbon/icons-react";
+import { Search, Add, Filter, Restaurant, WarningAlt } from "@carbon/icons-react";
 import {
     Button,
     Chip,
@@ -9,6 +9,7 @@ import {
     FloatingActionButton,
     Input,
     RecipeSelectModal,
+    Skeleton,
     DropdownMenu,
     DropdownMenuTrigger,
     DropdownMenuContent,
@@ -16,15 +17,29 @@ import {
     DropdownMenuSeparator,
     DropdownMenuItem,
 } from "@/components/index.js";
-import { FEED_FILTER_OPTIONS, FEED_ITEMS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
+import { FEED_FILTER_OPTIONS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
+import { useAppStore } from "@/store/useAppStore.js";
 import { SITE_NAME } from "@/libs/constants.js";
 
 export default function Feed() {
     const navigate = useNavigate();
     const location = useLocation();
+    const posts = useAppStore((state) => state.posts);
+    const postsStatus = useAppStore((state) => state.postsStatus);
+    const fetchPosts = useAppStore((state) => state.fetchPosts);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
     const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
+
+    useEffect(() => {
+        if (location.state?.openRecipeSelect) {
+            navigate(location.pathname, { replace: true, state: { ...location.state, openRecipeSelect: false } });
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchPosts();
+    }, [fetchPosts]);
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
@@ -45,13 +60,13 @@ export default function Feed() {
     };
 
     const filteredItems = useMemo(() => {
-        return FEED_ITEMS.filter((item) => {
+        return posts.filter((item) => {
             if (searchQuery.trim()) {
                 const q = searchQuery.toLowerCase();
                 if (
                     !item.title.toLowerCase().includes(q) &&
                     !item.author.toLowerCase().includes(q) &&
-                    !item.category.toLowerCase().includes(q)
+                    !item.category?.toLowerCase().includes(q)
                 ) return false;
             }
             const catFilters = activeFilters.filter((f) => f.group === "category");
@@ -62,7 +77,7 @@ export default function Feed() {
             if (diffFilters.length && !diffFilters.some((f) => f.value === item.difficulty)) return false;
             return true;
         });
-    }, [searchQuery, activeFilters]);
+    }, [posts, searchQuery, activeFilters]);
 
     return (
         <>
@@ -159,7 +174,21 @@ export default function Feed() {
                     </div>
                 )}
 
-                {filteredItems.length === 0 ? (
+                {postsStatus === "loading" ? (
+                    <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton key={i} className="h-52 rounded-card" />
+                        ))}
+                    </div>
+                ) : postsStatus === "error" ? (
+                    <EmptyState
+                        icon={<WarningAlt size={28} />}
+                        title="피드를 불러오지 못했어요"
+                        description="잠시 후 다시 시도해주세요"
+                        action="다시 불러오기"
+                        onAction={fetchPosts}
+                    />
+                ) : filteredItems.length === 0 ? (
                     <EmptyState
                         icon={<Restaurant size={28} />}
                         title="검색 결과가 없어요"
@@ -177,7 +206,6 @@ export default function Feed() {
                                 category={item.category}
                                 difficulty={item.difficulty}
                                 author={item.author}
-                                likes={item.likes}
                                 onClick={() => navigate(`/feed/${item.id}`)}
                             />
                         ))}
