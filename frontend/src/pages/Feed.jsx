@@ -42,6 +42,7 @@ export default function Feed() {
     const [error, setError] = useState(false);
     const [likedPostIds, setLikedPostIds] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
     const [recipeSelectOpen, setRecipeSelectOpen] = useState(false);
     const handleLike = (id) => {
@@ -67,6 +68,11 @@ export default function Feed() {
     );
 
     useEffect(() => {
+        const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    useEffect(() => {
         if (!user) return;
         getLikedPosts()
             .then((data) => setLikedPostIds((data?.posts ?? []).map((p) => p.postId)))
@@ -76,10 +82,10 @@ export default function Feed() {
     const fetchPosts = useCallback(() => {
         setPosts(null);
         setError(false);
-        getPosts({ category: categoryParam, difficulty: difficultyParam })
+        getPosts({ category: categoryParam, difficulty: difficultyParam, q: debouncedQuery || undefined })
             .then((data) => setPosts((data?.posts ?? []).map(postToFeedItem)))
             .catch(() => setError(true));
-    }, [categoryParam, difficultyParam]);
+    }, [categoryParam, difficultyParam, debouncedQuery]);
 
     useEffect(() => {
         fetchPosts();
@@ -105,20 +111,11 @@ export default function Feed() {
 
     const filteredItems = useMemo(() => {
         return (posts ?? []).filter((item) => {
-            if (searchQuery.trim()) {
-                const q = searchQuery.toLowerCase();
-                const searchable = [item.title, item.author, item.category].filter(Boolean).join(" ").toLowerCase();
-                if (!searchable.includes(q)) return false;
-            }
-            const catFilters = activeFilters.filter((f) => f.group === "category");
             const timeFilters = activeFilters.filter((f) => f.group === "time");
-            const diffFilters = activeFilters.filter((f) => f.group === "difficulty");
-            if (catFilters.length && !catFilters.some((f) => f.value === item.category)) return false;
             if (timeFilters.length && !timeFilters.some((f) => parseInt(item.time) <= parseInt(f.value))) return false;
-            if (diffFilters.length && !diffFilters.some((f) => f.value === item.difficulty)) return false;
             return true;
         });
-    }, [posts, searchQuery, activeFilters]);
+    }, [posts, activeFilters]);
 
     return (
         <>
