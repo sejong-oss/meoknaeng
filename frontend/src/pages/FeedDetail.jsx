@@ -242,26 +242,21 @@ export default function FeedDetail() {
             return;
         }
 
-        let ignore = false;
-
         setPost(null);
         setComments([]);
         setStatus("loading");
 
         getPost(id)
             .then((postData) => {
-                if (ignore) return;
                 setPost(postDetailToView(postData));
                 setStatus("success");
             })
             .catch(() => {
-                if (ignore) return;
                 setStatus("error");
             });
 
         getPostComments(id)
             .then((commentsData) => {
-                if (ignore) return;
                 setComments(
                     (commentsData?.comments ?? []).map((c) => ({
                         id: c.comment_id,
@@ -272,8 +267,6 @@ export default function FeedDetail() {
                 );
             })
             .catch(() => {});
-
-        return () => { ignore = true; };
     }, [id, navigate]);
 
     if (status === "loading") return <FeedDetailSkeleton />;

@@ -75,19 +75,15 @@ export default function Feed() {
     }, [user]);
 
     useEffect(() => {
-        let cancelled = false;
         setPosts((prev) => { if (prev.length === 0) setPostsStatus("loading"); return prev; });
         getPosts({ category: categoryParam, difficulty: difficultyParam })
             .then((data) => {
-                if (cancelled) return;
                 setPosts((data?.posts ?? []).map(postToFeedItem));
                 setPostsStatus("success");
             })
             .catch(() => {
-                if (cancelled) return;
                 setPosts((prev) => { if (prev.length === 0) setPostsStatus("error"); return prev; });
             });
-        return () => { cancelled = true; };
     }, [categoryParam, difficultyParam, retryKey]);
 
     const toggleFilter = (group, label, value) => {
