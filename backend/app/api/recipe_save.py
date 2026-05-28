@@ -3,8 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user_id
 from app.db import get_db
-from app.models.schemas import ApiResponse, RecipeDetail, RecipeDetailIngredient, RecipeDetailStep
+from app.models.schemas import ApiResponse, RecipeDetail, RecipeDetailIngredient, RecipeDetailStep, YouTubeVideoItem
 from app.service.recipe_save import RecipeSaveError, get_recipe, save_recipe, unsave_recipe
+from app.service.youtube import YouTubeServiceError, get_recipe_videos
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 
@@ -45,6 +46,20 @@ async def get_recipe_handler(
     except RecipeSaveError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
 
+    try:
+        videos_response = await get_recipe_videos(recipe_id, recipe.name, db)
+        videos = [
+            YouTubeVideoItem(
+                video_id=v.video_id,
+                title=v.title,
+                thumbnail_url=v.thumbnail_url,
+                video_url=v.video_url,
+            )
+            for v in videos_response.videos
+        ]
+    except YouTubeServiceError:
+        videos = []
+
     return ApiResponse(
         success=True,
         data=RecipeDetail(
@@ -63,5 +78,6 @@ async def get_recipe_handler(
                 [RecipeDetailStep(order=s.step_order, description=s.description) for s in recipe.steps],
                 key=lambda s: s.order,
             ),
+            videos=videos,
         ),
     )

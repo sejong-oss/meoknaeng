@@ -51,7 +51,11 @@ async def unsave_recipe(user_id: str, recipe_id: str, db: AsyncSession) -> None:
 async def get_recipe(recipe_id: str, db: AsyncSession) -> Recipe:
     result = await db.execute(
         select(Recipe)
-        .options(selectinload(Recipe.ingredients), selectinload(Recipe.steps))
+        .options(
+            selectinload(Recipe.ingredients),
+            selectinload(Recipe.steps),
+            selectinload(Recipe.videos),
+        )
         .where(Recipe.recipe_id == recipe_id)
     )
     recipe = result.scalar_one_or_none()
