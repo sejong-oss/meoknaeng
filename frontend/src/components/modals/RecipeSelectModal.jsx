@@ -4,9 +4,6 @@ import { Chip } from "@/components/Chip.jsx";
 import { Modal, ModalContent, ModalFooter } from "@/components/Modal.jsx";
 import { Select, SelectItem } from "@/components/Select.jsx";
 
-const getIngredientSummary = (ingredients = []) =>
-    ingredients.slice(0, 3).map((ingredient) => ingredient.name).join(", ");
-
 export function RecipeSelectModal({
     open,
     onOpenChange,
@@ -16,7 +13,6 @@ export function RecipeSelectModal({
 }) {
     const [selectedRecipeId, setSelectedRecipeId] = useState("");
     const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId);
-    const selectedIngredientSummary = selectedRecipe ? getIngredientSummary(selectedRecipe.ingredients) : "";
     const isEmpty = !loading && recipes.length === 0;
 
     const handleOpenChange = (nextOpen) => {
@@ -62,9 +58,7 @@ export function RecipeSelectModal({
                     </Select>
                     {selectedRecipe ? (
                         <div className="flex min-h-8 flex-wrap gap-1.5">
-                            {selectedIngredientSummary && (
-                                <Chip variant="neutral">{selectedIngredientSummary}</Chip>
-                            )}
+                            <Chip variant="neutral">{selectedRecipe.category}</Chip>
                             <Chip variant="neutral">{selectedRecipe.time}</Chip>
                             <Chip variant="neutral">{selectedRecipe.difficulty}</Chip>
                         </div>

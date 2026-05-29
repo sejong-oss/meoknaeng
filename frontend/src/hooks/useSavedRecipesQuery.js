@@ -6,6 +6,7 @@ import { formatMinutes, formatServings } from "@/libs/utils.js";
 const savedRecipeToView = (recipe) => ({
     id: recipe.recipeId,
     title: recipe.name,
+    category: recipe.category,
     time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
