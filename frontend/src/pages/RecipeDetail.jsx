@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
+import { formatMinutes, formatServings } from "@/libs/utils.js";
 import { getRecipe } from "@/libs/api.js";
 import { addRecipeIngredientStatuses } from "@/libs/recipeIngredients.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -56,14 +58,12 @@ const ingredientStatusOrder = {
     optional: 2,
 };
 
-const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
-const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 
 const recipeToDetailView = (recipe, ownedIngredients) => ({
-    id: recipe.recipe_id,
+    id: recipe.recipeId,
     title: recipe.name,
     description: recipe.description,
-    time: formatMinutes(recipe.cook_time),
+    time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     ingredients: addRecipeIngredientStatuses(recipe.ingredients, ownedIngredients),
@@ -174,11 +174,11 @@ export default function RecipeDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const stepsRef = useRef(null);
-    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
-    const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
-    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
+    const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
+    const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
     const recommendationIngredients = useAppStore((state) => state.recommendationIngredients);
     const [recipe, setRecipe] = useState(null);
     const [status, setStatus] = useState("loading");
@@ -190,7 +190,7 @@ export default function RecipeDetail() {
             return;
         }
         try {
-            await toggleSavedRecipe(recipe.id);
+            await toggleSavedRecipe.mutateAsync({ recipeId: recipe.id, isSaved: savedRecipeIds.includes(recipe.id) });
             toast.success(savedRecipeIds.includes(recipe.id) ? "저장한 레시피에서 삭제했어요" : "저장한 레시피에 추가했어요");
         } catch {
             toast.error(savedRecipeIds.includes(recipe.id) ? "저장 취소에 실패했어요" : "레시피를 저장하지 못했어요");
@@ -198,12 +198,7 @@ export default function RecipeDetail() {
     };
 
     useEffect(() => {
-        fetchSavedRecipes();
-    }, [fetchSavedRecipes, user]);
-
-    useEffect(() => {
         if (!id) {
-            setRecipe(null);
             toast.error("레시피를 찾을 수 없어요");
             navigate("/recipes", { replace: true });
             return;
@@ -211,8 +206,12 @@ export default function RecipeDetail() {
 
         let ignore = false;
 
-        setRecipe(null);
-        setStatus("loading");
+        Promise.resolve().then(() => {
+            if (ignore) return;
+
+            setRecipe(null);
+            setStatus("loading");
+        });
 
         getRecipe(id)
             .then((data) => {

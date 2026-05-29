@@ -1,9 +1,17 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FEED_DETAIL_FALLBACKS, FEED_DETAIL_RECIPES } from "@/data/mockData.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import {
+    useCreateCommentMutation,
+    useDeleteCommentMutation,
+    useLikedPostsQuery,
+    usePostCommentsQuery,
+    usePostQuery,
+    useTogglePostLikeMutation,
+    useUpdateCommentMutation,
+} from "@/hooks/usePostQueries.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -11,11 +19,11 @@ import {
     Favorite,
     FavoriteFilled,
     Growth,
+    OverflowMenuVertical,
     Restaurant,
     Send,
     Share,
     Time,
-    UserFollow,
     UserMultiple,
 } from "@carbon/icons-react";
 import {
@@ -24,11 +32,17 @@ import {
     Button,
     Card,
     Chip,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuDangerItem,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
     Input,
     PhotoPlaceholder,
     RecipeSectionTitle,
     RecipeStat,
     RecipeStepRow,
+    Skeleton,
 } from "@/components/index.js";
 
 const StatChip = ({ Icon, children }) => (
@@ -53,10 +67,6 @@ const PostHeader = ({ recipe, likeCount, liked, onLike }) => (
                 <p className="truncate text-sm font-extrabold text-gray-900 md:text-base">@{recipe.author.name}</p>
                 <p className="truncate text-xs font-medium text-gray-500">{recipe.createdAt}</p>
             </div>
-            <Button variant="outline" size="sm">
-                <UserFollow size={14} />
-                팔로우
-            </Button>
         </div>
 
         <div className="flex items-center justify-between gap-3">
@@ -84,19 +94,79 @@ const PostHeader = ({ recipe, likeCount, liked, onLike }) => (
     </div>
 );
 
-const CommentRow = ({ comment }) => (
+const CommentRow = ({
+    comment,
+    canManage,
+    deleting,
+    editing,
+    editValue,
+    updating,
+    onEdit,
+    onEditChange,
+    onEditCancel,
+    onEditSubmit,
+    onDelete,
+}) => (
     <div className="flex gap-3 border-b border-gray-200 py-4 last:border-b-0">
         <Avatar name={comment.author} size="md" color="neutral" />
         <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-sm font-bold text-gray-900">@{comment.author}</span>
-                <span className="text-xs font-medium text-gray-500">{comment.time}</span>
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-sm font-bold text-gray-900">@{comment.author}</span>
+                    <span className="text-xs font-medium text-gray-500">{comment.time}</span>
+                </div>
+                {canManage && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="!size-8 shrink-0 !p-0 text-gray-700 hover:text-gray-900 [&>svg]:!size-4"
+                                aria-label="댓글 메뉴"
+                                title="댓글 메뉴"
+                            >
+                                <OverflowMenuVertical />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={onEdit} disabled={editing}>
+                                수정
+                            </DropdownMenuItem>
+                            <DropdownMenuDangerItem
+                                onSelect={onDelete}
+                                disabled={deleting}
+                            >
+                                삭제
+                            </DropdownMenuDangerItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
-            <p className="mt-1 text-sm leading-relaxed text-gray-700">{comment.body}</p>
-            <button type="button" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-primary-600">
-                <Favorite size={12} />
-                {comment.likes}
-            </button>
+            {editing ? (
+                <div className="mt-2 flex flex-col gap-2">
+                    <Input
+                        className="[&>div]:h-10"
+                        value={editValue}
+                        onChange={(event) => onEditChange(event.target.value)}
+                        onKeyDown={(event) => {
+                            if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+
+                            event.preventDefault();
+                            onEditSubmit();
+                        }}
+                    />
+                    <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={onEditCancel} disabled={updating}>
+                            취소
+                        </Button>
+                        <Button variant="primary" size="sm" onClick={onEditSubmit} disabled={updating || !editValue.trim()}>
+                            저장
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <p className="mt-1 text-sm leading-relaxed text-gray-700">{comment.body}</p>
+            )}
         </div>
     </div>
 );
@@ -146,73 +216,149 @@ const RelatedRecipeRow = ({ recipe, onClick }) => {
     );
 };
 
-function buildRecipe(id) {
-    const fallback = FEED_DETAIL_FALLBACKS[id];
-
-    if (!fallback) {
-        return null;
-    }
-
-    return {
-        ...FEED_DETAIL_RECIPES["1"],
-        id,
-        title: fallback.title,
-        time: fallback.time ?? "20분",
-        difficulty: fallback.difficulty ?? "쉬움",
-        category: fallback.category,
-        author: {
-            name: fallback.author,
-        },
-        likes: fallback.likes,
-        bookmarks: Math.max(18, Math.round(fallback.likes * 0.28)),
-        description: `${fallback.title}를 냉장고 재료로 간단하게 만들 수 있고, 복잡한 준비 없이 바로 따라 하기 좋은 레시피입니다`,
-        note: "간은 마지막에 한 번 더 확인하고 취향에 맞게 조절해주세요",
-    };
+function FeedDetailSkeleton() {
+    return (
+        <>
+            <title>{`피드 | ${SITE_NAME}`}</title>
+            <div className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0 md:gap-7 md:py-2">
+                <Skeleton className="hidden h-4 w-40 rounded-full md:block" />
+                <div className="relative md:hidden">
+                    <Skeleton className="h-60 w-full rounded-none" />
+                </div>
+                <div className="relative z-10 -mt-8 grid gap-7 md:mt-0 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
+                    <article className="flex flex-col gap-6 rounded-t-[2rem] bg-white px-5 pb-6 pt-8 shadow-xl md:rounded-none md:px-0 md:pb-0 md:pt-0 md:shadow-none">
+                        <div className="flex flex-col gap-4">
+                            <Skeleton className="h-9 w-3/4 md:h-12 md:w-1/2" />
+                            <div className="flex flex-col gap-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-5/6" />
+                            </div>
+                            <Skeleton className="hidden h-[23.75rem] w-full rounded-card md:flex" />
+                        </div>
+                    </article>
+                    <aside className="hidden md:sticky md:top-6 md:flex md:flex-col md:gap-4">
+                        <Card className="gap-5 p-5 shadow-md">
+                            <Skeleton className="h-5 w-20" />
+                            <Skeleton className="h-16 w-full rounded-btn" />
+                            <Skeleton className="h-40 w-full rounded-card" />
+                            <Skeleton className="h-12 w-full rounded-btn" />
+                        </Card>
+                    </aside>
+                </div>
+            </div>
+        </>
+    );
 }
 
 export default function FeedDetail() {
-    const { id = "1" } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const stepsRef = useRef(null);
-    const likedPosts = useAppStore((state) => state.likedPosts);
-    const likedPostIds = useAppStore((state) => state.likedPostIds);
-    const toggleLikedPost = useAppStore((state) => state.toggleLikedPost);
-    const recipe = useMemo(() => FEED_DETAIL_RECIPES[id] ?? buildRecipe(id), [id]);
+    const user = useAppStore((state) => state.user);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const postQuery = usePostQuery(id);
+    const commentsQuery = usePostCommentsQuery(id);
+    const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const togglePostLike = useTogglePostLikeMutation(user?.id);
+    const createCommentMutation = useCreateCommentMutation();
+    const updateCommentMutation = useUpdateCommentMutation();
+    const deleteCommentMutation = useDeleteCommentMutation();
+    const post = postQuery.data;
+    const comments = commentsQuery.data ?? [];
+    const likedPostIds = (likedPostsQuery.data ?? []).map((item) => item.id);
+    const commentSubmittingRef = useRef(false);
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editingCommentInput, setEditingCommentInput] = useState("");
+    const handleLike = (id) => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+
+        const isLiked = likedPostIds.includes(id);
+        togglePostLike.mutate({ postId: id, isLiked });
+    };
+    const [commentInput, setCommentInput] = useState("");
 
     useEffect(() => {
-        if (recipe) return;
+        if (id && !postQuery.isError) return;
 
-        toast.error("공유 레시피를 찾을 수 없어요");
-        navigate("/feed", { replace: true });
-    }, [navigate, recipe]);
-
-    if (!recipe) {
-        return (
-            <title>{`피드 | ${SITE_NAME}`}</title>
+        toast.error(!id || postQuery.error?.status === 404
+            ? "공유 레시피를 찾을 수 없어요"
+            : "공유 레시피를 불러오지 못했어요"
         );
-    }
+        navigate("/feed", { replace: true });
+    }, [id, navigate, postQuery.error, postQuery.isError]);
 
-    const initiallyLiked = likedPosts.some((post) => post.id === recipe.id);
-    const liked = likedPostIds.includes(recipe.id);
-    const likeCount = recipe.likes + (liked ? 1 : 0) - (initiallyLiked ? 1 : 0);
+    if (postQuery.isLoading || !post) return <FeedDetailSkeleton />;
+
+    const liked = likedPostIds.includes(post.id);
+    const likeCount = post.likes ?? 0;
+    const handleCommentSubmit = async () => {
+        if (!commentInput.trim() || createCommentMutation.isPending || commentSubmittingRef.current) return;
+
+        commentSubmittingRef.current = true;
+        try {
+            await createCommentMutation.mutateAsync({ postId: post.id, content: commentInput.trim() });
+            setCommentInput("");
+            toast.success("댓글을 등록했어요");
+        } catch {
+            toast.error("댓글 등록에 실패했어요");
+        } finally {
+            commentSubmittingRef.current = false;
+        }
+    };
+    const handleCommentDelete = async (commentId) => {
+        try {
+            await deleteCommentMutation.mutateAsync({ postId: post.id, commentId });
+            toast.success("댓글을 삭제했어요");
+        } catch {
+            toast.error("댓글 삭제에 실패했어요");
+        }
+    };
+    const startCommentEdit = (comment) => {
+        setEditingCommentId(comment.id);
+        setEditingCommentInput(comment.body);
+    };
+    const cancelCommentEdit = () => {
+        setEditingCommentId(null);
+        setEditingCommentInput("");
+    };
+    const handleCommentUpdate = async () => {
+        const content = editingCommentInput.trim();
+        if (!editingCommentId || !content || updateCommentMutation.isPending) return;
+
+        try {
+            await updateCommentMutation.mutateAsync({
+                postId: post.id,
+                commentId: editingCommentId,
+                content,
+            });
+            cancelCommentEdit();
+            toast.success("댓글을 수정했어요");
+        } catch {
+            toast.error("댓글 수정에 실패했어요");
+        }
+    };
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
     return (
         <>
-            <title>{`${recipe.title} | ${SITE_NAME}`}</title>
+            <title>{`${post.title} | ${SITE_NAME}`}</title>
             <div className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0 md:gap-7 md:py-2">
                 <Breadcrumb
                     className="hidden md:flex"
                     items={[
                         { label: "피드", onClick: () => navigate("/feed") },
-                        { label: recipe.title },
+                        { label: post.title },
                     ]}
                 />
 
                 <div className="relative md:hidden">
-                    <PhotoPlaceholder label={recipe.title} tone="deep" className="h-60 w-full" />
+                    <PhotoPlaceholder label={post.title} tone="deep" className="h-60 w-full" />
                     <Button
                         variant="outline"
                         size="sm"
@@ -230,100 +376,137 @@ export default function FeedDetail() {
                             <div className="flex flex-col items-start gap-2">
                                 <Chip variant="neutral">
                                     <Restaurant size={12} />
-                                    {recipe.category}
+                                    {post.category}
                                 </Chip>
 
                                 <h1 className="text-3xl font-extrabold leading-[1.2] tracking-tight text-gray-900 md:text-4xl lg:text-5xl">
-                                    {recipe.title}
+                                    {post.title}
                                 </h1>
                             </div>
 
                             <PostHeader
-                                recipe={recipe}
+                                recipe={post}
                                 likeCount={likeCount}
                                 liked={liked}
-                                onLike={() => toggleLikedPost(recipe.id)}
+                                onLike={() => handleLike(post.id)}
                             />
 
                             <p className="max-w-3xl text-sm leading-relaxed text-gray-600 md:text-base">
-                                {recipe.description}
+                                {post.description}
                             </p>
 
                             <div className="flex flex-wrap gap-1.5 md:hidden">
-                                <StatChip Icon={Time}>{recipe.time}</StatChip>
-                                <StatChip Icon={Growth}>{recipe.difficulty}</StatChip>
-                                <StatChip Icon={UserMultiple}>{recipe.servings}</StatChip>
+                                <StatChip Icon={Time}>{post.time}</StatChip>
+                                <StatChip Icon={Growth}>{post.difficulty}</StatChip>
+                                <StatChip Icon={UserMultiple}>{post.servings}</StatChip>
                             </div>
 
-                            <PhotoPlaceholder label={`${recipe.title} / main`} tone="deep" className="hidden h-[23.75rem] w-full rounded-card md:flex" />
+                            <PhotoPlaceholder label={`${post.title} / main`} tone="deep" className="hidden h-[23.75rem] w-full rounded-card md:flex" />
                         </section>
 
-                        <section className="flex flex-col gap-3 md:hidden">
-                            <RecipeSectionTitle meta={`${recipe.ingredients.length}개`}>재료</RecipeSectionTitle>
-                            <div className="flex flex-wrap gap-1.5">
-                                {recipe.ingredients.map((ingredient) => (
-                                    <Chip key={ingredient.name} variant="brand-soft">
-                                        {ingredient.name} {ingredient.amount}
-                                    </Chip>
-                                ))}
-                            </div>
-                        </section>
+                        {post.ingredients.length > 0 && (
+                            <section className="flex flex-col gap-3 md:hidden">
+                                <RecipeSectionTitle meta={`${post.ingredients.length}개`}>재료</RecipeSectionTitle>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {post.ingredients.map((ingredient) => (
+                                        <Chip key={ingredient.name} variant="brand-soft">
+                                            {ingredient.name} {ingredient.amount}
+                                        </Chip>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
-                        <Card variant="muted" className="gap-2 p-4">
-                            <p className="text-xs font-bold uppercase tracking-wide text-gray-500">작성자 팁</p>
-                            <p className="text-sm leading-relaxed text-gray-700 md:text-base">{recipe.note}</p>
-                        </Card>
+                        {post.note && (
+                            <Card variant="muted" className="gap-2 p-4">
+                                <p className="text-xs font-bold uppercase tracking-wide text-gray-500">작성자 팁</p>
+                                <p className="text-sm leading-relaxed text-gray-700 md:text-base">{post.note}</p>
+                            </Card>
+                        )}
 
                         <section ref={stepsRef} className="scroll-mt-6 flex flex-col gap-2 md:scroll-mt-24">
-                            <RecipeSectionTitle meta={`${recipe.steps.length} STEPS`}>조리법</RecipeSectionTitle>
+                            <RecipeSectionTitle meta={`${post.steps.length} STEPS`}>조리법</RecipeSectionTitle>
                             <div className="flex flex-col">
-                                {recipe.steps.map((step, index) => (
+                                {post.steps.map((step, index) => (
                                     <RecipeStepRow key={step} index={index + 1}>{step}</RecipeStepRow>
                                 ))}
                             </div>
                         </section>
 
-                        <section className="flex flex-col gap-3">
-                            <RecipeSectionTitle
-                                action={(
-                                    <Button variant="ghost" size="sm" onClick={() => navigate("/feed")}>
-                                        더보기
-                                    </Button>
-                                )}
-                            >
-                                같은 작성자의 다른 레시피
-                            </RecipeSectionTitle>
-                            <div className="flex flex-col overflow-hidden rounded-card border border-gray-200 bg-white">
-                                {recipe.related.map((item) => (
-                                    <RelatedRecipeRow
-                                        key={item.id}
-                                        recipe={item}
-                                        onClick={() => navigate(`/feed/${item.id}`)}
-                                    />
-                                ))}
-                            </div>
-                        </section>
+                        {post.related.length > 0 && (
+                            <section className="flex flex-col gap-3">
+                                <RecipeSectionTitle
+                                    action={(
+                                        <Button variant="ghost" size="sm" onClick={() => navigate("/feed")}>
+                                            더보기
+                                        </Button>
+                                    )}
+                                >
+                                    같은 작성자의 다른 레시피
+                                </RecipeSectionTitle>
+                                <div className="flex flex-col overflow-hidden rounded-card border border-gray-200 bg-white">
+                                    {post.related.map((item) => (
+                                        <RelatedRecipeRow
+                                            key={item.id}
+                                            recipe={item}
+                                            onClick={() => navigate(`/feed/${item.id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         <section className="flex flex-col gap-4">
                             <div className="flex items-center gap-2">
                                 <h2 className="text-xl font-extrabold tracking-tight text-gray-900 md:text-2xl">댓글</h2>
                                 <Chip variant="neutral" className="px-2.5 py-1">
-                                    {recipe.comments.length}
+                                    {comments.length}
                                 </Chip>
                             </div>
                             <div className="flex items-center gap-2 rounded-card border border-gray-200 bg-white p-2.5 md:gap-3 md:p-3">
                                 <div className="hidden md:block">
-                                    <Avatar name="나" size="md" color="neutral" />
+                                    <Avatar name={user?.name ?? "나"} size="md" color="neutral" />
                                 </div>
-                                <Input className="flex-1 [&>div]:h-11" placeholder="댓글을 남겨보세요" />
-                                <Button variant="primary" size="md" className="h-11 px-3 md:px-4">
+                                <Input
+                                    className="flex-1 [&>div]:h-11"
+                                    placeholder={user ? "댓글을 남겨보세요" : "댓글을 작성하려면 로그인하세요"}
+                                    value={commentInput}
+                                    onChange={(e) => setCommentInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+
+                                        e.preventDefault();
+                                        handleCommentSubmit();
+                                    }}
+                                    disabled={!user}
+                                />
+                                <Button
+                                    variant="primary"
+                                    size="md"
+                                    className="h-11 px-3 md:px-4"
+                                    onClick={handleCommentSubmit}
+                                    disabled={!user || !commentInput.trim() || createCommentMutation.isPending}
+                                >
                                     <Send size={14} />
                                     <span className="hidden sm:inline">등록</span>
                                 </Button>
                             </div>
                             <div className="flex flex-col">
-                                {recipe.comments.map((comment) => (
-                                    <CommentRow key={comment.id} comment={comment} />
+                                {comments.map((comment) => (
+                                    <CommentRow
+                                        key={comment.id}
+                                        comment={comment}
+                                        canManage={user?.id === comment.authorId}
+                                        deleting={deleteCommentMutation.isPending}
+                                        editing={editingCommentId === comment.id}
+                                        editValue={editingCommentInput}
+                                        updating={updateCommentMutation.isPending}
+                                        onEdit={() => startCommentEdit(comment)}
+                                        onEditChange={setEditingCommentInput}
+                                        onEditCancel={cancelCommentEdit}
+                                        onEditSubmit={handleCommentUpdate}
+                                        onDelete={() => handleCommentDelete(comment.id)}
+                                    />
                                 ))}
                             </div>
                         </section>
@@ -333,19 +516,21 @@ export default function FeedDetail() {
                         <Card className="gap-5 p-5 shadow-md">
                             <RecipeSectionTitle>요리 정보</RecipeSectionTitle>
                             <div className="flex gap-2">
-                                <RecipeStat label="시간" value={recipe.time} Icon={Time} />
-                                <RecipeStat label="난이도" value={recipe.difficulty} Icon={Growth} />
-                                <RecipeStat label="인분" value={recipe.servings} Icon={UserMultiple} />
+                                <RecipeStat label="시간" value={post.time} Icon={Time} />
+                                <RecipeStat label="난이도" value={post.difficulty} Icon={Growth} />
+                                <RecipeStat label="인분" value={post.servings} Icon={UserMultiple} />
                             </div>
 
-                            <div className="flex flex-col gap-2">
-                                <RecipeSectionTitle meta={`${recipe.ingredients.length}개`}>재료</RecipeSectionTitle>
-                                <div className="flex flex-col gap-1.5">
-                                    {recipe.ingredients.map((ingredient) => (
-                                        <IngredientRow key={ingredient.name} ingredient={ingredient} />
-                                    ))}
+                            {post.ingredients.length > 0 && (
+                                <div className="flex flex-col gap-2">
+                                    <RecipeSectionTitle meta={`${post.ingredients.length}개`}>재료</RecipeSectionTitle>
+                                    <div className="flex flex-col gap-1.5">
+                                        {post.ingredients.map((ingredient) => (
+                                            <IngredientRow key={ingredient.name} ingredient={ingredient} />
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <Button variant="primary" size="lg" fullWidth onClick={handleStartCooking}>
                                 요리 시작

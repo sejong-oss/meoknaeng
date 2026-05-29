@@ -1,43 +1,33 @@
 import { create } from "zustand";
 import {
-    MY_LIKED_POSTS,
-    MY_POSTS,
-} from "@/data/mockData.js";
-import {
     getMyProfile,
-    getSavedRecipes as getSavedRecipesRequest,
     login as loginRequest,
     logout as logoutRequest,
     recommendRecipes as recommendRecipesRequest,
-    saveRecipe as saveRecipeRequest,
     signup as signupRequest,
-    unsaveRecipe as unsaveRecipeRequest,
     updateMyProfile,
 } from "@/libs/api.js";
 
 import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
+import { formatMinutes, formatServings } from "@/libs/utils.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
-const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
-const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
+
 const DEFAULT_RECIPE_QUERY = "냉장고 재료로 만들 수 있는 레시피를 추천해줘.";
 
 const authUserToView = (user) => ({
-    id: user.userId ?? user.user_id,
+    id: user.userId,
     name: user.nickname,
     email: user.email,
-    recipes: 0,
-    followers: 0,
-    following: 0,
     ingredients: [],
 });
 
-const recipeId = (recipe) => recipe.recipe_id ?? recipe.name;
+const recipeId = (recipe) => recipe.recipeId ?? recipe.name;
 
 const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     id: recipeId(recipe),
     title: recipe.name,
-    time: formatMinutes(recipe.cook_time_minutes ?? recipe.cook_time),
+    time: formatMinutes(recipe.cookTimeMinutes ?? recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     description: recipe.summary ?? recipe.description,
@@ -45,16 +35,7 @@ const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     ownedIngredientCount: countOwnedRecipeIngredients(recipe.ingredients, ownedIngredients),
 });
 
-const savedApiToSummaryView = (recipe) => ({
-    id: recipe.recipeId,
-    title: recipe.name,
-    time: formatMinutes(recipe.cookTime),
-    difficulty: recipe.difficulty,
-    servings: formatServings(recipe.servings),
-    description: recipe.description,
-});
-
-export const useAppStore = create((set, get) => ({
+export const useAppStore = create((set) => ({
     user: null,
     authStatus: "idle",
     authInitialized: false,
@@ -66,12 +47,6 @@ export const useAppStore = create((set, get) => ({
     recommendationStatus: "idle",
     recommendationError: null,
     recommendationStartedAt: null,
-    myPosts: MY_POSTS,
-    likedPosts: MY_LIKED_POSTS,
-    savedRecipeIds: [],
-    savedRecipes: [],
-    savedRecipesLoaded: false,
-    likedPostIds: MY_LIKED_POSTS.map((post) => post.id),
 
     openLoginModal: () => set({ loginModalOpen: true }),
     setLoginModalOpen: (loginModalOpen) => set({ loginModalOpen }),
@@ -92,29 +67,9 @@ export const useAppStore = create((set, get) => ({
             set({
                 user: null,
                 pantryIngredients: [],
-                savedRecipeIds: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
-        }
-    },
-    fetchSavedRecipes: async () => {
-        const { user, savedRecipesLoaded } = get();
-
-        if (!user || savedRecipesLoaded) return;
-
-        set({ savedRecipesLoaded: true });
-
-        try {
-            const data = await getSavedRecipesRequest();
-            const recipes = data?.recipes ?? [];
-
-            set({
-                savedRecipeIds: recipes.map((r) => r.recipeId),
-                savedRecipes: recipes.map(savedApiToSummaryView),
-            });
-        } catch {
-            set({ savedRecipesLoaded: false });
         }
     },
     login: async (credentials) => {
@@ -168,9 +123,6 @@ export const useAppStore = create((set, get) => ({
             set({
                 user: null,
                 pantryIngredients: [],
-                savedRecipeIds: [],
-                savedRecipes: [],
-                savedRecipesLoaded: false,
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -240,35 +192,4 @@ export const useAppStore = create((set, get) => ({
             throw error;
         }
     },
-    toggleSavedRecipe: async (recipeId) => {
-        const { user, savedRecipeIds, savedRecipes } = get();
-
-        if (!user) return;
-
-        const isSaved = savedRecipeIds.includes(recipeId);
-
-        if (isSaved) {
-            await unsaveRecipeRequest(recipeId);
-        } else {
-            await saveRecipeRequest(recipeId);
-        }
-
-        const nextSavedRecipeIds = isSaved
-            ? savedRecipeIds.filter((id) => id !== recipeId)
-            : [...savedRecipeIds, recipeId];
-        const nextSavedRecipes = isSaved
-            ? savedRecipes.filter((r) => r.id !== recipeId)
-            : savedRecipes;
-
-        set({
-            savedRecipeIds: nextSavedRecipeIds,
-            savedRecipes: nextSavedRecipes,
-            savedRecipesLoaded: false,
-        });
-    },
-    toggleLikedPost: (postId) => set((state) => ({
-        likedPostIds: state.likedPostIds.includes(postId)
-            ? state.likedPostIds.filter((id) => id !== postId)
-            : [...state.likedPostIds, postId],
-    })),
 }));

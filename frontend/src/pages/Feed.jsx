@@ -1,14 +1,16 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, Add, Filter, Restaurant } from "@carbon/icons-react";
+import { Search, Add, Filter, Restaurant, WarningAlt } from "@carbon/icons-react";
 import {
     Button,
+    Card,
     Chip,
     EmptyState,
     FeedCard,
     FloatingActionButton,
     Input,
     RecipeSelectModal,
+    Skeleton,
     DropdownMenu,
     DropdownMenuTrigger,
     DropdownMenuContent,
@@ -16,53 +18,96 @@ import {
     DropdownMenuSeparator,
     DropdownMenuItem,
 } from "@/components/index.js";
-import { FEED_FILTER_OPTIONS, FEED_ITEMS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
-import { SITE_NAME } from "@/libs/constants.js";
+import { useAppStore } from "@/store/useAppStore.js";
+import { useLikedPostsQuery, usePostsQuery, useTogglePostLikeMutation } from "@/hooks/usePostQueries.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
+import { toast } from "@/libs/toast.js";
+import { FEED_FILTER_OPTIONS, SITE_NAME } from "@/libs/constants.js";
 
 export default function Feed() {
     const navigate = useNavigate();
     const location = useLocation();
+    const user = useAppStore((state) => state.user);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
-    const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
+    const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(user && location.state?.openRecipeSelect));
+    const categoryParam = useMemo(
+        () => activeFilters.find((f) => f.group === "category")?.value,
+        [activeFilters]
+    );
+    const difficultyParam = useMemo(
+        () => activeFilters.find((f) => f.group === "difficulty")?.value,
+        [activeFilters]
+    );
+    const cookTimeMaxParam = useMemo(
+        () => activeFilters.find((f) => f.group === "time")?.value,
+        [activeFilters]
+    );
+    const postsQuery = usePostsQuery({
+        category: categoryParam,
+        difficulty: difficultyParam,
+        cookTimeMax: cookTimeMaxParam ? Number(cookTimeMaxParam) : undefined,
+        q: debouncedQuery || undefined,
+    });
+    const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
+    const togglePostLike = useTogglePostLikeMutation(user?.id);
+    const likedPostIds = useMemo(
+        () => (likedPostsQuery.data ?? []).map((post) => post.id),
+        [likedPostsQuery.data]
+    );
+    const handleLike = (id) => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+
+        const isLiked = likedPostIds.includes(id);
+        togglePostLike.mutate({ postId: id, isLiked });
+    };
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        if (user || !location.state?.openRecipeSelect) return;
+
+        toast.info("로그인이 필요해요");
+        openLoginModal();
+        navigate("/feed", { replace: true });
+    }, [location.state?.openRecipeSelect, navigate, openLoginModal, user]);
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
-        setActiveFilters((prev) =>
-            prev.find((f) => f.key === key)
-                ? prev.filter((f) => f.key !== key)
-                : [...prev, { key, group, label, value }]
-        );
+        setActiveFilters((prev) => {
+            if (prev.find((f) => f.key === key)) return prev.filter((f) => f.key !== key);
+            return [...prev.filter((f) => f.group !== group), { key, group, label, value }];
+        });
     };
 
     const removeFilter = (key) => setActiveFilters((prev) => prev.filter((f) => f.key !== key));
     const clearAll = () => setActiveFilters([]);
     const isActive = (group, value) => activeFilters.some((f) => f.key === `${group}:${value}`);
-    const openRecipeSelect = () => setRecipeSelectOpen(true);
+    const openRecipeSelect = () => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+
+        setRecipeSelectOpen(true);
+    };
     const writeFeedPost = (recipeId) => {
         setRecipeSelectOpen(false);
         navigate("/feed/write", { state: { recipeId } });
     };
 
-    const filteredItems = useMemo(() => {
-        return FEED_ITEMS.filter((item) => {
-            if (searchQuery.trim()) {
-                const q = searchQuery.toLowerCase();
-                if (
-                    !item.title.toLowerCase().includes(q) &&
-                    !item.author.toLowerCase().includes(q) &&
-                    !item.category.toLowerCase().includes(q)
-                ) return false;
-            }
-            const catFilters = activeFilters.filter((f) => f.group === "category");
-            const timeFilters = activeFilters.filter((f) => f.group === "time");
-            const diffFilters = activeFilters.filter((f) => f.group === "difficulty");
-            if (catFilters.length && !catFilters.some((f) => f.value === item.category)) return false;
-            if (timeFilters.length && !timeFilters.some((f) => parseInt(item.time) <= parseInt(f.value))) return false;
-            if (diffFilters.length && !diffFilters.some((f) => f.value === item.difficulty)) return false;
-            return true;
-        });
-    }, [searchQuery, activeFilters]);
+    const feedItems = postsQuery.data ?? [];
 
     return (
         <>
@@ -115,18 +160,15 @@ export default function Feed() {
                                 <div key={group}>
                                     <DropdownMenuLabel>{label}</DropdownMenuLabel>
                                     <div className="flex flex-wrap gap-x-1.5 gap-y-1 px-3 pb-2 mt-1">
-                                        {options.flatMap(({ label: optLabel, value }, chipIdx) => [
-                                            group === "category" && chipIdx === 3
-                                                ? <div key="break" className="w-full" />
-                                                : null,
+                                        {options.map(({ label: optLabel, value }) => (
                                             <Chip
                                                 key={value}
                                                 variant={isActive(group, value) ? "brand" : "outline"}
                                                 onClick={() => toggleFilter(group, optLabel, value)}
                                             >
                                                 {optLabel}
-                                            </Chip>,
-                                        ])}
+                                            </Chip>
+                                        ))}
                                     </div>
                                 </div>
                             ))}
@@ -159,7 +201,29 @@ export default function Feed() {
                     </div>
                 )}
 
-                {filteredItems.length === 0 ? (
+                {postsQuery.isLoading ? (
+                    <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <Card key={i} className="!p-4">
+                                <Skeleton className="h-32 w-full rounded-card" />
+                                <Skeleton className="mt-3 h-5 w-3/4" />
+                                <div className="flex gap-1.5 mt-2">
+                                    <Skeleton className="h-5 w-14 rounded-full" />
+                                    <Skeleton className="h-5 w-16 rounded-full" />
+                                </div>
+                                <Skeleton className="mt-3 h-4 w-28 rounded-full" />
+                            </Card>
+                        ))}
+                    </div>
+                ) : postsQuery.isError ? (
+                    <EmptyState
+                        icon={<WarningAlt size={28} />}
+                        title="피드를 불러오지 못했어요"
+                        description="잠시 후 다시 시도해주세요"
+                        action="다시 불러오기"
+                        onAction={() => postsQuery.refetch()}
+                    />
+                ) : feedItems.length === 0 ? (
                     <EmptyState
                         icon={<Restaurant size={28} />}
                         title="검색 결과가 없어요"
@@ -169,7 +233,7 @@ export default function Feed() {
                     />
                 ) : (
                     <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {filteredItems.map((item) => (
+                        {feedItems.map((item) => (
                             <FeedCard
                                 key={item.id}
                                 title={item.title}
@@ -178,6 +242,8 @@ export default function Feed() {
                                 difficulty={item.difficulty}
                                 author={item.author}
                                 likes={item.likes}
+                                defaultLiked={likedPostIds.includes(item.id)}
+                                onLike={() => handleLike(item.id)}
                                 onClick={() => navigate(`/feed/${item.id}`)}
                             />
                         ))}
@@ -192,9 +258,9 @@ export default function Feed() {
                 <RecipeSelectModal
                     open={recipeSelectOpen}
                     onOpenChange={setRecipeSelectOpen}
-                    recipes={RECOMMENDED_RECIPES}
+                    recipes={savedRecipesQuery.data?.recipes ?? []}
+                    loading={savedRecipesQuery.isLoading}
                     onSelect={writeFeedPost}
-                    onEmptyAction={() => navigate("/home")}
                 />
             </div>
         </>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
     useBeforeUnload,
     useBlocker,
@@ -31,8 +32,25 @@ import {
     Textarea,
     toast,
 } from "@/components/index.js";
-import { getRecommendedRecipe } from "@/data/mockData.js";
+import { getRecipe } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
+import { queryKeys } from "@/libs/queryClient.js";
+import { formatMinutes, formatServings } from "@/libs/utils.js";
+
+const recipeToSourceRecipe = (recipe) => ({
+    id: recipe.recipeId,
+    title: recipe.name,
+    description: recipe.description,
+    category: recipe.category,
+    time: formatMinutes(recipe.cookTime),
+    difficulty: recipe.difficulty,
+    servings: formatServings(recipe.servings),
+    ingredients: recipe.ingredients ?? [],
+    steps: (recipe.steps ?? [])
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((step) => step.description),
+});
 
 function IngredientRow({ ingredient }) {
     return (
@@ -131,10 +149,16 @@ function SourceRecipeAside({ recipe }) {
 export default function FeedWrite() {
     const navigate = useNavigate();
     const location = useLocation();
-    const sourceRecipe = getRecommendedRecipe(location.state?.recipeId);
+    const recipeId = location.state?.recipeId;
+    const recipeQuery = useQuery({
+        queryKey: queryKeys.recipes.detail(recipeId),
+        queryFn: async ({ signal }) => recipeToSourceRecipe(await getRecipe(recipeId, { signal })),
+        enabled: Boolean(recipeId),
+    });
+    const sourceRecipe = recipeQuery.data;
     const [form, setForm] = useState({
-        title: sourceRecipe?.title ?? "",
-        description: sourceRecipe?.description ?? "",
+        title: "",
+        description: "",
         tip: "",
     });
     const [errors, setErrors] = useState({});
@@ -150,10 +174,29 @@ export default function FeedWrite() {
     });
 
     useEffect(() => {
-        if (sourceRecipe) return;
+        if (recipeId) return;
 
         navigate("/feed", { replace: true, state: { openRecipeSelect: true } });
-    }, [navigate, sourceRecipe]);
+    }, [navigate, recipeId]);
+
+    useEffect(() => {
+        if (!recipeQuery.isError) return;
+
+        toast.error("공유할 레시피를 불러오지 못했어요");
+        navigate("/feed", { replace: true, state: { openRecipeSelect: true } });
+    }, [navigate, recipeQuery.isError]);
+
+    useEffect(() => {
+        if (!sourceRecipe) return;
+
+        Promise.resolve().then(() => {
+            setForm((prev) => ({
+                ...prev,
+                title: prev.title || sourceRecipe.title,
+                description: prev.description || sourceRecipe.description || "",
+            }));
+        });
+    }, [sourceRecipe]);
 
     const updateField = (key, value) => {
         setForm((prev) => ({ ...prev, [key]: value }));
@@ -179,7 +222,7 @@ export default function FeedWrite() {
         navigate("/feed");
     };
 
-    if (!sourceRecipe) return null;
+    if (recipeQuery.isLoading || !sourceRecipe) return null;
 
     return (
         <>

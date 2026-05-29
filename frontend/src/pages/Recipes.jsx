@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     ArrowRight,
@@ -18,25 +17,8 @@ import { Breadcrumb, Button, Card, Chip, EmptyState, PhotoPlaceholder, ProgressB
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
-
-const RECOMMENDATION_PROGRESS_DURATION_MS = 20000;
-const RECOMMENDATION_COMPLETE_DELAY_MS = 450;
-const RECOMMENDATION_TIP_INTERVAL_MS = 4200;
-const RECOMMENDATION_LOADING_TIPS = [
-    "가진 재료와 잘 맞는 조합을 고르고 있어요",
-    "조리 시간과 난이도를 함께 따져보고 있어요",
-    "바로 따라 하기 좋은 순서로 정리하고 있어요",
-    "부족한 재료가 적은 메뉴를 우선 살펴보고 있어요",
-];
-
-function getRecommendationProgress(startedAt) {
-    const elapsed = Date.now() - startedAt;
-
-    return Math.min(
-        99,
-        Math.floor((elapsed / RECOMMENDATION_PROGRESS_DURATION_MS) * 99)
-    );
-}
+import { useRecommendationProgress } from "@/hooks/useRecommendationProgress.js";
+import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
 
 export default function Recipes() {
     const navigate = useNavigate();
@@ -47,21 +29,18 @@ export default function Recipes() {
     const recommendationError = useAppStore((state) => state.recommendationError);
     const recommendationStartedAt = useAppStore((state) => state.recommendationStartedAt);
     const recommendRecipes = useAppStore((state) => state.recommendRecipes);
-    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
-    const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
-    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const [progress, setProgress] = useState(0);
-    const [tipIndex, setTipIndex] = useState(0);
-    const [isCompleting, setIsCompleting] = useState(false);
-    const [holdResult, setHoldResult] = useState(recommendationStatus === "loading");
-    const completionStartedRef = useRef(false);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
+    const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
+    const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
+    const { progress, loadingTip, showLoading, resetLoading } = useRecommendationProgress(
+        recommendationStatus,
+        recommendationStartedAt
+    );
     const hasResults = Boolean(hero);
     const isHeroSaved = hero ? savedRecipeIds.includes(hero.id) : false;
     const heroOwnedIngredientCount = hero?.ownedIngredientCount ?? 0;
-    const isLoading = recommendationStatus === "loading";
-    const showLoading = isLoading || isCompleting || (recommendationStatus === "success" && holdResult);
     const isError = recommendationStatus === "error";
     const handleToggleSaved = async (id) => {
         if (!user) {
@@ -70,7 +49,7 @@ export default function Recipes() {
             return;
         }
         try {
-            await toggleSavedRecipe(id);
+            await toggleSavedRecipe.mutateAsync({ recipeId: id, isSaved: savedRecipeIds.includes(id) });
             toast.success(savedRecipeIds.includes(id) ? "저장한 레시피에서 삭제했어요" : "저장한 레시피에 추가했어요");
         } catch {
             toast.error(savedRecipeIds.includes(id) ? "저장 취소에 실패했어요" : "레시피를 저장하지 못했어요");
@@ -80,74 +59,9 @@ export default function Recipes() {
     const handleRecommendAgain = () => {
         if (ingredients.length === 0) return;
 
-        completionStartedRef.current = false;
-        setProgress(0);
-        setTipIndex(0);
-        setIsCompleting(false);
-        setHoldResult(true);
+        resetLoading();
         recommendRecipes(ingredients).catch(() => {});
     };
-
-    useEffect(() => {
-        fetchSavedRecipes();
-    }, [fetchSavedRecipes, user]);
-
-    useEffect(() => {
-        if (recommendationStatus !== "success" || !holdResult || completionStartedRef.current) return;
-
-        completionStartedRef.current = true;
-        setProgress(100);
-        setIsCompleting(true);
-
-        const timer = window.setTimeout(() => {
-            setIsCompleting(false);
-            setHoldResult(false);
-            setProgress(0);
-            setTipIndex(0);
-            completionStartedRef.current = false;
-        }, RECOMMENDATION_COMPLETE_DELAY_MS);
-
-        return () => window.clearTimeout(timer);
-    }, [holdResult, recommendationStatus]);
-
-    useEffect(() => {
-        if (!isLoading) return;
-
-        const startedAt = recommendationStartedAt ?? Date.now();
-        completionStartedRef.current = false;
-        setHoldResult(true);
-        setProgress(getRecommendationProgress(startedAt));
-        setTipIndex(0);
-        setIsCompleting(false);
-
-        const updateProgress = () => {
-            setProgress(getRecommendationProgress(startedAt));
-        };
-
-        updateProgress();
-
-        const interval = window.setInterval(updateProgress, 200);
-
-        return () => window.clearInterval(interval);
-    }, [isLoading, recommendationStartedAt]);
-
-    useEffect(() => {
-        if (isLoading || recommendationStatus === "success") return;
-
-        setHoldResult(false);
-        setIsCompleting(false);
-        completionStartedRef.current = false;
-    }, [isLoading, recommendationStatus]);
-
-    useEffect(() => {
-        if (!showLoading) return;
-
-        const interval = window.setInterval(() => {
-            setTipIndex((index) => (index + 1) % RECOMMENDATION_LOADING_TIPS.length);
-        }, RECOMMENDATION_TIP_INTERVAL_MS);
-
-        return () => window.clearInterval(interval);
-    }, [showLoading]);
 
     if (showLoading) {
         return (
@@ -170,7 +84,7 @@ export default function Recipes() {
                         </div>
                         <ProgressBar
                             value={progress}
-                            label={RECOMMENDATION_LOADING_TIPS[tipIndex]}
+                            label={loadingTip}
                             indicatorClassName="bg-primary-500"
                             className="w-full"
                         />

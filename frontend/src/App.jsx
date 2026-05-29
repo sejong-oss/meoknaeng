@@ -1,5 +1,7 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ToasterProvider } from "@/components/ToasterProvider.jsx";
+import { queryClient } from "@/libs/queryClient.js";
 import AppLayout from "@/layouts/AppLayout.jsx";
 import OnboardingLayout from "@/layouts/OnboardingLayout.jsx";
 import Onboarding from "@/pages/Onboarding.jsx";
@@ -36,9 +38,9 @@ const router = createBrowserRouter([
 
 export default function App() {
     return (
-        <>
+        <QueryClientProvider client={queryClient}>
             <ToasterProvider />
             <RouterProvider router={router} />
-        </>
+        </QueryClientProvider>
     );
 }

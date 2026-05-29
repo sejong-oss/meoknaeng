@@ -6,12 +6,13 @@ import {
     FeedCard, IngredientInput, RecipeCard,
     Skeleton, Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
-import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
 import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import { useLikedPostsQuery, useMyPostsQuery } from "@/hooks/usePostQueries.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
 
@@ -66,7 +67,6 @@ function MySkeleton() {
                     <div className="mb-5 flex gap-6">
                         <Skeleton className="h-10 w-24" />
                         <Skeleton className="h-10 w-16" />
-                        <Skeleton className="h-10 w-20" />
                     </div>
                     <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {Array.from({ length: 4 }).map((_, index) => (
@@ -92,11 +92,12 @@ export default function My() {
     const authStatus = useAppStore((state) => state.authStatus);
     const authInitialized = useAppStore((state) => state.authInitialized);
     const ingredients = useAppStore((state) => state.pantryIngredients);
-    const myPosts = useAppStore((state) => state.myPosts);
-    const likedPosts = useAppStore((state) => state.likedPosts);
-    const likedPostIds = useAppStore((state) => state.likedPostIds);
-    const savedRecipes = useAppStore((state) => state.savedRecipes);
-    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
+    const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const myPostsQuery = useMyPostsQuery(user?.id);
+    const savedRecipes = savedRecipesQuery.data?.recipes ?? [];
+    const likedPosts = likedPostsQuery.data ?? [];
+    const myPosts = myPostsQuery.data ?? [];
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
@@ -111,11 +112,6 @@ export default function My() {
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
-    const visibleLikedPosts = likedPosts.filter((post) => likedPostIds.includes(post.id));
-
-    useEffect(() => {
-        fetchSavedRecipes();
-    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         const el = ingredientsRef.current;
@@ -295,10 +291,6 @@ export default function My() {
                     <Avatar name={user.name} size="xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                     <div className="flex-1 min-w-0">
                         {renderNickname({ mobile: true })}
-                        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                            <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
-                            <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
-                        </div>
                     </div>
                     <Button
                         variant="outline"
@@ -323,10 +315,6 @@ export default function My() {
                         <Avatar name={user.name} size="2xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                         <div className="text-center mt-1">
                             {renderNickname()}
-                            <div className="mt-2 flex items-center gap-3.5 justify-center text-xs text-gray-500">
-                                <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
-                                <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
-                            </div>
                         </div>
                     </div>
 
@@ -371,7 +359,6 @@ export default function My() {
                                 ingredients={ingredients}
                                 onAdd={addPantryIngredient}
                                 onRemove={removePantryIngredient}
-                                ingredientList={INGREDIENT_LIST}
                                 loadSuggestions={loadIngredientSuggestions}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2"
                                 inputClassName="!py-1 !text-sm"
@@ -417,7 +404,7 @@ export default function My() {
                                 내 글 <span className="ml-1 text-xs opacity-60">{myPosts.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="likes" variant="line">
-                                좋아요 <span className="ml-1 text-xs opacity-60">{visibleLikedPosts.length}</span>
+                                좋아요 <span className="ml-1 text-xs opacity-60">{likedPosts.length}</span>
                             </TabsTrigger>
                         </TabsList>
 
@@ -456,7 +443,7 @@ export default function My() {
 
                         <TabsContent value="likes">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {visibleLikedPosts.map((item) => (
+                                {likedPosts.map((item) => (
                                     <FeedCard
                                         key={item.id}
                                         title={item.title}
