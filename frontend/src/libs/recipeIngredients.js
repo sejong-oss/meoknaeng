@@ -1,11 +1,5 @@
 const toOwnedIngredientSet = (ownedIngredients = []) => new Set(ownedIngredients);
 
-export function getRecipeIngredientStatus(ingredientName, ownedIngredients = []) {
-    const ownedIngredientSet = toOwnedIngredientSet(ownedIngredients);
-
-    return ownedIngredientSet.has(ingredientName) ? "owned" : "needed";
-}
-
 export function addRecipeIngredientStatuses(recipeIngredients = [], ownedIngredients = []) {
     const ownedIngredientSet = toOwnedIngredientSet(ownedIngredients);
 
