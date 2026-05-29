@@ -39,6 +39,8 @@ export function RecipeSelectModal({
                         placeholder="레시피를 선택해주세요"
                         size="lg"
                         className="w-full"
+                        viewportClassName={recipes.length >= 5 ? "max-h-[11.25rem] overflow-y-auto" : ""}
+                        hideScrollButtons
                     >
                         {loading ? (
                             <SelectItem value="loading" disabled>
