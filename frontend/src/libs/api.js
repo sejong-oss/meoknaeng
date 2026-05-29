@@ -106,51 +106,55 @@ export function getRecipe(recipeId) {
     return request(`/recipes/${recipeId}`);
 }
 
-export function saveRecipe(recipeId) {
+export function saveRecipe(recipeId, options = {}) {
     return request(`/recipes/${recipeId}`, { 
-        method: "POST" 
+        method: "POST",
+        ...options,
     });
 }
 
-export function unsaveRecipe(recipeId) {
+export function unsaveRecipe(recipeId, options = {}) {
     return request(`/recipes/${recipeId}`, { 
-        method: "DELETE" 
+        method: "DELETE",
+        ...options,
     });
 }
 
-export function getSavedRecipes() {
-    return request("/users/me/saved-recipes");
+export function getSavedRecipes(options = {}) {
+    return request("/users/me/saved-recipes", options);
 }
 
-export function getPosts({ page = 1, size = 100, q, category, difficulty } = {}) {
+export function getPosts({ page = 1, size = 100, q, category, difficulty } = {}, options = {}) {
     return request("/posts", {
         params: { page, size, q, category, difficulty },
+        ...options,
     });
 }
 
-export function getPost(postId) {
-    return request(`/posts/${postId}`);
+export function getPost(postId, options = {}) {
+    return request(`/posts/${postId}`, options);
 }
 
-export function getPostComments(postId) {
-    return request(`/posts/${postId}/comments`);
+export function getPostComments(postId, options = {}) {
+    return request(`/posts/${postId}/comments`, options);
 }
 
-export function createComment(postId, content) {
+export function createComment(postId, content, options = {}) {
     return request(`/posts/${postId}/comments`, {
         method: "POST",
         data: { content },
+        ...options,
     });
 }
 
-export function getLikedPosts() {
-    return request("/users/me/liked-posts");
+export function getLikedPosts(options = {}) {
+    return request("/users/me/liked-posts", options);
 }
 
-export function likePost(postId) {
-    return request(`/posts/${postId}/likes`, { method: "POST" });
+export function likePost(postId, options = {}) {
+    return request(`/posts/${postId}/likes`, { method: "POST", ...options });
 }
 
-export function unlikePost(postId) {
-    return request(`/posts/${postId}/likes`, { method: "DELETE" });
+export function unlikePost(postId, options = {}) {
+    return request(`/posts/${postId}/likes`, { method: "DELETE", ...options });
 }
