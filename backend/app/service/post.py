@@ -200,6 +200,7 @@ async def get_post_list(
     q: str | None,
     category: str | None,
     difficulty: str | None,
+    cook_time_max: int | None,
 ) -> tuple[list[tuple[Post, int]], int]:
     filters = []
     if q:
@@ -208,6 +209,8 @@ async def get_post_list(
         filters.append(Post.category == category)
     if difficulty:
         filters.append(Post.difficulty == difficulty)
+    if cook_time_max is not None:
+        filters.append(Post.cook_time <= cook_time_max)
 
     total = (await db.execute(
         select(func.count(Post.post_id)).filter(*filters)

@@ -115,9 +115,10 @@ async def get_post_list_handler(
     q: str | None = Query(None),
     category: str | None = Query(None),
     difficulty: str | None = Query(None),
+    cook_time_max: int | None = Query(None, ge=1),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostListResponse]:
-    posts_with_counts, total = await get_post_list(db, page, size, q, category, difficulty)
+    posts_with_counts, total = await get_post_list(db, page, size, q, category, difficulty, cook_time_max)
     return ApiResponse(
         success=True,
         data=PostListResponse(
