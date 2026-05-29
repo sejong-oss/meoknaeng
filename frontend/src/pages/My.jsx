@@ -10,6 +10,7 @@ import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
 import { autocompleteIngredients, getLikedPosts } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
+import { formatMinutes } from "@/libs/utils.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 
@@ -23,6 +24,17 @@ async function loadIngredientSuggestions(query) {
 
     return result?.items?.map((item) => item.name) ?? [];
 }
+
+const likedPostToView = (post) => ({
+    id: post.postId ?? post.post_id,
+    title: post.title,
+    time: formatMinutes(post.cookTime ?? post.cook_time),
+    category: post.category,
+    difficulty: post.difficulty,
+    author: post.authorNickname ?? post.author_nickname,
+    likes: post.likeCount ?? post.like_count,
+    description: post.description,
+});
 
 function MySkeleton() {
     return (
@@ -93,8 +105,7 @@ export default function My() {
     const authInitialized = useAppStore((state) => state.authInitialized);
     const ingredients = useAppStore((state) => state.pantryIngredients);
     const myPosts = useAppStore((state) => state.myPosts);
-    const likedPosts = useAppStore((state) => state.likedPosts);
-    const [likedPostIds, setLikedPostIds] = useState([]);
+    const [likedPosts, setLikedPosts] = useState([]);
     const savedRecipes = useAppStore((state) => state.savedRecipes);
     const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
@@ -111,7 +122,6 @@ export default function My() {
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
-    const visibleLikedPosts = likedPosts.filter((post) => likedPostIds.includes(post.id));
 
     useEffect(() => {
         fetchSavedRecipes();
@@ -120,7 +130,7 @@ export default function My() {
     useEffect(() => {
         if (!user) return;
         getLikedPosts()
-            .then((data) => setLikedPostIds((data?.posts ?? []).map((p) => p.postId)))
+            .then((data) => setLikedPosts((data?.posts ?? []).map(likedPostToView)))
             .catch(() => {});
     }, [user]);
 
@@ -424,7 +434,7 @@ export default function My() {
                                 내 글 <span className="ml-1 text-xs opacity-60">{myPosts.length}</span>
                             </TabsTrigger>
                             <TabsTrigger value="likes" variant="line">
-                                좋아요 <span className="ml-1 text-xs opacity-60">{visibleLikedPosts.length}</span>
+                                좋아요 <span className="ml-1 text-xs opacity-60">{likedPosts.length}</span>
                             </TabsTrigger>
                         </TabsList>
 
@@ -463,7 +473,7 @@ export default function My() {
 
                         <TabsContent value="likes">
                             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {visibleLikedPosts.map((item) => (
+                                {likedPosts.map((item) => (
                                     <FeedCard
                                         key={item.id}
                                         title={item.title}
