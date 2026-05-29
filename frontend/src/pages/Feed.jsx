@@ -250,8 +250,8 @@ export default function Feed() {
                     open={recipeSelectOpen}
                     onOpenChange={setRecipeSelectOpen}
                     recipes={savedRecipesQuery.data?.recipes ?? []}
+                    loading={savedRecipesQuery.isLoading}
                     onSelect={writeFeedPost}
-                    onEmptyAction={() => navigate("/home")}
                 />
             </div>
         </>
