@@ -34,6 +34,7 @@ export function Select({ value, onValueChange, placeholder = "선택", disabled,
                     sideOffset={6}
                     className={[
                         "z-50 min-w-(--radix-select-trigger-width) overflow-hidden",
+                        "max-h-[var(--radix-select-content-available-height)]",
                         "rounded-card bg-white shadow-lg border border-gray-200",
                         popoverAnim,
                         sideAnim,

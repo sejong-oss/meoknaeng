@@ -39,6 +39,7 @@ export function RecipeSelectModal({
                         placeholder="레시피를 선택해주세요"
                         size="lg"
                         className="w-full"
+
                     >
                         {loading ? (
                             <SelectItem value="loading" disabled>
@@ -64,7 +65,7 @@ export function RecipeSelectModal({
                         </div>
                     ) : (
                         <p className="min-h-8 text-xs font-medium leading-8 text-gray-500">
-                            공유할 레시피를 고르면 주요 재료와 조리 시간이 표시돼요
+                            공유할 레시피를 고르면 관련 정보가 표시돼요
                         </p>
                     )}
                 </div>
