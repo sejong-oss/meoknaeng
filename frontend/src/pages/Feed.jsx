@@ -18,12 +18,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuItem,
 } from "@/components/index.js";
-import { FEED_FILTER_OPTIONS } from "@/data/mockData.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useLikedPostsQuery, usePostsQuery, useTogglePostLikeMutation } from "@/hooks/usePostQueries.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 import { toast } from "@/libs/toast.js";
-import { SITE_NAME } from "@/libs/constants.js";
+import { FEED_FILTER_OPTIONS, SITE_NAME } from "@/libs/constants.js";
 
 export default function Feed() {
     const navigate = useNavigate();
