@@ -232,7 +232,9 @@ export default function FeedWrite() {
         if (!editPostQuery.data) return;
 
         const { form: editForm } = postToEditData(editPostQuery.data);
-        setForm(editForm);
+        Promise.resolve().then(() => {
+            setForm(editForm);
+        });
     }, [editPostQuery.data]);
 
     const updateField = (key, value) => {
