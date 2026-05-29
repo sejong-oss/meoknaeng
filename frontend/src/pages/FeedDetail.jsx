@@ -192,6 +192,7 @@ export default function FeedDetail() {
     const post = postQuery.data;
     const comments = commentsQuery.data ?? [];
     const likedPostIds = (likedPostsQuery.data ?? []).map((item) => item.id);
+    const commentSubmittingRef = useRef(false);
     const handleLike = (id) => {
         if (!user) {
             toast.info("로그인이 필요해요");
@@ -205,30 +206,30 @@ export default function FeedDetail() {
     const [commentInput, setCommentInput] = useState("");
 
     useEffect(() => {
-        if (!id) {
-            toast.error("공유 레시피를 찾을 수 없어요");
-            navigate("/feed", { replace: true });
-        }
-    }, [id, navigate]);
+        if (id && !postQuery.isError) return;
 
-    useEffect(() => {
-        if (!postQuery.isError) return;
-
-        toast.error("공유 레시피를 불러오지 못했어요");
+        toast.error(!id || postQuery.error?.status === 404
+            ? "공유 레시피를 찾을 수 없어요"
+            : "공유 레시피를 불러오지 못했어요"
+        );
         navigate("/feed", { replace: true });
-    }, [navigate, postQuery.isError]);
+    }, [id, navigate, postQuery.error, postQuery.isError]);
 
     if (postQuery.isLoading || !post) return <FeedDetailSkeleton />;
 
     const liked = likedPostIds.includes(post.id);
     const likeCount = post.likes ?? 0;
     const handleCommentSubmit = async () => {
-        if (!commentInput.trim() || createCommentMutation.isPending) return;
+        if (!commentInput.trim() || createCommentMutation.isPending || commentSubmittingRef.current) return;
+
+        commentSubmittingRef.current = true;
         try {
             await createCommentMutation.mutateAsync({ postId: post.id, content: commentInput.trim() });
             setCommentInput("");
         } catch {
             toast.error("댓글 등록에 실패했어요");
+        } finally {
+            commentSubmittingRef.current = false;
         }
     };
     const handleStartCooking = () => {
@@ -362,7 +363,12 @@ export default function FeedDetail() {
                                     placeholder={user ? "댓글을 남겨보세요" : "댓글을 작성하려면 로그인하세요"}
                                     value={commentInput}
                                     onChange={(e) => setCommentInput(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === "Enter") handleCommentSubmit(); }}
+                                    onKeyDown={(e) => {
+                                        if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+
+                                        e.preventDefault();
+                                        handleCommentSubmit();
+                                    }}
                                     disabled={!user}
                                 />
                                 <Button
