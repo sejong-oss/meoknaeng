@@ -9,14 +9,14 @@ const cardVariants = {
     muted: "bg-gray-50 border-transparent",
 };
 
-export function Card({ children, variant = "default", onClick, className = "" }) {
+export function Card({ children, variant = "default", onClick, interactive = Boolean(onClick), className = "" }) {
     return (
         <div
             onClick={onClick}
             className={[
-                "p-4 border rounded-card flex flex-col gap-2.5",
+                "p-4 border rounded-card flex flex-col gap-2.5 transition-all duration-200",
                 cardVariants[variant],
-                onClick ? "cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-md" : "",
+                interactive ? "cursor-pointer hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-md" : "",
                 className,
             ].join(" ")}
         >

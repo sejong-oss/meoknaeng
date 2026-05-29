@@ -96,29 +96,25 @@ function IngredientRow({ ingredient }) {
 }
 
 const VideoCard = ({ video }) => (
-    <Card className="gap-0 overflow-hidden rounded-btn p-0">
-        <div className="relative">
-            <PhotoPlaceholder label={video.title ?? "video"} tone="soft" className="h-32 w-full md:h-36" />
-            <div className="absolute inset-0 flex items-center justify-center">
-                <span className="inline-flex size-11 items-center justify-center rounded-full bg-white text-primary-500 shadow-lg">
-                    <PlayFilledAlt size={22} />
-                </span>
+    <a href={video.videoUrl ?? "#"} target="_blank" rel="noreferrer" className="block h-full">
+        <Card interactive className="h-full gap-2 overflow-hidden rounded-btn">
+            <div className="relative">
+                {video.thumbnailUrl ? (
+                    <img src={video.thumbnailUrl} alt={video.title} className="h-32 w-full rounded-btn object-cover md:h-36" />
+                ) : (
+                    <Skeleton className="h-32 w-full rounded-btn md:h-36" />
+                )}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="inline-flex size-11 items-center justify-center rounded-full bg-white text-primary-500 shadow-lg">
+                        <PlayFilledAlt size={22} />
+                    </span>
+                </div>
             </div>
-            {video.duration && (
-                <span className="absolute bottom-2 right-2 rounded bg-gray-900 px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
-                    {video.duration}
-                </span>
-            )}
-        </div>
-        <div className="flex flex-col gap-1 px-3 py-2.5">
-            <p className="line-clamp-2 text-sm font-bold leading-snug text-gray-900">{video.title}</p>
-            {(video.channel || video.views) && (
-                <span className="text-xs font-medium text-gray-500">
-                    {[video.channel, video.views].filter(Boolean).join(" · ")}
-                </span>
-            )}
-        </div>
-    </Card>
+            <div className="flex flex-col gap-1">
+                <p className="line-clamp-2 text-sm font-bold leading-snug text-gray-900">{video.title}</p>
+            </div>
+        </Card>
+    </a>
 );
 
 function RecipeDetailSkeleton() {
@@ -324,9 +320,9 @@ export default function RecipeDetail() {
                         <section className="flex flex-col gap-3">
                             <RecipeSectionTitle>관련 영상</RecipeSectionTitle>
                             {recipe.videos.length > 0 ? (
-                                <div className="grid gap-3 md:grid-cols-3">
+                                <div className="grid auto-rows-fr gap-3 md:grid-cols-3">
                                     {recipe.videos.map((video) => (
-                                        <VideoCard key={video.id ?? video.url ?? video.title} video={video} />
+                                        <VideoCard key={video.videoId} video={video} />
                                     ))}
                                 </div>
                             ) : (
