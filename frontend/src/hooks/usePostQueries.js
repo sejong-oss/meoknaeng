@@ -1,5 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createComment, getLikedPosts, getMyPosts, getPost, getPostComments, getPosts, likePost, unlikePost } from "@/libs/api.js";
+import {
+    createComment,
+    deleteComment,
+    getLikedPosts,
+    getMyPosts,
+    getPost,
+    getPostComments,
+    getPosts,
+    likePost,
+    unlikePost,
+    updateComment,
+} from "@/libs/api.js";
 import { queryKeys } from "@/libs/queryClient.js";
 import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
 
@@ -38,6 +49,7 @@ const postDetailToView = (post) => ({
 
 const commentToView = (comment) => ({
     id: comment.commentId,
+    authorId: comment.authorId,
     author: comment.authorNickname,
     body: comment.content,
     time: formatRelativeTime(comment.createdAt),
@@ -154,6 +166,48 @@ export function useCreateCommentMutation() {
                 commentToView(comment),
                 ...comments,
             ]);
+        },
+    });
+}
+
+export function useUpdateCommentMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, commentId, content }) => updateComment(postId, commentId, content),
+        onSuccess: (comment, { postId }) => {
+            queryClient.setQueryData(queryKeys.posts.comments(postId), (comments = []) =>
+                comments.map((item) => item.id === comment.commentId ? commentToView(comment) : item)
+            );
+        },
+    });
+}
+
+export function useDeleteCommentMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, commentId }) => deleteComment(postId, commentId),
+        onMutate: async ({ postId, commentId }) => {
+            const queryKey = queryKeys.posts.comments(postId);
+
+            await queryClient.cancelQueries({ queryKey });
+
+            const previousComments = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueryData(queryKey, (comments = []) =>
+                comments.filter((comment) => comment.id !== commentId)
+            );
+
+            return { previousComments };
+        },
+        onError: (_error, { postId }, context) => {
+            if (context?.previousComments) {
+                queryClient.setQueryData(queryKeys.posts.comments(postId), context.previousComments);
+            }
+        },
+        onSettled: (_data, _error, { postId }) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.posts.comments(postId) });
         },
     });
 }

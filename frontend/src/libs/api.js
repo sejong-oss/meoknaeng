@@ -147,6 +147,21 @@ export function createComment(postId, content, options = {}) {
     });
 }
 
+export function updateComment(postId, commentId, content, options = {}) {
+    return request(`/posts/${postId}/comments/${commentId}`, {
+        method: "PATCH",
+        data: { content },
+        ...options,
+    });
+}
+
+export function deleteComment(postId, commentId, options = {}) {
+    return request(`/posts/${postId}/comments/${commentId}`, {
+        method: "DELETE",
+        ...options,
+    });
+}
+
 export function getLikedPosts(options = {}) {
     return request("/users/me/liked-posts", options);
 }

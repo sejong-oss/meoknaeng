@@ -5,10 +5,12 @@ import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
     useCreateCommentMutation,
+    useDeleteCommentMutation,
     useLikedPostsQuery,
     usePostCommentsQuery,
     usePostQuery,
     useTogglePostLikeMutation,
+    useUpdateCommentMutation,
 } from "@/hooks/usePostQueries.js";
 import {
     ArrowLeft,
@@ -17,6 +19,7 @@ import {
     Favorite,
     FavoriteFilled,
     Growth,
+    OverflowMenuVertical,
     Restaurant,
     Send,
     Share,
@@ -29,6 +32,11 @@ import {
     Button,
     Card,
     Chip,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuDangerItem,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
     Input,
     PhotoPlaceholder,
     RecipeSectionTitle,
@@ -86,15 +94,79 @@ const PostHeader = ({ recipe, likeCount, liked, onLike }) => (
     </div>
 );
 
-const CommentRow = ({ comment }) => (
+const CommentRow = ({
+    comment,
+    canManage,
+    deleting,
+    editing,
+    editValue,
+    updating,
+    onEdit,
+    onEditChange,
+    onEditCancel,
+    onEditSubmit,
+    onDelete,
+}) => (
     <div className="flex gap-3 border-b border-gray-200 py-4 last:border-b-0">
         <Avatar name={comment.author} size="md" color="neutral" />
         <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-sm font-bold text-gray-900">@{comment.author}</span>
-                <span className="text-xs font-medium text-gray-500">{comment.time}</span>
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-sm font-bold text-gray-900">@{comment.author}</span>
+                    <span className="text-xs font-medium text-gray-500">{comment.time}</span>
+                </div>
+                {canManage && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="!size-8 shrink-0 !p-0 text-gray-700 hover:text-gray-900 [&>svg]:!size-4"
+                                aria-label="댓글 메뉴"
+                                title="댓글 메뉴"
+                            >
+                                <OverflowMenuVertical />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={onEdit} disabled={editing}>
+                                수정
+                            </DropdownMenuItem>
+                            <DropdownMenuDangerItem
+                                onSelect={onDelete}
+                                disabled={deleting}
+                            >
+                                삭제
+                            </DropdownMenuDangerItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
-            <p className="mt-1 text-sm leading-relaxed text-gray-700">{comment.body}</p>
+            {editing ? (
+                <div className="mt-2 flex flex-col gap-2">
+                    <Input
+                        className="[&>div]:h-10"
+                        value={editValue}
+                        onChange={(event) => onEditChange(event.target.value)}
+                        onKeyDown={(event) => {
+                            if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+
+                            event.preventDefault();
+                            onEditSubmit();
+                        }}
+                    />
+                    <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={onEditCancel} disabled={updating}>
+                            취소
+                        </Button>
+                        <Button variant="primary" size="sm" onClick={onEditSubmit} disabled={updating || !editValue.trim()}>
+                            저장
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <p className="mt-1 text-sm leading-relaxed text-gray-700">{comment.body}</p>
+            )}
         </div>
     </div>
 );
@@ -189,10 +261,14 @@ export default function FeedDetail() {
     const likedPostsQuery = useLikedPostsQuery(user?.id);
     const togglePostLike = useTogglePostLikeMutation(user?.id);
     const createCommentMutation = useCreateCommentMutation();
+    const updateCommentMutation = useUpdateCommentMutation();
+    const deleteCommentMutation = useDeleteCommentMutation();
     const post = postQuery.data;
     const comments = commentsQuery.data ?? [];
     const likedPostIds = (likedPostsQuery.data ?? []).map((item) => item.id);
     const commentSubmittingRef = useRef(false);
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editingCommentInput, setEditingCommentInput] = useState("");
     const handleLike = (id) => {
         if (!user) {
             toast.info("로그인이 필요해요");
@@ -230,6 +306,38 @@ export default function FeedDetail() {
             toast.error("댓글 등록에 실패했어요");
         } finally {
             commentSubmittingRef.current = false;
+        }
+    };
+    const handleCommentDelete = async (commentId) => {
+        try {
+            await deleteCommentMutation.mutateAsync({ postId: post.id, commentId });
+            toast.success("댓글을 삭제했어요");
+        } catch {
+            toast.error("댓글 삭제에 실패했어요");
+        }
+    };
+    const startCommentEdit = (comment) => {
+        setEditingCommentId(comment.id);
+        setEditingCommentInput(comment.body);
+    };
+    const cancelCommentEdit = () => {
+        setEditingCommentId(null);
+        setEditingCommentInput("");
+    };
+    const handleCommentUpdate = async () => {
+        const content = editingCommentInput.trim();
+        if (!editingCommentId || !content || updateCommentMutation.isPending) return;
+
+        try {
+            await updateCommentMutation.mutateAsync({
+                postId: post.id,
+                commentId: editingCommentId,
+                content,
+            });
+            cancelCommentEdit();
+            toast.success("댓글을 수정했어요");
+        } catch {
+            toast.error("댓글 수정에 실패했어요");
         }
     };
     const handleStartCooking = () => {
@@ -384,7 +492,20 @@ export default function FeedDetail() {
                             </div>
                             <div className="flex flex-col">
                                 {comments.map((comment) => (
-                                    <CommentRow key={comment.id} comment={comment} />
+                                    <CommentRow
+                                        key={comment.id}
+                                        comment={comment}
+                                        canManage={user?.id === comment.authorId}
+                                        deleting={deleteCommentMutation.isPending}
+                                        editing={editingCommentId === comment.id}
+                                        editValue={editingCommentInput}
+                                        updating={updateCommentMutation.isPending}
+                                        onEdit={() => startCommentEdit(comment)}
+                                        onEditChange={setEditingCommentInput}
+                                        onEditCancel={cancelCommentEdit}
+                                        onEditSubmit={handleCommentUpdate}
+                                        onDelete={() => handleCommentDelete(comment.id)}
+                                    />
                                 ))}
                             </div>
                         </section>
