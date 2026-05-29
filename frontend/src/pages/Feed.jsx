@@ -32,7 +32,7 @@ export default function Feed() {
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
-    const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
+    const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(user && location.state?.openRecipeSelect));
     const categoryParam = useMemo(
         () => activeFilters.find((f) => f.group === "category")?.value,
         [activeFilters]
@@ -74,6 +74,14 @@ export default function Feed() {
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
+    useEffect(() => {
+        if (user || !location.state?.openRecipeSelect) return;
+
+        toast.info("로그인이 필요해요");
+        openLoginModal();
+        navigate("/feed", { replace: true });
+    }, [location.state?.openRecipeSelect, navigate, openLoginModal, user]);
+
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
         setActiveFilters((prev) => {
@@ -85,7 +93,15 @@ export default function Feed() {
     const removeFilter = (key) => setActiveFilters((prev) => prev.filter((f) => f.key !== key));
     const clearAll = () => setActiveFilters([]);
     const isActive = (group, value) => activeFilters.some((f) => f.key === `${group}:${value}`);
-    const openRecipeSelect = () => setRecipeSelectOpen(true);
+    const openRecipeSelect = () => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+
+        setRecipeSelectOpen(true);
+    };
     const writeFeedPost = (recipeId) => {
         setRecipeSelectOpen(false);
         navigate("/feed/write", { state: { recipeId } });
