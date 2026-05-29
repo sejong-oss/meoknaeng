@@ -1,0 +1,145 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createComment, getLikedPosts, getPost, getPostComments, getPosts, likePost, unlikePost } from "@/libs/api.js";
+import { queryKeys } from "@/libs/queryClient.js";
+import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
+
+export const postToFeedItem = (post) => ({
+    id: post.postId ?? post.post_id,
+    title: post.title,
+    time: formatMinutes(post.cookTime ?? post.cook_time),
+    category: post.category,
+    difficulty: post.difficulty,
+    author: post.authorNickname ?? post.author_nickname,
+    likes: post.likeCount ?? post.like_count ?? 0,
+    description: post.description,
+});
+
+const postDetailToView = (post) => ({
+    id: post.postId ?? post.post_id,
+    title: post.title,
+    description: post.description,
+    note: post.tip ?? null,
+    time: formatMinutes(post.sourceRecipe?.cookTime ?? post.source_recipe?.cook_time),
+    difficulty: post.sourceRecipe?.difficulty ?? post.source_recipe?.difficulty,
+    category: post.sourceRecipe?.category ?? post.source_recipe?.category,
+    servings: formatServings(post.sourceRecipe?.servings ?? post.source_recipe?.servings),
+    createdAt: formatRelativeTime(post.createdAt ?? post.created_at),
+    likes: post.likeCount ?? post.like_count ?? 0,
+    author: {
+        name: post.authorNickname ?? post.author_nickname,
+    },
+    ingredients: post.sourceRecipe?.ingredients ?? post.source_recipe?.ingredients ?? [],
+    steps: (post.sourceRecipe?.steps ?? post.source_recipe?.steps ?? [])
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((step) => step.description),
+    related: [],
+});
+
+const commentToView = (comment) => ({
+    id: comment.commentId ?? comment.comment_id,
+    author: comment.authorNickname ?? comment.author_nickname,
+    body: comment.content,
+    time: formatRelativeTime(comment.createdAt ?? comment.created_at),
+});
+
+export function usePostsQuery(params) {
+    return useQuery({
+        queryKey: queryKeys.posts.list(params),
+        queryFn: async ({ signal }) => {
+            const data = await getPosts(params, { signal });
+            return (data?.posts ?? []).map(postToFeedItem);
+        },
+    });
+}
+
+export function usePostQuery(postId) {
+    return useQuery({
+        queryKey: queryKeys.posts.detail(postId),
+        queryFn: async ({ signal }) => postDetailToView(await getPost(postId, { signal })),
+        enabled: Boolean(postId),
+    });
+}
+
+export function usePostCommentsQuery(postId) {
+    return useQuery({
+        queryKey: queryKeys.posts.comments(postId),
+        queryFn: async ({ signal }) => {
+            const data = await getPostComments(postId, { signal });
+            return (data?.comments ?? []).map(commentToView);
+        },
+        enabled: Boolean(postId),
+    });
+}
+
+export function useLikedPostsQuery(userId) {
+    return useQuery({
+        queryKey: queryKeys.likedPosts(userId),
+        queryFn: async ({ signal }) => {
+            const data = await getLikedPosts({ signal });
+            return (data?.posts ?? []).map(postToFeedItem);
+        },
+        enabled: Boolean(userId),
+    });
+}
+
+export function useTogglePostLikeMutation(userId) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, isLiked }) => isLiked ? unlikePost(postId) : likePost(postId),
+        onMutate: async ({ postId, isLiked }) => {
+            await Promise.all([
+                queryClient.cancelQueries({ queryKey: queryKeys.likedPosts(userId) }),
+                queryClient.cancelQueries({ queryKey: queryKeys.posts.all }),
+            ]);
+
+            const likedKey = queryKeys.likedPosts(userId);
+            const previousLikedPosts = queryClient.getQueryData(likedKey);
+
+            queryClient.setQueryData(likedKey, (posts = []) => (
+                isLiked
+                    ? posts.filter((post) => post.id !== postId)
+                    : [...posts, { id: postId, likes: 0 }]
+            ));
+
+            const updateLikeCount = (post) => (
+                post?.id === postId
+                    ? { ...post, likes: post.likes + (isLiked ? -1 : 1) }
+                    : post
+            );
+
+            queryClient.setQueriesData({ queryKey: queryKeys.posts.all }, (data) => {
+                if (Array.isArray(data)) return data.map(updateLikeCount);
+                if (data?.id === postId) return updateLikeCount(data);
+                return data;
+            });
+
+            return { previousLikedPosts };
+        },
+        onError: (_error, _variables, context) => {
+            if (context?.previousLikedPosts) {
+                queryClient.setQueryData(queryKeys.likedPosts(userId), context.previousLikedPosts);
+            }
+        },
+        onSettled: (_data, _error, { postId }) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.likedPosts(userId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+        },
+    });
+}
+
+export function useCreateCommentMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, content }) => createComment(postId, content),
+        onSuccess: (comment, { postId }) => {
+            queryClient.setQueryData(queryKeys.posts.comments(postId), (comments = []) => [
+                commentToView(comment),
+                ...comments,
+            ]);
+        },
+    });
+}
