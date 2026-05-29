@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Generic, Optional, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
 
@@ -18,6 +18,10 @@ class ErrorResponse(BaseModel):
     message: str
 
 
+class ApiBaseModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class Difficulty(str, Enum):
     EASY = "쉬움"
     MEDIUM = "중간"
@@ -31,33 +35,33 @@ class Category(str, Enum):
     WESTERN = "양식"
 
 
-class YouTubeVideoItem(BaseModel):
-    video_id: str = Field(..., description="YouTube 영상 ID")
+class YouTubeVideoItem(ApiBaseModel):
+    video_id: str = Field(..., alias="videoId", description="YouTube 영상 ID")
     title: str = Field(..., description="영상 제목")
-    thumbnail_url: str = Field(..., description="썸네일 이미지 URL")
-    video_url: str = Field(..., description="YouTube 영상 링크")
+    thumbnail_url: str = Field(..., alias="thumbnailUrl", description="썸네일 이미지 URL")
+    video_url: str = Field(..., alias="videoUrl", description="YouTube 영상 링크")
 
 
 class YouTubeVideosResponse(BaseModel):
     videos: list[YouTubeVideoItem] = Field(..., description="관련 YouTube 영상 목록")
 
 
-class RecipeIngredient(BaseModel):
+class RecipeIngredient(ApiBaseModel):
     name: str = Field(..., description="재료 이름")
     amount: str | None = Field(None, description="분량 표기 (예: '200g', '1큰술'). 모르면 null")
 
 
-class RecipeStep(BaseModel):
+class RecipeStep(ApiBaseModel):
     order: int = Field(..., ge=1, description="단계 번호 (1부터 시작)")
     description: str = Field(..., description="해당 단계 조리 설명")
 
 
-class Recipe(BaseModel):
-    recipe_id: str | None = Field(None, description="저장된 레시피 ID")
+class Recipe(ApiBaseModel):
+    recipe_id: str | None = Field(None, alias="recipeId", description="저장된 레시피 ID")
     name: str = Field(..., description="요리 이름")
     summary: str = Field(..., description="요리 한줄 설명")
     category: Category = Field(..., description="카테고리")
-    cook_time_minutes: int = Field(..., ge=1, description="조리 시간(분)")
+    cook_time_minutes: int = Field(..., alias="cookTimeMinutes", ge=1, description="조리 시간(분)")
     difficulty: Difficulty = Field(..., description="난이도")
     servings: int = Field(..., ge=1, description="인분")
     ingredients: list[RecipeIngredient] = Field(..., description="재료 목록")
@@ -69,26 +73,26 @@ class RecipeRequest(BaseModel):
     query: Optional[str] = Field(None, description="사용자가 원하는 레시피 요구사항 (없으면 재료 기반으로만 추천)")
 
 
-class RecipeResponse(BaseModel):
+class RecipeResponse(ApiBaseModel):
     recipes: list[Recipe] = Field(..., description="추천 레시피 목록")
 
 
-class RecipeDetailIngredient(BaseModel):
+class RecipeDetailIngredient(ApiBaseModel):
     name: str
     amount: str
 
 
-class RecipeDetailStep(BaseModel):
+class RecipeDetailStep(ApiBaseModel):
     order: int
     description: str | None
 
 
-class RecipeDetail(BaseModel):
-    recipe_id: str
+class RecipeDetail(ApiBaseModel):
+    recipe_id: str = Field(..., alias="recipeId")
     name: str
     description: str | None
     category: str | None
-    cook_time: int | None
+    cook_time: int | None = Field(None, alias="cookTime")
     difficulty: str | None
     servings: int | None
     ingredients: list[RecipeDetailIngredient]
@@ -115,57 +119,57 @@ class PostUpdateRequest(BaseModel):
     difficulty: str | None = None
 
 
-class PostResponse(BaseModel):
-    post_id: str
-    author_id: str
+class PostResponse(ApiBaseModel):
+    post_id: str = Field(..., alias="postId")
+    author_id: str = Field(..., alias="authorId")
     title: str
     description: str | None
     tip: str | None
-    cook_time: int | None
+    cook_time: int | None = Field(None, alias="cookTime")
     category: str | None
     difficulty: str | None
-    source_recipe_id: str | None
-    created_at: str
-    updated_at: str
+    source_recipe_id: str | None = Field(None, alias="sourceRecipeId")
+    created_at: str = Field(..., alias="createdAt")
+    updated_at: str = Field(..., alias="updatedAt")
 
 
-class RecipeSummary(BaseModel):
-    recipe_id: str
+class RecipeSummary(ApiBaseModel):
+    recipe_id: str = Field(..., alias="recipeId")
     name: str
     description: str | None
-    cook_time: int | None
+    cook_time: int | None = Field(None, alias="cookTime")
     difficulty: str | None
     servings: int | None
 
 
-class PostListItem(BaseModel):
-    post_id: str
+class PostListItem(ApiBaseModel):
+    post_id: str = Field(..., alias="postId")
     title: str
-    cook_time: int | None
+    cook_time: int | None = Field(None, alias="cookTime")
     category: str | None
     difficulty: str | None
-    author_nickname: str
-    like_count: int
-    created_at: str
+    author_nickname: str = Field(..., alias="authorNickname")
+    like_count: int = Field(..., alias="likeCount")
+    created_at: str = Field(..., alias="createdAt")
 
 
-class PostListResponse(BaseModel):
+class PostListResponse(ApiBaseModel):
     posts: list[PostListItem]
     total: int
     page: int
     size: int
 
 
-class PostDetailResponse(BaseModel):
-    post_id: str
-    author_id: str
-    author_nickname: str
+class PostDetailResponse(ApiBaseModel):
+    post_id: str = Field(..., alias="postId")
+    author_id: str = Field(..., alias="authorId")
+    author_nickname: str = Field(..., alias="authorNickname")
     title: str
     description: str | None
     tip: str | None
-    created_at: str
-    updated_at: str
-    source_recipe: RecipeDetail | None
+    created_at: str = Field(..., alias="createdAt")
+    updated_at: str = Field(..., alias="updatedAt")
+    source_recipe: RecipeDetail | None = Field(None, alias="sourceRecipe")
 
 
 class CommentCreateRequest(BaseModel):
@@ -176,14 +180,14 @@ class CommentUpdateRequest(BaseModel):
     content: str = Field(..., min_length=1)
 
 
-class CommentResponse(BaseModel):
-    comment_id: str
-    post_id: str
-    author_id: str
-    author_nickname: str
+class CommentResponse(ApiBaseModel):
+    comment_id: str = Field(..., alias="commentId")
+    post_id: str = Field(..., alias="postId")
+    author_id: str = Field(..., alias="authorId")
+    author_nickname: str = Field(..., alias="authorNickname")
     content: str
-    created_at: str
+    created_at: str = Field(..., alias="createdAt")
 
 
-class CommentListResponse(BaseModel):
+class CommentListResponse(ApiBaseModel):
     comments: list[CommentResponse]
