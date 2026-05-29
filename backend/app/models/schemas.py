@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Generic, Optional, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 T = TypeVar("T")
 
@@ -18,6 +19,13 @@ class ErrorResponse(BaseModel):
     message: str
 
 
+class ApiBaseModel(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+
 class Difficulty(str, Enum):
     EASY = "쉬움"
     MEDIUM = "중간"
@@ -31,28 +39,28 @@ class Category(str, Enum):
     WESTERN = "양식"
 
 
-class YouTubeVideoItem(BaseModel):
+class YouTubeVideoItem(ApiBaseModel):
     video_id: str = Field(..., description="YouTube 영상 ID")
     title: str = Field(..., description="영상 제목")
     thumbnail_url: str = Field(..., description="썸네일 이미지 URL")
     video_url: str = Field(..., description="YouTube 영상 링크")
 
 
-class YouTubeVideosResponse(BaseModel):
+class YouTubeVideosResponse(ApiBaseModel):
     videos: list[YouTubeVideoItem] = Field(..., description="관련 YouTube 영상 목록")
 
 
-class RecipeIngredient(BaseModel):
+class RecipeIngredient(ApiBaseModel):
     name: str = Field(..., description="재료 이름")
     amount: str | None = Field(None, description="분량 표기 (예: '200g', '1큰술'). 모르면 null")
 
 
-class RecipeStep(BaseModel):
+class RecipeStep(ApiBaseModel):
     order: int = Field(..., ge=1, description="단계 번호 (1부터 시작)")
     description: str = Field(..., description="해당 단계 조리 설명")
 
 
-class Recipe(BaseModel):
+class Recipe(ApiBaseModel):
     recipe_id: str | None = Field(None, description="저장된 레시피 ID")
     name: str = Field(..., description="요리 이름")
     summary: str = Field(..., description="요리 한줄 설명")
@@ -69,21 +77,21 @@ class RecipeRequest(BaseModel):
     query: Optional[str] = Field(None, description="사용자가 원하는 레시피 요구사항 (없으면 재료 기반으로만 추천)")
 
 
-class RecipeResponse(BaseModel):
+class RecipeResponse(ApiBaseModel):
     recipes: list[Recipe] = Field(..., description="추천 레시피 목록")
 
 
-class RecipeDetailIngredient(BaseModel):
+class RecipeDetailIngredient(ApiBaseModel):
     name: str
     amount: str
 
 
-class RecipeDetailStep(BaseModel):
+class RecipeDetailStep(ApiBaseModel):
     order: int
     description: str | None
 
 
-class RecipeDetail(BaseModel):
+class RecipeDetail(ApiBaseModel):
     recipe_id: str
     name: str
     description: str | None
@@ -115,7 +123,7 @@ class PostUpdateRequest(BaseModel):
     difficulty: str | None = None
 
 
-class PostResponse(BaseModel):
+class PostResponse(ApiBaseModel):
     post_id: str
     author_id: str
     title: str
@@ -129,7 +137,7 @@ class PostResponse(BaseModel):
     updated_at: str
 
 
-class RecipeSummary(BaseModel):
+class RecipeSummary(ApiBaseModel):
     recipe_id: str
     name: str
     description: str | None
@@ -138,7 +146,7 @@ class RecipeSummary(BaseModel):
     servings: int | None
 
 
-class PostListItem(BaseModel):
+class PostListItem(ApiBaseModel):
     post_id: str
     title: str
     cook_time: int | None
@@ -149,14 +157,14 @@ class PostListItem(BaseModel):
     created_at: str
 
 
-class PostListResponse(BaseModel):
+class PostListResponse(ApiBaseModel):
     posts: list[PostListItem]
     total: int
     page: int
     size: int
 
 
-class PostDetailResponse(BaseModel):
+class PostDetailResponse(ApiBaseModel):
     post_id: str
     author_id: str
     author_nickname: str
@@ -176,7 +184,7 @@ class CommentUpdateRequest(BaseModel):
     content: str = Field(..., min_length=1)
 
 
-class CommentResponse(BaseModel):
+class CommentResponse(ApiBaseModel):
     comment_id: str
     post_id: str
     author_id: str
@@ -185,5 +193,5 @@ class CommentResponse(BaseModel):
     created_at: str
 
 
-class CommentListResponse(BaseModel):
+class CommentListResponse(ApiBaseModel):
     comments: list[CommentResponse]
