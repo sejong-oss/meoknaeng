@@ -18,6 +18,7 @@ import { Breadcrumb, Button, Card, Chip, EmptyState, PhotoPlaceholder, ProgressB
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
 
 const RECOMMENDATION_PROGRESS_DURATION_MS = 20000;
 const RECOMMENDATION_COMPLETE_DELAY_MS = 450;
@@ -47,11 +48,11 @@ export default function Recipes() {
     const recommendationError = useAppStore((state) => state.recommendationError);
     const recommendationStartedAt = useAppStore((state) => state.recommendationStartedAt);
     const recommendRecipes = useAppStore((state) => state.recommendRecipes);
-    const savedRecipeIds = useAppStore((state) => state.savedRecipeIds);
-    const toggleSavedRecipe = useAppStore((state) => state.toggleSavedRecipe);
-    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
+    const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
+    const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
     const [progress, setProgress] = useState(0);
     const [tipIndex, setTipIndex] = useState(0);
     const [isCompleting, setIsCompleting] = useState(false);
@@ -70,7 +71,7 @@ export default function Recipes() {
             return;
         }
         try {
-            await toggleSavedRecipe(id);
+            await toggleSavedRecipe.mutateAsync({ recipeId: id, isSaved: savedRecipeIds.includes(id) });
             toast.success(savedRecipeIds.includes(id) ? "저장한 레시피에서 삭제했어요" : "저장한 레시피에 추가했어요");
         } catch {
             toast.error(savedRecipeIds.includes(id) ? "저장 취소에 실패했어요" : "레시피를 저장하지 못했어요");
@@ -87,10 +88,6 @@ export default function Recipes() {
         setHoldResult(true);
         recommendRecipes(ingredients).catch(() => {});
     };
-
-    useEffect(() => {
-        fetchSavedRecipes();
-    }, [fetchSavedRecipes, user]);
 
     useEffect(() => {
         if (recommendationStatus !== "success" || !holdResult || completionStartedRef.current) return;
@@ -114,11 +111,13 @@ export default function Recipes() {
         if (!isLoading) return;
 
         const startedAt = recommendationStartedAt ?? Date.now();
-        completionStartedRef.current = false;
-        setHoldResult(true);
-        setProgress(getRecommendationProgress(startedAt));
-        setTipIndex(0);
-        setIsCompleting(false);
+        Promise.resolve().then(() => {
+            completionStartedRef.current = false;
+            setHoldResult(true);
+            setProgress(getRecommendationProgress(startedAt));
+            setTipIndex(0);
+            setIsCompleting(false);
+        });
 
         const updateProgress = () => {
             setProgress(getRecommendationProgress(startedAt));
@@ -134,9 +133,11 @@ export default function Recipes() {
     useEffect(() => {
         if (isLoading || recommendationStatus === "success") return;
 
-        setHoldResult(false);
-        setIsCompleting(false);
-        completionStartedRef.current = false;
+        Promise.resolve().then(() => {
+            setHoldResult(false);
+            setIsCompleting(false);
+            completionStartedRef.current = false;
+        });
     }, [isLoading, recommendationStatus]);
 
     useEffect(() => {

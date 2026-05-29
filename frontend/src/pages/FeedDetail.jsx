@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SITE_NAME } from "@/libs/constants.js";
-import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
-import { createComment, getLikedPosts, getPost, getPostComments, likePost, unlikePost } from "@/libs/api.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import {
+    useCreateCommentMutation,
+    useLikedPostsQuery,
+    usePostCommentsQuery,
+    usePostQuery,
+    useTogglePostLikeMutation,
+} from "@/hooks/usePostQueries.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -139,28 +144,6 @@ const RelatedRecipeRow = ({ recipe, onClick }) => {
     );
 };
 
-const postDetailToView = (post) => ({
-    id: post.post_id,
-    title: post.title,
-    description: post.description,
-    note: post.tip ?? null,
-    time: formatMinutes(post.source_recipe?.cook_time),
-    difficulty: post.source_recipe?.difficulty,
-    category: post.source_recipe?.category,
-    servings: formatServings(post.source_recipe?.servings),
-    createdAt: formatRelativeTime(post.created_at),
-    likes: post.like_count ?? 0,
-    author: {
-        name: post.author_nickname,
-    },
-    ingredients: post.source_recipe?.ingredients ?? [],
-    steps: (post.source_recipe?.steps ?? [])
-        .slice()
-        .sort((a, b) => a.order - b.order)
-        .map((step) => step.description),
-    related: [],
-});
-
 function FeedDetailSkeleton() {
     return (
         <>
@@ -201,7 +184,14 @@ export default function FeedDetail() {
     const stepsRef = useRef(null);
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const [likedPostIds, setLikedPostIds] = useState([]);
+    const postQuery = usePostQuery(id);
+    const commentsQuery = usePostCommentsQuery(id);
+    const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const togglePostLike = useTogglePostLikeMutation(user?.id);
+    const createCommentMutation = useCreateCommentMutation();
+    const post = postQuery.data;
+    const comments = commentsQuery.data ?? [];
+    const likedPostIds = (likedPostsQuery.data ?? []).map((item) => item.id);
     const handleLike = (id) => {
         if (!user) {
             toast.info("로그인이 필요해요");
@@ -210,98 +200,35 @@ export default function FeedDetail() {
         }
 
         const isLiked = likedPostIds.includes(id);
-        setLikedPostIds((prev) => isLiked ? prev.filter((p) => p !== id) : [...prev, id]);
-        setPost((prev) => prev ? { ...prev, likes: prev.likes + (isLiked ? -1 : 1) } : prev);
-        (isLiked ? unlikePost(id) : likePost(id)).catch((error) => {
-            if (error?.status === 409) return;
-            setLikedPostIds((prev) => isLiked ? [...prev, id] : prev.filter((p) => p !== id));
-            setPost((prev) => prev ? { ...prev, likes: prev.likes + (isLiked ? 1 : -1) } : prev);
-        });
+        togglePostLike.mutate({ postId: id, isLiked });
     };
-    const [post, setPost] = useState(null);
-    const [comments, setComments] = useState([]);
-    const [status, setStatus] = useState("loading");
     const [commentInput, setCommentInput] = useState("");
-    const [commentSubmitting, setCommentSubmitting] = useState(false);
-
-    useEffect(() => {
-        if (!user) return;
-        getLikedPosts()
-            .then((data) => setLikedPostIds((data?.posts ?? []).map((p) => p.postId)))
-            .catch(() => {});
-    }, [user]);
 
     useEffect(() => {
         if (!id) {
             toast.error("공유 레시피를 찾을 수 없어요");
             navigate("/feed", { replace: true });
-            return;
         }
-
-        let ignore = false;
-
-        Promise.resolve().then(() => {
-            if (ignore) return;
-
-            setPost(null);
-            setComments([]);
-            setStatus("loading");
-        });
-
-        getPost(id)
-            .then((postData) => {
-                if (ignore) return;
-
-                setPost(postDetailToView(postData));
-                setStatus("success");
-            })
-            .catch(() => {
-                if (ignore) return;
-
-                toast.error("공유 레시피를 불러오지 못했어요");
-                navigate("/feed", { replace: true });
-            });
-
-        getPostComments(id)
-            .then((commentsData) => {
-                if (ignore) return;
-
-                setComments(
-                    (commentsData?.comments ?? []).map((c) => ({
-                        id: c.comment_id,
-                        author: c.author_nickname,
-                        body: c.content,
-                        time: formatRelativeTime(c.created_at),
-                    }))
-                );
-            })
-            .catch(() => {});
-
-        return () => {
-            ignore = true;
-        };
     }, [id, navigate]);
 
-    if (status === "loading") return <FeedDetailSkeleton />;
+    useEffect(() => {
+        if (!postQuery.isError) return;
+
+        toast.error("공유 레시피를 불러오지 못했어요");
+        navigate("/feed", { replace: true });
+    }, [navigate, postQuery.isError]);
+
+    if (postQuery.isLoading || !post) return <FeedDetailSkeleton />;
 
     const liked = likedPostIds.includes(post.id);
     const likeCount = post.likes ?? 0;
     const handleCommentSubmit = async () => {
-        if (!commentInput.trim() || commentSubmitting) return;
-        setCommentSubmitting(true);
+        if (!commentInput.trim() || createCommentMutation.isPending) return;
         try {
-            const data = await createComment(post.id, commentInput.trim());
-            setComments((prev) => [{
-                id: data.comment_id,
-                author: data.author_nickname,
-                body: data.content,
-                time: formatRelativeTime(data.created_at),
-            }, ...prev]);
+            await createCommentMutation.mutateAsync({ postId: post.id, content: commentInput.trim() });
             setCommentInput("");
         } catch {
             toast.error("댓글 등록에 실패했어요");
-        } finally {
-            setCommentSubmitting(false);
         }
     };
     const handleStartCooking = () => {
@@ -443,7 +370,7 @@ export default function FeedDetail() {
                                     size="md"
                                     className="h-11 px-3 md:px-4"
                                     onClick={handleCommentSubmit}
-                                    disabled={!user || commentSubmitting}
+                                    disabled={!user || createCommentMutation.isPending}
                                 >
                                     <Send size={14} />
                                     <span className="hidden sm:inline">등록</span>

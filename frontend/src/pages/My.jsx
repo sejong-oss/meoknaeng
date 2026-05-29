@@ -8,11 +8,12 @@ import {
 } from "@/components/index.js";
 import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
-import { autocompleteIngredients, getLikedPosts } from "@/libs/api.js";
+import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
-import { formatMinutes } from "@/libs/utils.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import { useLikedPostsQuery } from "@/hooks/usePostQueries.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
 
@@ -24,17 +25,6 @@ async function loadIngredientSuggestions(query) {
 
     return result?.items?.map((item) => item.name) ?? [];
 }
-
-const likedPostToView = (post) => ({
-    id: post.postId ?? post.post_id,
-    title: post.title,
-    time: formatMinutes(post.cookTime ?? post.cook_time),
-    category: post.category,
-    difficulty: post.difficulty,
-    author: post.authorNickname ?? post.author_nickname,
-    likes: post.likeCount ?? post.like_count,
-    description: post.description,
-});
 
 function MySkeleton() {
     return (
@@ -105,9 +95,10 @@ export default function My() {
     const authInitialized = useAppStore((state) => state.authInitialized);
     const ingredients = useAppStore((state) => state.pantryIngredients);
     const myPosts = useAppStore((state) => state.myPosts);
-    const [likedPosts, setLikedPosts] = useState([]);
-    const savedRecipes = useAppStore((state) => state.savedRecipes);
-    const fetchSavedRecipes = useAppStore((state) => state.fetchSavedRecipes);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
+    const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const savedRecipes = savedRecipesQuery.data?.recipes ?? [];
+    const likedPosts = likedPostsQuery.data ?? [];
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
@@ -122,17 +113,6 @@ export default function My() {
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
-
-    useEffect(() => {
-        fetchSavedRecipes();
-    }, [fetchSavedRecipes, user]);
-
-    useEffect(() => {
-        if (!user) return;
-        getLikedPosts()
-            .then((data) => setLikedPosts((data?.posts ?? []).map(likedPostToView)))
-            .catch(() => {});
-    }, [user]);
 
     useEffect(() => {
         const el = ingredientsRef.current;

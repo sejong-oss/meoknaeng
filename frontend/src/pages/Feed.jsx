@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Add, Filter, Restaurant, WarningAlt } from "@carbon/icons-react";
 import {
@@ -20,33 +20,38 @@ import {
 } from "@/components/index.js";
 import { FEED_FILTER_OPTIONS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
 import { useAppStore } from "@/store/useAppStore.js";
-import { getLikedPosts, getPosts, likePost, unlikePost } from "@/libs/api.js";
-import { formatMinutes } from "@/libs/utils.js";
+import { useLikedPostsQuery, usePostsQuery, useTogglePostLikeMutation } from "@/hooks/usePostQueries.js";
 import { toast } from "@/libs/toast.js";
 import { SITE_NAME } from "@/libs/constants.js";
-
-const postToFeedItem = (post) => ({
-    id: post.post_id,
-    title: post.title,
-    time: formatMinutes(post.cook_time),
-    category: post.category,
-    difficulty: post.difficulty,
-    author: post.author_nickname,
-    likes: post.like_count ?? 0,
-});
 
 export default function Feed() {
     const navigate = useNavigate();
     const location = useLocation();
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const [posts, setPosts] = useState([]);
-    const [status, setStatus] = useState("loading");
-    const [likedPostIds, setLikedPostIds] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
     const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
+    const categoryParam = useMemo(
+        () => activeFilters.find((f) => f.group === "category")?.value,
+        [activeFilters]
+    );
+    const difficultyParam = useMemo(
+        () => activeFilters.find((f) => f.group === "difficulty")?.value,
+        [activeFilters]
+    );
+    const postsQuery = usePostsQuery({
+        category: categoryParam,
+        difficulty: difficultyParam,
+        q: debouncedQuery || undefined,
+    });
+    const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const togglePostLike = useTogglePostLikeMutation(user?.id);
+    const likedPostIds = useMemo(
+        () => (likedPostsQuery.data ?? []).map((post) => post.id),
+        [likedPostsQuery.data]
+    );
     const handleLike = (id) => {
         if (!user) {
             toast.info("로그인이 필요해요");
@@ -55,57 +60,13 @@ export default function Feed() {
         }
 
         const isLiked = likedPostIds.includes(id);
-        setLikedPostIds((prev) => isLiked ? prev.filter((p) => p !== id) : [...prev, id]);
-        setPosts((prev) => prev.map((p) => p.id === id ? { ...p, likes: p.likes + (isLiked ? -1 : 1) } : p));
-        (isLiked ? unlikePost(id) : likePost(id)).catch((error) => {
-            if (error?.status === 409) return;
-            setLikedPostIds((prev) => isLiked ? [...prev, id] : prev.filter((p) => p !== id));
-            setPosts((prev) => prev.map((p) => p.id === id ? { ...p, likes: p.likes + (isLiked ? 1 : -1) } : p));
-        });
+        togglePostLike.mutate({ postId: id, isLiked });
     };
-
-    const categoryParam = useMemo(
-        () => activeFilters.find((f) => f.group === "category")?.value,
-        [activeFilters]
-    );
-
-    const difficultyParam = useMemo(
-        () => activeFilters.find((f) => f.group === "difficulty")?.value,
-        [activeFilters]
-    );
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
         return () => clearTimeout(timer);
     }, [searchQuery]);
-
-    useEffect(() => {
-        if (!user) return;
-        getLikedPosts()
-            .then((data) => setLikedPostIds((data?.posts ?? []).map((p) => p.postId)))
-            .catch(() => {});
-    }, [user]);
-
-    const loadPosts = useCallback(() => {
-        getPosts({ category: categoryParam, difficulty: difficultyParam, q: debouncedQuery || undefined })
-            .then((data) => {
-                setPosts((data?.posts ?? []).map(postToFeedItem));
-                setStatus("success");
-            })
-            .catch(() => {
-                setPosts([]);
-                setStatus("error");
-            });
-    }, [categoryParam, difficultyParam, debouncedQuery]);
-
-    const fetchPosts = useCallback(() => {
-        setStatus("loading");
-        loadPosts();
-    }, [loadPosts]);
-
-    useEffect(() => {
-        loadPosts();
-    }, [loadPosts]);
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
@@ -126,12 +87,14 @@ export default function Feed() {
     };
 
     const filteredItems = useMemo(() => {
+        const posts = postsQuery.data ?? [];
+
         return posts.filter((item) => {
             const timeFilters = activeFilters.filter((f) => f.group === "time");
             if (timeFilters.length && !timeFilters.some((f) => parseInt(item.time) <= parseInt(f.value))) return false;
             return true;
         });
-    }, [posts, activeFilters]);
+    }, [postsQuery.data, activeFilters]);
 
     return (
         <>
@@ -228,7 +191,7 @@ export default function Feed() {
                     </div>
                 )}
 
-                {status === "loading" ? (
+                {postsQuery.isLoading ? (
                     <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <Card key={i} className="!p-4">
@@ -242,13 +205,13 @@ export default function Feed() {
                             </Card>
                         ))}
                     </div>
-                ) : status === "error" ? (
+                ) : postsQuery.isError ? (
                     <EmptyState
                         icon={<WarningAlt size={28} />}
                         title="피드를 불러오지 못했어요"
                         description="잠시 후 다시 시도해주세요"
                         action="다시 불러오기"
-                        onAction={fetchPosts}
+                        onAction={() => postsQuery.refetch()}
                     />
                 ) : filteredItems.length === 0 ? (
                     <EmptyState

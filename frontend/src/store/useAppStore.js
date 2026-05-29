@@ -1,17 +1,13 @@
 import { create } from "zustand";
 import {
-    MY_LIKED_POSTS,
     MY_POSTS,
 } from "@/data/mockData.js";
 import {
     getMyProfile,
-    getSavedRecipes as getSavedRecipesRequest,
     login as loginRequest,
     logout as logoutRequest,
     recommendRecipes as recommendRecipesRequest,
-    saveRecipe as saveRecipeRequest,
     signup as signupRequest,
-    unsaveRecipe as unsaveRecipeRequest,
     updateMyProfile,
 } from "@/libs/api.js";
 
@@ -46,16 +42,7 @@ const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     ownedIngredientCount: countOwnedRecipeIngredients(recipe.ingredients, ownedIngredients),
 });
 
-const savedApiToSummaryView = (recipe) => ({
-    id: recipe.recipeId,
-    title: recipe.name,
-    time: formatMinutes(recipe.cookTime),
-    difficulty: recipe.difficulty,
-    servings: formatServings(recipe.servings),
-    description: recipe.description,
-});
-
-export const useAppStore = create((set, get) => ({
+export const useAppStore = create((set) => ({
     user: null,
     authStatus: "idle",
     authInitialized: false,
@@ -68,10 +55,6 @@ export const useAppStore = create((set, get) => ({
     recommendationError: null,
     recommendationStartedAt: null,
     myPosts: MY_POSTS,
-    likedPosts: MY_LIKED_POSTS,
-    savedRecipeIds: [],
-    savedRecipes: [],
-    savedRecipesLoaded: false,
 
     openLoginModal: () => set({ loginModalOpen: true }),
     setLoginModalOpen: (loginModalOpen) => set({ loginModalOpen }),
@@ -92,29 +75,9 @@ export const useAppStore = create((set, get) => ({
             set({
                 user: null,
                 pantryIngredients: [],
-                savedRecipeIds: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
-        }
-    },
-    fetchSavedRecipes: async () => {
-        const { user, savedRecipesLoaded } = get();
-
-        if (!user || savedRecipesLoaded) return;
-
-        set({ savedRecipesLoaded: true });
-
-        try {
-            const data = await getSavedRecipesRequest();
-            const recipes = data?.recipes ?? [];
-
-            set({
-                savedRecipeIds: recipes.map((r) => r.recipeId),
-                savedRecipes: recipes.map(savedApiToSummaryView),
-            });
-        } catch {
-            set({ savedRecipesLoaded: false });
         }
     },
     login: async (credentials) => {
@@ -168,9 +131,6 @@ export const useAppStore = create((set, get) => ({
             set({
                 user: null,
                 pantryIngredients: [],
-                savedRecipeIds: [],
-                savedRecipes: [],
-                savedRecipesLoaded: false,
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -239,31 +199,5 @@ export const useAppStore = create((set, get) => ({
             });
             throw error;
         }
-    },
-    toggleSavedRecipe: async (recipeId) => {
-        const { user, savedRecipeIds, savedRecipes } = get();
-
-        if (!user) return;
-
-        const isSaved = savedRecipeIds.includes(recipeId);
-
-        if (isSaved) {
-            await unsaveRecipeRequest(recipeId);
-        } else {
-            await saveRecipeRequest(recipeId);
-        }
-
-        const nextSavedRecipeIds = isSaved
-            ? savedRecipeIds.filter((id) => id !== recipeId)
-            : [...savedRecipeIds, recipeId];
-        const nextSavedRecipes = isSaved
-            ? savedRecipes.filter((r) => r.id !== recipeId)
-            : savedRecipes;
-
-        set({
-            savedRecipeIds: nextSavedRecipeIds,
-            savedRecipes: nextSavedRecipes,
-            savedRecipesLoaded: false,
-        });
     },
 }));
