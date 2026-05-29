@@ -170,6 +170,37 @@ export function getMyPosts(options = {}) {
     return request("/users/me/posts", options);
 }
 
+export function createPost({ title, description, tip, sourceRecipeId, cookTime, category, difficulty }, options = {}) {
+    return request("/posts", {
+        method: "POST",
+        data: {
+            title,
+            description,
+            tip,
+            source_recipe_id: sourceRecipeId,
+            cook_time: cookTime,
+            category,
+            difficulty,
+        },
+        ...options,
+    });
+}
+
+export function updatePost(postId, { title, description, tip }, options = {}) {
+    return request(`/posts/${postId}`, {
+        method: "PATCH",
+        data: { title, description, tip },
+        ...options,
+    });
+}
+
+export function deletePost(postId, options = {}) {
+    return request(`/posts/${postId}`, {
+        method: "DELETE",
+        ...options,
+    });
+}
+
 export function likePost(postId, options = {}) {
     return request(`/posts/${postId}/likes`, { method: "POST", ...options });
 }

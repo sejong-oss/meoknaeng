@@ -32,9 +32,11 @@ import {
     Textarea,
     toast,
 } from "@/components/index.js";
-import { getRecipe } from "@/libs/api.js";
+import { getPost, getRecipe } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { queryKeys } from "@/libs/queryClient.js";
+import { useCreatePostMutation, useUpdatePostMutation } from "@/hooks/usePostMutations.js";
+import { useAppStore } from "@/store/useAppStore.js";
 import { formatMinutes, formatServings } from "@/libs/utils.js";
 
 const recipeToSourceRecipe = (recipe) => ({
@@ -42,6 +44,7 @@ const recipeToSourceRecipe = (recipe) => ({
     title: recipe.name,
     description: recipe.description,
     category: recipe.category,
+    cookTime: recipe.cookTime,
     time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
@@ -50,6 +53,15 @@ const recipeToSourceRecipe = (recipe) => ({
         .slice()
         .sort((a, b) => a.order - b.order)
         .map((step) => step.description),
+});
+
+const postToEditData = (post) => ({
+    form: {
+        title: post.title ?? "",
+        description: post.description ?? "",
+        tip: post.tip ?? "",
+    },
+    sourceRecipe: post.sourceRecipe ? recipeToSourceRecipe(post.sourceRecipe) : null,
 });
 
 function IngredientRow({ ingredient }) {
@@ -149,18 +161,28 @@ function SourceRecipeAside({ recipe }) {
 export default function FeedWrite() {
     const navigate = useNavigate();
     const location = useLocation();
+    const user = useAppStore((state) => state.user);
     const recipeId = location.state?.recipeId;
+    const postId = location.state?.postId;
+    const isEditMode = Boolean(postId);
+
     const recipeQuery = useQuery({
         queryKey: queryKeys.recipes.detail(recipeId),
         queryFn: async ({ signal }) => recipeToSourceRecipe(await getRecipe(recipeId, { signal })),
         enabled: Boolean(recipeId),
     });
-    const sourceRecipe = recipeQuery.data;
-    const [form, setForm] = useState({
-        title: "",
-        description: "",
-        tip: "",
+
+    const editPostQuery = useQuery({
+        queryKey: ["posts", "edit", postId],
+        queryFn: async ({ signal }) => getPost(postId, { signal }),
+        enabled: isEditMode,
     });
+
+    const createPostMutation = useCreatePostMutation(user?.id);
+    const updatePostMutation = useUpdatePostMutation(user?.id);
+
+    const sourceRecipe = recipeQuery.data ?? (editPostQuery.data ? postToEditData(editPostQuery.data).sourceRecipe : null);
+    const [form, setForm] = useState({ title: "", description: "", tip: "" });
     const [errors, setErrors] = useState({});
     const submittingRef = useRef(false);
     const shouldConfirmLeave = useCallback(() => Boolean(sourceRecipe) && !submittingRef.current, [sourceRecipe]);
@@ -174,10 +196,10 @@ export default function FeedWrite() {
     });
 
     useEffect(() => {
-        if (recipeId) return;
+        if (recipeId || postId) return;
 
         navigate("/feed", { replace: true, state: { openRecipeSelect: true } });
-    }, [navigate, recipeId]);
+    }, [navigate, recipeId, postId]);
 
     useEffect(() => {
         if (!recipeQuery.isError) return;
@@ -187,16 +209,31 @@ export default function FeedWrite() {
     }, [navigate, recipeQuery.isError]);
 
     useEffect(() => {
-        if (!sourceRecipe) return;
+        if (!editPostQuery.isError) return;
 
+        toast.error("게시글을 불러오지 못했어요");
+        navigate("/feed", { replace: true });
+    }, [navigate, editPostQuery.isError]);
+
+    useEffect(() => {
+        if (!recipeQuery.data) return;
+
+        const recipe = recipeQuery.data;
         Promise.resolve().then(() => {
             setForm((prev) => ({
                 ...prev,
-                title: prev.title || sourceRecipe.title,
-                description: prev.description || sourceRecipe.description || "",
+                title: prev.title || recipe.title,
+                description: prev.description || recipe.description || "",
             }));
         });
-    }, [sourceRecipe]);
+    }, [recipeQuery.data]);
+
+    useEffect(() => {
+        if (!editPostQuery.data) return;
+
+        const { form: editForm } = postToEditData(editPostQuery.data);
+        setForm(editForm);
+    }, [editPostQuery.data]);
 
     const updateField = (key, value) => {
         setForm((prev) => ({ ...prev, [key]: value }));
@@ -210,30 +247,63 @@ export default function FeedWrite() {
         return Object.keys(nextErrors).length === 0;
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         if (!validate()) {
             toast.error("필수 항목을 확인해주세요");
             return;
         }
 
-        toast.success("레시피 공유 글이 등록됐어요");
         submittingRef.current = true;
-        navigate("/feed");
+        try {
+            if (isEditMode) {
+                await updatePostMutation.mutateAsync({
+                    postId,
+                    title: form.title.trim(),
+                    description: form.description.trim(),
+                    tip: form.tip.trim(),
+                });
+                toast.success("게시글이 수정됐어요");
+                navigate(`/feed/${postId}`, { replace: true });
+            } else {
+                const created = await createPostMutation.mutateAsync({
+                    title: form.title.trim(),
+                    description: form.description.trim() || null,
+                    tip: form.tip.trim() || null,
+                    sourceRecipeId: recipeId,
+                    cookTime: sourceRecipe?.cookTime,
+                    category: sourceRecipe?.category,
+                    difficulty: sourceRecipe?.difficulty,
+                });
+                toast.success("게시글이 등록됐어요");
+                navigate(`/feed/${created.postId}`, { replace: true });
+            }
+        } catch {
+            submittingRef.current = false;
+            toast.error(isEditMode ? "게시글 수정에 실패했어요" : "게시글 등록에 실패했어요");
+        }
     };
 
-    if (recipeQuery.isLoading || !sourceRecipe) return null;
+    const isPending = createPostMutation.isPending || updatePostMutation.isPending;
+    const isLoading = isEditMode
+        ? (editPostQuery.isLoading || !sourceRecipe)
+        : (recipeQuery.isLoading || !sourceRecipe);
+
+    if (isLoading) return null;
+
+    const pageTitle = isEditMode ? "게시글 수정" : "레시피 공유";
+    const submitLabel = isEditMode ? "수정하기" : "등록하기";
 
     return (
         <>
-            <title>{`게시글 작성 | ${SITE_NAME}`}</title>
+            <title>{`${pageTitle} | ${SITE_NAME}`}</title>
             <form onSubmit={handleSubmit} className="-mx-4 -my-6 flex flex-col md:mx-0 md:my-0">
                 <div className="flex flex-col gap-6 px-4 py-6 md:gap-7 md:px-0 md:py-2">
                     <Breadcrumb
                         className="hidden md:flex"
                         items={[
                             { label: "피드", onClick: () => navigate("/feed") },
-                            { label: "레시피 공유" },
+                            { label: pageTitle },
                         ]}
                     />
 
@@ -242,25 +312,27 @@ export default function FeedWrite() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => navigate("/feed")}
+                                onClick={() => navigate(-1)}
                                 className="-ml-2 w-fit text-gray-500 md:hidden"
                             >
                                 <ArrowLeft size={16} />
-                                피드로 돌아가기
+                                돌아가기
                             </Button>
                             <div className="flex flex-col gap-3">
                                 <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-5xl">
-                                    레시피 공유
+                                    {pageTitle}
                                 </h1>
-                                <p className="text-sm font-medium text-gray-500 md:text-base">
-                                    추천받은 레시피에 직접 만들어 본 경험을 더해 다른 사용자와 공유해보세요
-                                </p>
+                                {!isEditMode && (
+                                    <p className="text-sm font-medium text-gray-500 md:text-base">
+                                        추천받은 레시피에 직접 만들어 본 경험을 더해 다른 사용자와 공유해보세요
+                                    </p>
+                                )}
                             </div>
                         </div>
                         <div className="hidden md:block">
-                            <Button variant="primary" size="md" type="submit">
+                            <Button variant="primary" size="md" type="submit" disabled={isPending}>
                                 <Checkmark size={16} />
-                                등록하기
+                                {submitLabel}
                             </Button>
                         </div>
                     </div>
@@ -305,9 +377,9 @@ export default function FeedWrite() {
                     </div>
                 </div>
 
-                <FloatingActionButton type="submit">
+                <FloatingActionButton type="submit" disabled={isPending}>
                     <Checkmark size={16} />
-                    등록하기
+                    {submitLabel}
                 </FloatingActionButton>
 
                 <LeaveWriteModal

@@ -12,6 +12,7 @@ import {
     useTogglePostLikeMutation,
     useUpdateCommentMutation,
 } from "@/hooks/usePostQueries.js";
+import { useDeletePostMutation } from "@/hooks/usePostMutations.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -59,7 +60,7 @@ const IngredientRow = ({ ingredient }) => (
     </div>
 );
 
-const PostHeader = ({ recipe, likeCount, liked, onLike }) => (
+const PostHeader = ({ recipe, likeCount, liked, onLike, canManage, onEdit, onDelete, deleting }) => (
     <div className="flex flex-col gap-2.5 border-b border-gray-200 pb-4">
         <div className="flex items-center gap-2.5">
             <Avatar name={recipe.author.name} size="md" />
@@ -81,15 +82,37 @@ const PostHeader = ({ recipe, likeCount, liked, onLike }) => (
                     좋아요 {likeCount}
                 </Button>
             </div>
-            <Button
-                variant="ghost"
-                size="sm"
-                className="size-9 p-0"
-                aria-label="공유"
-                title="공유"
-            >
-                <Share size={14} />
-            </Button>
+            <div className="flex items-center gap-1">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="size-9 p-0"
+                    aria-label="공유"
+                    title="공유"
+                >
+                    <Share size={14} />
+                </Button>
+                {canManage && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="size-9 p-0"
+                                aria-label="게시글 메뉴"
+                            >
+                                <OverflowMenuVertical />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={onEdit}>수정</DropdownMenuItem>
+                            <DropdownMenuDangerItem onSelect={onDelete} disabled={deleting}>
+                                삭제
+                            </DropdownMenuDangerItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
+            </div>
         </div>
     </div>
 );
@@ -263,6 +286,7 @@ export default function FeedDetail() {
     const createCommentMutation = useCreateCommentMutation();
     const updateCommentMutation = useUpdateCommentMutation();
     const deleteCommentMutation = useDeleteCommentMutation();
+    const deletePostMutation = useDeletePostMutation(user?.id);
     const post = postQuery.data;
     const comments = commentsQuery.data ?? [];
     const likedPostIds = (likedPostsQuery.data ?? []).map((item) => item.id);
@@ -344,6 +368,18 @@ export default function FeedDetail() {
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
+    const handleEditPost = () => {
+        navigate("/feed/write", { state: { postId: post.id } });
+    };
+    const handleDeletePost = async () => {
+        try {
+            await deletePostMutation.mutateAsync({ postId: post.id });
+            toast.success("게시글을 삭제했어요");
+            navigate("/feed", { replace: true });
+        } catch {
+            toast.error("게시글 삭제에 실패했어요");
+        }
+    };
 
     return (
         <>
@@ -389,6 +425,10 @@ export default function FeedDetail() {
                                 likeCount={likeCount}
                                 liked={liked}
                                 onLike={() => handleLike(post.id)}
+                                canManage={user?.id === post.authorId}
+                                onEdit={handleEditPost}
+                                onDelete={handleDeletePost}
+                                deleting={deletePostMutation.isPending}
                             />
 
                             <p className="max-w-3xl text-sm leading-relaxed text-gray-600 md:text-base">
@@ -547,6 +587,7 @@ export default function FeedDetail() {
                     </Button>
                 </div>
             </div>
+
         </>
     );
 }

@@ -27,6 +27,7 @@ export const postToFeedItem = (post) => ({
 
 const postDetailToView = (post) => ({
     id: post.postId,
+    authorId: post.authorId,
     title: post.title,
     description: post.description,
     note: post.tip ?? null,
