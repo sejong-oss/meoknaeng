@@ -263,7 +263,7 @@ export default function FeedWrite() {
                     description: form.description.trim(),
                     tip: form.tip.trim(),
                 });
-                toast.success("게시글이 수정됐어요");
+                toast.success("게시글을 수정했어요");
                 navigate(`/feed/${postId}`, { replace: true });
             } else {
                 const created = await createPostMutation.mutateAsync({
@@ -275,7 +275,7 @@ export default function FeedWrite() {
                     category: sourceRecipe?.category,
                     difficulty: sourceRecipe?.difficulty,
                 });
-                toast.success("게시글이 등록됐어요");
+                toast.success("게시글을 등록했어요");
                 navigate(`/feed/${created.postId}`, { replace: true });
             }
         } catch {
