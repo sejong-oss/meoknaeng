@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timezone
 
 from pydantic import ValidationError
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.chain.recipe import recipe_chain
@@ -10,6 +11,7 @@ from app.models.recipe import Recipe as RecipeORM
 from app.models.recipe import RecipeIngredient as RecipeIngredientORM
 from app.models.recipe import RecipeStep as RecipeStepORM
 from app.models.schemas import RecipeRequest, RecipeResponse
+from app.models.user import UserIngredient
 
 
 class RecipeServiceError(Exception):
@@ -18,7 +20,7 @@ class RecipeServiceError(Exception):
         self.detail = detail
 
 
-async def recommend_recipe(payload: RecipeRequest, db: AsyncSession) -> RecipeResponse:
+async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id: str | None = None) -> RecipeResponse:
     try:
         raw = await recipe_chain.ainvoke(
             {
@@ -68,6 +70,17 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession) -> RecipeRe
             ))
 
         recipe.recipe_id = orm_recipe.recipe_id
+
+    if user_id:
+        existing = set(
+            (await db.scalars(
+                select(UserIngredient.ingredient_name).where(UserIngredient.user_id == user_id)
+            )).all()
+        )
+        new_names = [name for name in payload.ingredients if name not in existing]
+        if new_names:
+            for name in new_names:
+                db.add(UserIngredient(user_id=user_id, ingredient_name=name, created_at=now))
 
     await db.commit()
     return response
