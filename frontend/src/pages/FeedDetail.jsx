@@ -16,7 +16,6 @@ import {
     Send,
     Share,
     Time,
-    UserFollow,
     UserMultiple,
 } from "@carbon/icons-react";
 import {
@@ -55,10 +54,6 @@ const PostHeader = ({ recipe, likeCount, liked, onLike }) => (
                 <p className="truncate text-sm font-extrabold text-gray-900 md:text-base">@{recipe.author.name}</p>
                 <p className="truncate text-xs font-medium text-gray-500">{recipe.createdAt}</p>
             </div>
-            <Button variant="outline" size="sm">
-                <UserFollow size={14} />
-                팔로우
-            </Button>
         </div>
 
         <div className="flex items-center justify-between gap-3">
@@ -144,8 +139,6 @@ const RelatedRecipeRow = ({ recipe, onClick }) => {
     );
 };
 
-
-
 const postDetailToView = (post) => ({
     id: post.post_id,
     title: post.title,
@@ -210,7 +203,12 @@ export default function FeedDetail() {
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const [likedPostIds, setLikedPostIds] = useState([]);
     const handleLike = (id) => {
-        if (!user) { toast.info("로그인이 필요해요"); openLoginModal(); return; }
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+
         const isLiked = likedPostIds.includes(id);
         setLikedPostIds((prev) => isLiked ? prev.filter((p) => p !== id) : [...prev, id]);
         setPost((prev) => prev ? { ...prev, likes: prev.likes + (isLiked ? -1 : 1) } : prev);
@@ -240,22 +238,34 @@ export default function FeedDetail() {
             return;
         }
 
-        setPost(null);
-        setComments([]);
-        setStatus("loading");
+        let ignore = false;
+
+        Promise.resolve().then(() => {
+            if (ignore) return;
+
+            setPost(null);
+            setComments([]);
+            setStatus("loading");
+        });
 
         getPost(id)
             .then((postData) => {
+                if (ignore) return;
+
                 setPost(postDetailToView(postData));
                 setStatus("success");
             })
             .catch(() => {
+                if (ignore) return;
+
                 toast.error("공유 레시피를 불러오지 못했어요");
                 navigate("/feed", { replace: true });
             });
 
         getPostComments(id)
             .then((commentsData) => {
+                if (ignore) return;
+
                 setComments(
                     (commentsData?.comments ?? []).map((c) => ({
                         id: c.comment_id,
@@ -266,10 +276,13 @@ export default function FeedDetail() {
                 );
             })
             .catch(() => {});
+
+        return () => {
+            ignore = true;
+        };
     }, [id, navigate]);
 
     if (status === "loading") return <FeedDetailSkeleton />;
-
 
     const liked = likedPostIds.includes(post.id);
     const likeCount = post.likes ?? 0;
