@@ -34,30 +34,7 @@ export function useToggleSavedRecipeMutation(userId) {
 
     return useMutation({
         mutationFn: ({ recipeId, isSaved }) => isSaved ? unsaveRecipe(recipeId) : saveRecipe(recipeId),
-        onMutate: async ({ recipeId, isSaved }) => {
-            const queryKey = queryKeys.savedRecipes(userId);
-
-            await queryClient.cancelQueries({ queryKey });
-
-            const previousSavedRecipes = queryClient.getQueryData(queryKey);
-
-            queryClient.setQueryData(queryKey, (data = { ids: [], recipes: [] }) => ({
-                ids: isSaved
-                    ? data.ids.filter((id) => id !== recipeId)
-                    : [...new Set([...data.ids, recipeId])],
-                recipes: isSaved
-                    ? data.recipes.filter((recipe) => recipe.id !== recipeId)
-                    : data.recipes,
-            }));
-
-            return { previousSavedRecipes };
-        },
-        onError: (_error, _variables, context) => {
-            if (context?.previousSavedRecipes) {
-                queryClient.setQueryData(queryKeys.savedRecipes(userId), context.previousSavedRecipes);
-            }
-        },
-        onSettled: () => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.savedRecipes(userId) });
         },
     });

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Favorite, FavoriteFilled, Growth, Time, Restaurant, UserMultiple } from "@carbon/icons-react";
 import { Chip } from "@/components/Chip.jsx";
 import { Avatar } from "@/components/Avatar.jsx";
@@ -70,21 +69,11 @@ export function ContentCard({
     onClick,
     className = "",
 }) {
-    const [likedOverride, setLikedOverride] = useState(null);
     const hasLikes = Number.isFinite(likes);
-    const liked = onLike ? defaultLiked : likedOverride ?? defaultLiked;
-    const visibleLikes = onLike
-        ? likes
-        : likes + (liked ? 1 : 0) - (defaultLiked ? 1 : 0);
+    const liked = defaultLiked;
     const handleLikeClick = (event) => {
         event.stopPropagation();
-
-        if (onLike) {
-            onLike();
-            return;
-        }
-
-        setLikedOverride(!liked);
+        onLike?.();
     };
 
     return (
@@ -109,7 +98,7 @@ export function ContentCard({
                         className={["absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-white/75 backdrop-blur-sm text-xs transition-colors", liked ? "text-primary-500" : "text-gray-500"].join(" ")}
                     >
                         {liked ? <FavoriteFilled size={12} /> : <Favorite size={12} />}
-                        <span className={liked ? "font-semibold" : ""}>{visibleLikes}</span>
+                        <span className={liked ? "font-semibold" : ""}>{likes}</span>
                     </button>
                 )}
             </div>
