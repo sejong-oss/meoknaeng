@@ -66,7 +66,7 @@ def _to_list_item(post, like_count: int) -> PostListItem:
     )
 
 
-def _to_detail(post) -> PostDetailResponse:
+def _to_detail(post, like_count: int) -> PostDetailResponse:
     recipe = None
     if post.source_recipe:
         r = post.source_recipe
@@ -91,6 +91,7 @@ def _to_detail(post) -> PostDetailResponse:
         title=post.title,
         description=post.description,
         tip=post.tip,
+        like_count=like_count,
         created_at=post.created_at.isoformat(),
         updated_at=post.updated_at.isoformat(),
         source_recipe=recipe,
@@ -136,8 +137,8 @@ async def get_post_detail_handler(
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostDetailResponse]:
     try:
-        post = await get_post_detail(post_id, db)
-        return ApiResponse(success=True, data=_to_detail(post))
+        post, like_count = await get_post_detail(post_id, db)
+        return ApiResponse(success=True, data=_to_detail(post, like_count))
     except PostError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
 

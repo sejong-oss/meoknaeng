@@ -235,9 +235,16 @@ async def get_post_list(
     return [(post, like_count) for post, like_count in rows], total
 
 
-async def get_post_detail(post_id: str, db: AsyncSession) -> Post:
+async def get_post_detail(post_id: str, db: AsyncSession) -> tuple[Post, int]:
+    like_count_subq = (
+        select(func.count(PostLike.post_id))
+        .where(PostLike.post_id == Post.post_id)
+        .correlate(Post)
+        .scalar_subquery()
+    )
+
     stmt = (
-        select(Post)
+        select(Post, like_count_subq.label("like_count"))
         .options(
             selectinload(Post.author),
             selectinload(Post.source_recipe).selectinload(Recipe.ingredients),
@@ -245,7 +252,9 @@ async def get_post_detail(post_id: str, db: AsyncSession) -> Post:
         )
         .where(Post.post_id == post_id)
     )
-    post = (await db.execute(stmt)).scalar_one_or_none()
-    if not post:
+    row = (await db.execute(stmt)).one_or_none()
+    if not row:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
-    return post
+
+    post, like_count = row
+    return post, like_count
