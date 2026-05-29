@@ -96,11 +96,11 @@ function IngredientRow({ ingredient }) {
 }
 
 const VideoCard = ({ video }) => (
-    <a href={video.video_url ?? "#"} target="_blank" rel="noreferrer" className="block h-full">
-        <Card className="h-full gap-2 overflow-hidden rounded-btn">
+    <a href={video.videoUrl ?? "#"} target="_blank" rel="noreferrer" className="block h-full">
+        <Card interactive className="h-full gap-2 overflow-hidden rounded-btn">
             <div className="relative">
-                {video.thumbnail_url ? (
-                    <img src={video.thumbnail_url} alt={video.title} className="h-32 w-full rounded-btn object-cover md:h-36" />
+                {video.thumbnailUrl ? (
+                    <img src={video.thumbnailUrl} alt={video.title} className="h-32 w-full rounded-btn object-cover md:h-36" />
                 ) : (
                     <Skeleton className="h-32 w-full rounded-btn md:h-36" />
                 )}
@@ -322,7 +322,7 @@ export default function RecipeDetail() {
                             {recipe.videos.length > 0 ? (
                                 <div className="grid auto-rows-fr gap-3 md:grid-cols-3">
                                     {recipe.videos.map((video) => (
-                                        <VideoCard key={video.video_id} video={video} />
+                                        <VideoCard key={video.videoId} video={video} />
                                     ))}
                                 </div>
                             ) : (
