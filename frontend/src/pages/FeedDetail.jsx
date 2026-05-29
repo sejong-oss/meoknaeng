@@ -4,14 +4,16 @@ import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import {
-    useCreateCommentMutation,
-    useDeleteCommentMutation,
     useLikedPostsQuery,
     usePostCommentsQuery,
     usePostQuery,
+} from "@/hooks/usePostQueries.js";
+import {
+    useCreateCommentMutation,
+    useDeleteCommentMutation,
     useTogglePostLikeMutation,
     useUpdateCommentMutation,
-} from "@/hooks/usePostQueries.js";
+} from "@/hooks/usePostInteractionMutations.js";
 import { useDeletePostMutation } from "@/hooks/usePostMutations.js";
 import {
     ArrowLeft,

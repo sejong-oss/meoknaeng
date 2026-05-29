@@ -19,7 +19,8 @@ import {
     DropdownMenuItem,
 } from "@/components/index.js";
 import { useAppStore } from "@/store/useAppStore.js";
-import { useLikedPostsQuery, usePostsQuery, useTogglePostLikeMutation } from "@/hooks/usePostQueries.js";
+import { useLikedPostsQuery, usePostsQuery } from "@/hooks/usePostQueries.js";
+import { useTogglePostLikeMutation } from "@/hooks/usePostInteractionMutations.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 import { toast } from "@/libs/toast.js";
 import { FEED_FILTER_OPTIONS, SITE_NAME } from "@/libs/constants.js";
