@@ -302,6 +302,7 @@ export default function FeedDetail() {
         try {
             await createCommentMutation.mutateAsync({ postId: post.id, content: commentInput.trim() });
             setCommentInput("");
+            toast.success("댓글을 등록했어요");
         } catch {
             toast.error("댓글 등록에 실패했어요");
         } finally {
@@ -464,7 +465,7 @@ export default function FeedDetail() {
                             </div>
                             <div className="flex items-center gap-2 rounded-card border border-gray-200 bg-white p-2.5 md:gap-3 md:p-3">
                                 <div className="hidden md:block">
-                                    <Avatar name="나" size="md" color="neutral" />
+                                    <Avatar name={user?.name ?? "나"} size="md" color="neutral" />
                                 </div>
                                 <Input
                                     className="flex-1 [&>div]:h-11"
@@ -484,7 +485,7 @@ export default function FeedDetail() {
                                     size="md"
                                     className="h-11 px-3 md:px-4"
                                     onClick={handleCommentSubmit}
-                                    disabled={!user || createCommentMutation.isPending}
+                                    disabled={!user || !commentInput.trim() || createCommentMutation.isPending}
                                 >
                                     <Send size={14} />
                                     <span className="hidden sm:inline">등록</span>

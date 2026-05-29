@@ -9,11 +9,10 @@ import {
 } from "@/libs/api.js";
 
 import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
+import { formatMinutes, formatServings } from "@/libs/utils.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
 
-const formatMinutes = (minutes) => minutes == null ? "" : `${minutes}분`;
-const formatServings = (servings) => servings == null ? "" : `${servings}인분`;
 const DEFAULT_RECIPE_QUERY = "냉장고 재료로 만들 수 있는 레시피를 추천해줘.";
 
 const authUserToView = (user) => ({
