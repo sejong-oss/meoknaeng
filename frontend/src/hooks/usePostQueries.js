@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createComment, getLikedPosts, getPost, getPostComments, getPosts, likePost, unlikePost } from "@/libs/api.js";
+import { createComment, getLikedPosts, getMyPosts, getPost, getPostComments, getPosts, likePost, unlikePost } from "@/libs/api.js";
 import { queryKeys } from "@/libs/queryClient.js";
 import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
 
@@ -78,6 +78,20 @@ export function useLikedPostsQuery(userId) {
         queryFn: async ({ signal }) => {
             const data = await getLikedPosts({ signal });
             return (data?.posts ?? []).map(postToFeedItem);
+        },
+        enabled: Boolean(userId),
+    });
+}
+
+export function useMyPostsQuery(userId) {
+    return useQuery({
+        queryKey: queryKeys.myPosts(userId),
+        queryFn: async ({ signal }) => {
+            const data = await getMyPosts({ signal });
+            return (data?.posts ?? []).map((post) => ({
+                ...postToFeedItem(post),
+                likes: undefined,
+            }));
         },
         enabled: Boolean(userId),
     });

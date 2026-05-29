@@ -151,6 +151,10 @@ export function getLikedPosts(options = {}) {
     return request("/users/me/liked-posts", options);
 }
 
+export function getMyPosts(options = {}) {
+    return request("/users/me/posts", options);
+}
+
 export function likePost(postId, options = {}) {
     return request(`/posts/${postId}/likes`, { method: "POST", ...options });
 }

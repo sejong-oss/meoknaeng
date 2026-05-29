@@ -1,8 +1,5 @@
 import { create } from "zustand";
 import {
-    MY_POSTS,
-} from "@/data/mockData.js";
-import {
     getMyProfile,
     login as loginRequest,
     logout as logoutRequest,
@@ -23,9 +20,6 @@ const authUserToView = (user) => ({
     id: user.userId ?? user.user_id,
     name: user.nickname,
     email: user.email,
-    recipes: 0,
-    followers: 0,
-    following: 0,
     ingredients: [],
 });
 
@@ -54,7 +48,6 @@ export const useAppStore = create((set) => ({
     recommendationStatus: "idle",
     recommendationError: null,
     recommendationStartedAt: null,
-    myPosts: MY_POSTS,
 
     openLoginModal: () => set({ loginModalOpen: true }),
     setLoginModalOpen: (loginModalOpen) => set({ loginModalOpen }),

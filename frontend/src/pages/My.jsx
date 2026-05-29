@@ -12,7 +12,7 @@ import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
-import { useLikedPostsQuery } from "@/hooks/usePostQueries.js";
+import { useLikedPostsQuery, useMyPostsQuery } from "@/hooks/usePostQueries.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
@@ -94,11 +94,12 @@ export default function My() {
     const authStatus = useAppStore((state) => state.authStatus);
     const authInitialized = useAppStore((state) => state.authInitialized);
     const ingredients = useAppStore((state) => state.pantryIngredients);
-    const myPosts = useAppStore((state) => state.myPosts);
     const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const myPostsQuery = useMyPostsQuery(user?.id);
     const savedRecipes = savedRecipesQuery.data?.recipes ?? [];
     const likedPosts = likedPostsQuery.data ?? [];
+    const myPosts = myPostsQuery.data ?? [];
     const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
@@ -292,10 +293,6 @@ export default function My() {
                     <Avatar name={user.name} size="xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                     <div className="flex-1 min-w-0">
                         {renderNickname({ mobile: true })}
-                        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                            <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
-                            <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
-                        </div>
                     </div>
                     <Button
                         variant="outline"
@@ -320,10 +317,6 @@ export default function My() {
                         <Avatar name={user.name} size="2xl" className="[&>div]:border-4 [&>div]:border-white [&>div]:shadow-lg" />
                         <div className="text-center mt-1">
                             {renderNickname()}
-                            <div className="mt-2 flex items-center gap-3.5 justify-center text-xs text-gray-500">
-                                <span><span className="font-bold text-gray-900">{user.followers}</span> 팔로워</span>
-                                <span><span className="font-bold text-gray-900">{user.following}</span> 팔로잉</span>
-                            </div>
                         </div>
                     </div>
 

@@ -16,6 +16,7 @@ export const queryClient = new QueryClient({
 export const queryKeys = {
     savedRecipes: (userId) => ["users", userId, "savedRecipes"],
     likedPosts: (userId) => ["users", userId, "likedPosts"],
+    myPosts: (userId) => ["users", userId, "posts"],
     posts: {
         all: ["posts"],
         list: (params) => ["posts", "list", params],
