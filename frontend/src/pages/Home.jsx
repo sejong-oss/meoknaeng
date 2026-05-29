@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Chip, EmptyState, IngredientInput } from "@/components";
 import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
-import { INGREDIENT_LIST } from "@/data/mockData.js";
 import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -129,7 +128,6 @@ export default function Home() {
                                 ingredients={ingredients}
                                 onAdd={handleAdd}
                                 onRemove={handleRemove}
-                                ingredientList={INGREDIENT_LIST}
                                 loadSuggestions={loadIngredientSuggestions}
                                 suggestionsAnchorRef={inputPanelRef}
                                 chipClassName="!px-4 !py-2 !text-sm !gap-1.5"
