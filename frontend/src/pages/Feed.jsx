@@ -41,9 +41,14 @@ export default function Feed() {
         () => activeFilters.find((f) => f.group === "difficulty")?.value,
         [activeFilters]
     );
+    const cookTimeMaxParam = useMemo(
+        () => activeFilters.find((f) => f.group === "time")?.value,
+        [activeFilters]
+    );
     const postsQuery = usePostsQuery({
         category: categoryParam,
         difficulty: difficultyParam,
+        cookTimeMax: cookTimeMaxParam ? Number(cookTimeMaxParam) : undefined,
         q: debouncedQuery || undefined,
     });
     const likedPostsQuery = useLikedPostsQuery(user?.id);
@@ -71,11 +76,10 @@ export default function Feed() {
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
-        setActiveFilters((prev) =>
-            prev.find((f) => f.key === key)
-                ? prev.filter((f) => f.key !== key)
-                : [...prev, { key, group, label, value }]
-        );
+        setActiveFilters((prev) => {
+            if (prev.find((f) => f.key === key)) return prev.filter((f) => f.key !== key);
+            return [...prev.filter((f) => f.group !== group), { key, group, label, value }];
+        });
     };
 
     const removeFilter = (key) => setActiveFilters((prev) => prev.filter((f) => f.key !== key));
@@ -87,15 +91,7 @@ export default function Feed() {
         navigate("/feed/write", { state: { recipeId } });
     };
 
-    const filteredItems = useMemo(() => {
-        const posts = postsQuery.data ?? [];
-
-        return posts.filter((item) => {
-            const timeFilters = activeFilters.filter((f) => f.group === "time");
-            if (timeFilters.length && !timeFilters.some((f) => parseInt(item.time) <= parseInt(f.value))) return false;
-            return true;
-        });
-    }, [postsQuery.data, activeFilters]);
+    const feedItems = postsQuery.data ?? [];
 
     return (
         <>
@@ -148,18 +144,15 @@ export default function Feed() {
                                 <div key={group}>
                                     <DropdownMenuLabel>{label}</DropdownMenuLabel>
                                     <div className="flex flex-wrap gap-x-1.5 gap-y-1 px-3 pb-2 mt-1">
-                                        {options.flatMap(({ label: optLabel, value }, chipIdx) => [
-                                            group === "category" && chipIdx === 3
-                                                ? <div key="break" className="w-full" />
-                                                : null,
+                                        {options.map(({ label: optLabel, value }) => (
                                             <Chip
                                                 key={value}
                                                 variant={isActive(group, value) ? "brand" : "outline"}
                                                 onClick={() => toggleFilter(group, optLabel, value)}
                                             >
                                                 {optLabel}
-                                            </Chip>,
-                                        ])}
+                                            </Chip>
+                                        ))}
                                     </div>
                                 </div>
                             ))}
@@ -214,7 +207,7 @@ export default function Feed() {
                         action="다시 불러오기"
                         onAction={() => postsQuery.refetch()}
                     />
-                ) : filteredItems.length === 0 ? (
+                ) : feedItems.length === 0 ? (
                     <EmptyState
                         icon={<Restaurant size={28} />}
                         title="검색 결과가 없어요"
@@ -224,7 +217,7 @@ export default function Feed() {
                     />
                 ) : (
                     <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {filteredItems.map((item) => (
+                        {feedItems.map((item) => (
                             <FeedCard
                                 key={item.id}
                                 title={item.title}

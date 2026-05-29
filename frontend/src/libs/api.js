@@ -124,9 +124,9 @@ export function getSavedRecipes(options = {}) {
     return request("/users/me/saved-recipes", options);
 }
 
-export function getPosts({ page = 1, size = 100, q, category, difficulty } = {}, options = {}) {
+export function getPosts({ page = 1, size = 100, q, category, difficulty, cookTimeMax } = {}, options = {}) {
     return request("/posts", {
-        params: { page, size, q, category, difficulty },
+        params: { page, size, q, category, difficulty, cookTimeMax },
         ...options,
     });
 }
