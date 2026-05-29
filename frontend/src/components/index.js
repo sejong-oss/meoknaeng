@@ -17,6 +17,7 @@ export { Select, SelectItem, SelectGroup, SelectSeparator } from "@/components/S
 export { Modal, ModalTrigger, ModalContent, ModalFooter, ModalClose } from "@/components/Modal.jsx";
 export { LoginModal } from "@/components/modals/LoginModal.jsx";
 export { LeaveWriteModal } from "@/components/modals/LeaveWriteModal.jsx";
+export { DeletePostModal } from "@/components/modals/DeletePostModal.jsx";
 export { RecipeSelectModal } from "@/components/modals/RecipeSelectModal.jsx";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/Tabs.jsx";
 export {

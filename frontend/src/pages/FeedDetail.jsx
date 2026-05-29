@@ -33,6 +33,7 @@ import {
     Button,
     Card,
     Chip,
+    DeletePostModal,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuDangerItem,
@@ -293,6 +294,7 @@ export default function FeedDetail() {
     const commentSubmittingRef = useRef(false);
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingCommentInput, setEditingCommentInput] = useState("");
+    const [deletePostOpen, setDeletePostOpen] = useState(false);
     const handleLike = (id) => {
         if (!user) {
             toast.info("로그인이 필요해요");
@@ -371,12 +373,13 @@ export default function FeedDetail() {
     const handleEditPost = () => {
         navigate("/feed/write", { state: { postId: post.id } });
     };
-    const handleDeletePost = async () => {
+    const handleDeleteConfirm = async () => {
         try {
             await deletePostMutation.mutateAsync({ postId: post.id });
             toast.success("게시글을 삭제했어요");
             navigate("/feed", { replace: true });
         } catch {
+            setDeletePostOpen(false);
             toast.error("게시글 삭제에 실패했어요");
         }
     };
@@ -427,7 +430,7 @@ export default function FeedDetail() {
                                 onLike={() => handleLike(post.id)}
                                 canManage={user?.id === post.authorId}
                                 onEdit={handleEditPost}
-                                onDelete={handleDeletePost}
+                                onDelete={() => setDeletePostOpen(true)}
                                 deleting={deletePostMutation.isPending}
                             />
 
@@ -588,6 +591,13 @@ export default function FeedDetail() {
                 </div>
             </div>
 
+            <DeletePostModal
+                open={deletePostOpen}
+                onOpenChange={setDeletePostOpen}
+                onCancel={() => setDeletePostOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                deleting={deletePostMutation.isPending}
+            />
         </>
     );
 }
