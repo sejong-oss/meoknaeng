@@ -4,9 +4,9 @@ import { queryKeys } from "@/libs/queryClient.js";
 import { formatMinutes, formatServings } from "@/libs/utils.js";
 
 const savedRecipeToView = (recipe) => ({
-    id: recipe.recipeId ?? recipe.recipe_id,
+    id: recipe.recipeId,
     title: recipe.name,
-    time: formatMinutes(recipe.cookTime ?? recipe.cook_time),
+    time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     description: recipe.description,
@@ -16,7 +16,7 @@ const savedRecipesToView = (data) => {
     const recipes = data?.recipes ?? [];
 
     return {
-        ids: recipes.map((recipe) => recipe.recipeId ?? recipe.recipe_id),
+        ids: recipes.map((recipe) => recipe.recipeId),
         recipes: recipes.map(savedRecipeToView),
     };
 };

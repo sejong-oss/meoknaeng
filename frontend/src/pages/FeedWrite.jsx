@@ -38,11 +38,11 @@ import { queryKeys } from "@/libs/queryClient.js";
 import { formatMinutes, formatServings } from "@/libs/utils.js";
 
 const recipeToSourceRecipe = (recipe) => ({
-    id: recipe.recipeId ?? recipe.recipe_id,
+    id: recipe.recipeId,
     title: recipe.name,
     description: recipe.description,
     category: recipe.category,
-    time: formatMinutes(recipe.cookTime ?? recipe.cook_time),
+    time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     ingredients: recipe.ingredients ?? [],

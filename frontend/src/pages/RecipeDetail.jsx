@@ -60,10 +60,10 @@ const ingredientStatusOrder = {
 
 
 const recipeToDetailView = (recipe, ownedIngredients) => ({
-    id: recipe.recipe_id,
+    id: recipe.recipeId,
     title: recipe.name,
     description: recipe.description,
-    time: formatMinutes(recipe.cook_time),
+    time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     ingredients: addRecipeIngredientStatuses(recipe.ingredients, ownedIngredients),

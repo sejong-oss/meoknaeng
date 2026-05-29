@@ -17,18 +17,18 @@ const formatServings = (servings) => servings == null ? "" : `${servings}인분`
 const DEFAULT_RECIPE_QUERY = "냉장고 재료로 만들 수 있는 레시피를 추천해줘.";
 
 const authUserToView = (user) => ({
-    id: user.userId ?? user.user_id,
+    id: user.userId,
     name: user.nickname,
     email: user.email,
     ingredients: [],
 });
 
-const recipeId = (recipe) => recipe.recipe_id ?? recipe.name;
+const recipeId = (recipe) => recipe.recipeId ?? recipe.name;
 
 const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     id: recipeId(recipe),
     title: recipe.name,
-    time: formatMinutes(recipe.cook_time_minutes ?? recipe.cook_time),
+    time: formatMinutes(recipe.cookTimeMinutes ?? recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     description: recipe.summary ?? recipe.description,

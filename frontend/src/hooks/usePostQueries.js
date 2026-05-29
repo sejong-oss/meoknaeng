@@ -4,32 +4,32 @@ import { queryKeys } from "@/libs/queryClient.js";
 import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
 
 export const postToFeedItem = (post) => ({
-    id: post.postId ?? post.post_id,
+    id: post.postId,
     title: post.title,
-    time: formatMinutes(post.cookTime ?? post.cook_time),
+    time: formatMinutes(post.cookTime),
     category: post.category,
     difficulty: post.difficulty,
-    author: post.authorNickname ?? post.author_nickname,
-    likes: post.likeCount ?? post.like_count ?? 0,
+    author: post.authorNickname,
+    likes: post.likeCount ?? 0,
     description: post.description,
 });
 
 const postDetailToView = (post) => ({
-    id: post.postId ?? post.post_id,
+    id: post.postId,
     title: post.title,
     description: post.description,
     note: post.tip ?? null,
-    time: formatMinutes(post.sourceRecipe?.cookTime ?? post.source_recipe?.cook_time),
-    difficulty: post.sourceRecipe?.difficulty ?? post.source_recipe?.difficulty,
-    category: post.sourceRecipe?.category ?? post.source_recipe?.category,
-    servings: formatServings(post.sourceRecipe?.servings ?? post.source_recipe?.servings),
-    createdAt: formatRelativeTime(post.createdAt ?? post.created_at),
-    likes: post.likeCount ?? post.like_count ?? 0,
+    time: formatMinutes(post.sourceRecipe?.cookTime),
+    difficulty: post.sourceRecipe?.difficulty,
+    category: post.sourceRecipe?.category,
+    servings: formatServings(post.sourceRecipe?.servings),
+    createdAt: formatRelativeTime(post.createdAt),
+    likes: post.likeCount ?? 0,
     author: {
-        name: post.authorNickname ?? post.author_nickname,
+        name: post.authorNickname,
     },
-    ingredients: post.sourceRecipe?.ingredients ?? post.source_recipe?.ingredients ?? [],
-    steps: (post.sourceRecipe?.steps ?? post.source_recipe?.steps ?? [])
+    ingredients: post.sourceRecipe?.ingredients ?? [],
+    steps: (post.sourceRecipe?.steps ?? [])
         .slice()
         .sort((a, b) => a.order - b.order)
         .map((step) => step.description),
@@ -37,10 +37,10 @@ const postDetailToView = (post) => ({
 });
 
 const commentToView = (comment) => ({
-    id: comment.commentId ?? comment.comment_id,
-    author: comment.authorNickname ?? comment.author_nickname,
+    id: comment.commentId,
+    author: comment.authorNickname,
     body: comment.content,
-    time: formatRelativeTime(comment.createdAt ?? comment.created_at),
+    time: formatRelativeTime(comment.createdAt),
 });
 
 export function usePostsQuery(params) {
