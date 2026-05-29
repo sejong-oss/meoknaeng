@@ -18,9 +18,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuItem,
 } from "@/components/index.js";
-import { FEED_FILTER_OPTIONS, RECOMMENDED_RECIPES } from "@/data/mockData.js";
+import { FEED_FILTER_OPTIONS } from "@/data/mockData.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useLikedPostsQuery, usePostsQuery, useTogglePostLikeMutation } from "@/hooks/usePostQueries.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 import { toast } from "@/libs/toast.js";
 import { SITE_NAME } from "@/libs/constants.js";
 
@@ -47,6 +48,7 @@ export default function Feed() {
         q: debouncedQuery || undefined,
     });
     const likedPostsQuery = useLikedPostsQuery(user?.id);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const togglePostLike = useTogglePostLikeMutation(user?.id);
     const likedPostIds = useMemo(
         () => (likedPostsQuery.data ?? []).map((post) => post.id),
@@ -248,7 +250,7 @@ export default function Feed() {
                 <RecipeSelectModal
                     open={recipeSelectOpen}
                     onOpenChange={setRecipeSelectOpen}
-                    recipes={RECOMMENDED_RECIPES}
+                    recipes={savedRecipesQuery.data?.recipes ?? []}
                     onSelect={writeFeedPost}
                     onEmptyAction={() => navigate("/home")}
                 />

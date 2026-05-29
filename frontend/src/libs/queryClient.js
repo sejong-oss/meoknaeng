@@ -17,6 +17,9 @@ export const queryKeys = {
     savedRecipes: (userId) => ["users", userId, "savedRecipes"],
     likedPosts: (userId) => ["users", userId, "likedPosts"],
     myPosts: (userId) => ["users", userId, "posts"],
+    recipes: {
+        detail: (recipeId) => ["recipes", "detail", recipeId],
+    },
     posts: {
         all: ["posts"],
         list: (params) => ["posts", "list", params],

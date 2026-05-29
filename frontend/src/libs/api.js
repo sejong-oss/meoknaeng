@@ -102,8 +102,8 @@ export function recommendRecipes({ ingredients, query }) {
     });
 }
 
-export function getRecipe(recipeId) {
-    return request(`/recipes/${recipeId}`);
+export function getRecipe(recipeId, options = {}) {
+    return request(`/recipes/${recipeId}`, options);
 }
 
 export function saveRecipe(recipeId, options = {}) {
