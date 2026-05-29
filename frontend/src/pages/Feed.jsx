@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Add, Filter, Restaurant, WarningAlt } from "@carbon/icons-react";
 import {
     Button,
@@ -37,17 +37,23 @@ const postToFeedItem = (post) => ({
 
 export default function Feed() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAppStore((state) => state.user);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const [posts, setPosts] = useState(null);
-    const [error, setError] = useState(false);
+    const [posts, setPosts] = useState([]);
+    const [status, setStatus] = useState("loading");
     const [likedPostIds, setLikedPostIds] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
-    const [recipeSelectOpen, setRecipeSelectOpen] = useState(false);
+    const [recipeSelectOpen, setRecipeSelectOpen] = useState(Boolean(location.state?.openRecipeSelect));
     const handleLike = (id) => {
-        if (!user) { toast.info("로그인이 필요해요"); openLoginModal(); return; }
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+
         const isLiked = likedPostIds.includes(id);
         setLikedPostIds((prev) => isLiked ? prev.filter((p) => p !== id) : [...prev, id]);
         setPosts((prev) => prev.map((p) => p.id === id ? { ...p, likes: p.likes + (isLiked ? -1 : 1) } : p));
@@ -80,17 +86,26 @@ export default function Feed() {
             .catch(() => {});
     }, [user]);
 
-    const fetchPosts = useCallback(() => {
-        setPosts(null);
-        setError(false);
+    const loadPosts = useCallback(() => {
         getPosts({ category: categoryParam, difficulty: difficultyParam, q: debouncedQuery || undefined })
-            .then((data) => setPosts((data?.posts ?? []).map(postToFeedItem)))
-            .catch(() => setError(true));
+            .then((data) => {
+                setPosts((data?.posts ?? []).map(postToFeedItem));
+                setStatus("success");
+            })
+            .catch(() => {
+                setPosts([]);
+                setStatus("error");
+            });
     }, [categoryParam, difficultyParam, debouncedQuery]);
 
+    const fetchPosts = useCallback(() => {
+        setStatus("loading");
+        loadPosts();
+    }, [loadPosts]);
+
     useEffect(() => {
-        fetchPosts();
-    }, [fetchPosts]);
+        loadPosts();
+    }, [loadPosts]);
 
     const toggleFilter = (group, label, value) => {
         const key = `${group}:${value}`;
@@ -111,7 +126,7 @@ export default function Feed() {
     };
 
     const filteredItems = useMemo(() => {
-        return (posts ?? []).filter((item) => {
+        return posts.filter((item) => {
             const timeFilters = activeFilters.filter((f) => f.group === "time");
             if (timeFilters.length && !timeFilters.some((f) => parseInt(item.time) <= parseInt(f.value))) return false;
             return true;
@@ -213,7 +228,7 @@ export default function Feed() {
                     </div>
                 )}
 
-                {posts === null ? (
+                {status === "loading" ? (
                     <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <Card key={i} className="!p-4">
@@ -227,7 +242,7 @@ export default function Feed() {
                             </Card>
                         ))}
                     </div>
-                ) : error ? (
+                ) : status === "error" ? (
                     <EmptyState
                         icon={<WarningAlt size={28} />}
                         title="피드를 불러오지 못했어요"
