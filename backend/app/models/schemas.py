@@ -171,6 +171,7 @@ class PostDetailResponse(ApiBaseModel):
     title: str
     description: str | None
     tip: str | None
+    like_count: int
     created_at: str
     updated_at: str
     source_recipe: RecipeDetail | None
