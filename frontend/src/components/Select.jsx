@@ -8,7 +8,7 @@ const triggerSizes = {
     lg: "h-12 px-4 text-base gap-2",
 };
 
-export function Select({ value, onValueChange, placeholder = "선택", disabled, size = "md", className = "", viewportClassName = "", hideScrollButtons = false, children }) {
+export function Select({ value, onValueChange, placeholder = "선택", disabled, size = "md", className = "", children }) {
     return (
         <RadixSelect.Root value={value} onValueChange={onValueChange} disabled={disabled}>
             <RadixSelect.Trigger
@@ -33,26 +33,22 @@ export function Select({ value, onValueChange, placeholder = "선택", disabled,
                     position="popper"
                     sideOffset={6}
                     className={[
-                        "z-50 min-w-(--radix-select-trigger-width)",
-                        viewportClassName ? "overflow-y-auto" : "overflow-hidden",
+                        "z-50 min-w-(--radix-select-trigger-width) overflow-hidden",
+                        "max-h-[var(--radix-select-content-available-height)]",
                         "rounded-card bg-white shadow-lg border border-gray-200",
                         popoverAnim,
                         sideAnim,
                     ].join(" ")}
                 >
-                    {!hideScrollButtons && (
-                        <RadixSelect.ScrollUpButton className="flex items-center justify-center py-1 text-gray-500">
-                            <ChevronUp size={14} />
-                        </RadixSelect.ScrollUpButton>
-                    )}
-                    <RadixSelect.Viewport className={`p-1 ${viewportClassName}`}>
+                    <RadixSelect.ScrollUpButton className="flex items-center justify-center py-1 text-gray-500">
+                        <ChevronUp size={14} />
+                    </RadixSelect.ScrollUpButton>
+                    <RadixSelect.Viewport className="p-1">
                         {children}
                     </RadixSelect.Viewport>
-                    {!hideScrollButtons && (
-                        <RadixSelect.ScrollDownButton className="flex items-center justify-center py-1 text-gray-500">
-                            <ChevronDown size={14} />
-                        </RadixSelect.ScrollDownButton>
-                    )}
+                    <RadixSelect.ScrollDownButton className="flex items-center justify-center py-1 text-gray-500">
+                        <ChevronDown size={14} />
+                    </RadixSelect.ScrollDownButton>
                 </RadixSelect.Content>
             </RadixSelect.Portal>
         </RadixSelect.Root>
