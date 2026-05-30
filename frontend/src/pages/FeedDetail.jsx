@@ -15,6 +15,7 @@ import {
     useUpdateCommentMutation,
 } from "@/hooks/usePostInteractionMutations.js";
 import { useDeletePostMutation } from "@/hooks/usePostMutations.js";
+import { usePostShare } from "@/hooks/useShare.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -63,7 +64,7 @@ const IngredientRow = ({ ingredient }) => (
     </div>
 );
 
-const PostHeader = ({ recipe, likeCount, liked, onLike, canManage, onEdit, onDelete, deleting }) => (
+const PostHeader = ({ recipe, likeCount, liked, onLike, onShare, canManage, onEdit, onDelete, deleting }) => (
     <div className="flex flex-col gap-2.5 border-b border-gray-200 pb-4">
         <div className="flex items-center gap-2.5">
             <Avatar name={recipe.author.name} size="md" />
@@ -92,6 +93,7 @@ const PostHeader = ({ recipe, likeCount, liked, onLike, canManage, onEdit, onDel
                     className="size-9 p-0"
                     aria-label="공유"
                     title="공유"
+                    onClick={onShare}
                 >
                     <Share size={14} />
                 </Button>
@@ -290,6 +292,7 @@ export default function FeedDetail() {
     const updateCommentMutation = useUpdateCommentMutation();
     const deleteCommentMutation = useDeleteCommentMutation();
     const deletePostMutation = useDeletePostMutation(user?.id);
+    const sharePost = usePostShare();
     const post = postQuery.data;
     const comments = commentsQuery.data ?? [];
     const likedPostIds = (likedPostsQuery.data ?? []).map((item) => item.id);
@@ -372,6 +375,7 @@ export default function FeedDetail() {
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
+    const handleShare = () => sharePost(post);
     const handleEditPost = () => {
         navigate("/feed/write", { state: { postId: post.id } });
     };
@@ -430,6 +434,7 @@ export default function FeedDetail() {
                                 likeCount={likeCount}
                                 liked={liked}
                                 onLike={() => handleLike(post.id)}
+                                onShare={handleShare}
                                 canManage={user?.id === post.authorId}
                                 onEdit={handleEditPost}
                                 onDelete={() => setDeletePostOpen(true)}

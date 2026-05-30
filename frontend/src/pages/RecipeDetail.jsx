@@ -7,6 +7,7 @@ import { addRecipeIngredientStatuses } from "@/libs/recipeIngredients.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
+import { useRecipeShare } from "@/hooks/useShare.js";
 import {
     ArrowLeft,
     ArrowRight,
@@ -174,6 +175,7 @@ export default function RecipeDetail() {
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
+    const shareRecipe = useRecipeShare();
     const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
     const recommendationIngredients = useAppStore((state) => state.recommendationIngredients);
     const [recipe, setRecipe] = useState(null);
@@ -248,6 +250,7 @@ export default function RecipeDetail() {
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
+    const handleShare = () => shareRecipe(recipe);
 
     return (
         <>
@@ -366,7 +369,7 @@ export default function RecipeDetail() {
                                     {isSaved ? <BookmarkFilled size={14} /> : <Bookmark size={14} />}
                                     저장
                                 </Button>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" onClick={handleShare}>
                                     <Share size={14} />
                                     공유
                                 </Button>
@@ -389,7 +392,7 @@ export default function RecipeDetail() {
                     >
                         {isSaved ? <BookmarkFilled size={18} /> : <Bookmark size={18} />}
                     </Button>
-                    <Button variant="outline" size="lg" className="px-4" aria-label="공유">
+                    <Button variant="outline" size="lg" className="px-4" aria-label="공유" onClick={handleShare}>
                         <Share size={18} />
                     </Button>
                 </div>
