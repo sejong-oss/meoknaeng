@@ -19,6 +19,7 @@ import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useRecommendationProgress } from "@/hooks/useRecommendationProgress.js";
 import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
+import { useRecipeShare } from "@/hooks/useShare.js";
 
 export default function Recipes() {
     const navigate = useNavigate();
@@ -33,6 +34,7 @@ export default function Recipes() {
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
+    const shareRecipe = useRecipeShare();
     const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
     const { progress, loadingTip, showLoading, resetLoading } = useRecommendationProgress(
         recommendationStatus,
@@ -62,6 +64,7 @@ export default function Recipes() {
         resetLoading();
         recommendRecipes(ingredients).catch(() => {});
     };
+    const handleShareHero = () => shareRecipe(hero);
 
     if (showLoading) {
         return (
@@ -231,7 +234,13 @@ export default function Recipes() {
                                         {isHeroSaved ? <BookmarkFilled size={18} /> : <Bookmark size={18} />}
                                         <span className="hidden md:inline">저장</span>
                                     </Button>
-                                    <Button variant="outline" size="lg" className="flex-1 px-4 md:px-5 lg:flex-none" aria-label="공유">
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        className="flex-1 px-4 md:px-5 lg:flex-none"
+                                        aria-label="공유"
+                                        onClick={handleShareHero}
+                                    >
                                         <Share size={18} />
                                         <span className="hidden md:inline">공유</span>
                                     </Button>
