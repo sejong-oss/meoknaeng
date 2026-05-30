@@ -448,7 +448,6 @@ export default function My() {
                                         category={item.category}
                                         difficulty={item.difficulty}
                                         likes={item.likes}
-                                        description={item.description}
                                         onClick={() => navigate(`/feed/${item.id}`)}
                                     />
                                 ))}
@@ -466,7 +465,6 @@ export default function My() {
                                         difficulty={item.difficulty}
                                         author={item.author}
                                         likes={item.likes}
-                                        description={item.description}
                                         defaultLiked
                                         onClick={() => navigate(`/feed/${item.id}`)}
                                     />

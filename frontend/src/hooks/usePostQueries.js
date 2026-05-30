@@ -17,7 +17,6 @@ export const postToFeedItem = (post) => ({
     difficulty: post.difficulty,
     author: post.authorNickname,
     likes: post.likeCount ?? 0,
-    description: post.description,
 });
 
 const postDetailToView = (post) => ({
