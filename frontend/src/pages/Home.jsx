@@ -176,7 +176,7 @@ export default function Home() {
                                         className="w-full !py-5 !px-3"
                                     />
                                 ) : pantryIngredients.length > 0 ? (
-                                    pantryIngredients.filter((i) => !ingredients.includes(i)).map((item) => (
+                                    pantryIngredients.filter((i) => !ingredients.includes(i)).slice(0, 8).map((item) => (
                                         <Chip key={item} variant="brand-soft" onClick={() => handleAddPantryIngredient(item)} className="!px-4 !py-2 !text-sm">
                                             + {item}
                                         </Chip>
