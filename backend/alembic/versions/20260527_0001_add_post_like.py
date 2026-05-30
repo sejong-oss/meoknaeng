@@ -1,7 +1,7 @@
 """add post like table
 
 Revision ID: 20260527_0001
-Revises: 20260525_0001
+Revises: 20260519_0001
 Create Date: 2026-05-27
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "20260527_0001"
-down_revision: Union[str, Sequence[str], None] = "20260525_0001"
+down_revision: Union[str, Sequence[str], None] = "20260519_0001"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
