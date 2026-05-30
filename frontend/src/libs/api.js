@@ -220,3 +220,9 @@ export function likePost(postId, options = {}) {
 export function unlikePost(postId, options = {}) {
     return request(`/posts/${postId}/likes`, { method: "DELETE", ...options });
 }
+
+export function deleteMyAccount() {
+    return request("/users/me", {
+        method: "DELETE",
+    });
+}

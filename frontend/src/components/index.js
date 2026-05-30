@@ -19,6 +19,7 @@ export { LoginModal } from "@/components/modals/LoginModal.jsx";
 export { LeaveWriteModal } from "@/components/modals/LeaveWriteModal.jsx";
 export { DeletePostModal } from "@/components/modals/DeletePostModal.jsx";
 export { RecipeSelectModal } from "@/components/modals/RecipeSelectModal.jsx";
+export { WithdrawModal } from "@/components/modals/WithdrawModal.jsx";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/Tabs.jsx";
 export {
     DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,

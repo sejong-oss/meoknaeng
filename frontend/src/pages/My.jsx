@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Checkmark, ChevronDown, Close, Edit, Logout, UserAvatar } from "@carbon/icons-react";
 import {
     Avatar, Button, Card, Chip, EmptyState,
-    FeedCard, IngredientInput, RecipeCard,
+    FeedCard, IngredientInput, RecipeCard, WithdrawModal,
     Skeleton, Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
-import { autocompleteIngredients } from "@/libs/api.js";
+import { autocompleteIngredients, deleteMyAccount } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -111,6 +111,9 @@ export default function My() {
     const [editingNickname, setEditingNickname] = useState(false);
     const [nicknameDraft, setNicknameDraft] = useState(user?.name ?? "");
     const [savingNickname, setSavingNickname] = useState(false);
+    const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+    const [withdrawing, setWithdrawing] = useState(false);
+    const isWithdrawingRef = useRef(false);
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
@@ -139,6 +142,7 @@ export default function My() {
     useEffect(() => {
         if (user || !authInitialized) return;
         if (isMobile) return;
+        if (isWithdrawingRef.current) return;
 
         toast.info("로그인이 필요해요");
         openLoginModal();
@@ -188,6 +192,28 @@ export default function My() {
             navigate("/home", { replace: true });
         } catch (error) {
             toast.error(error.message ?? "로그아웃하지 못했어요.");
+        }
+    };
+
+    const handleWithdraw = async () => {
+        isWithdrawingRef.current = true;
+        setWithdrawing(true);
+        try {
+            await deleteMyAccount();
+            useAppStore.setState({
+                user: null,
+                pantryIngredients: [],
+                authStatus: "idle",
+                authInitialized: true,
+            });
+            toast.success("회원탈퇴가 완료되었어요.");
+            navigate("/home", { replace: true });
+        } catch (error) {
+            isWithdrawingRef.current = false;
+            toast.error(error.message ?? "회원탈퇴에 실패했어요.");
+            setWithdrawModalOpen(false);
+        } finally {
+            setWithdrawing(false);
         }
     };
 
@@ -405,6 +431,16 @@ export default function My() {
                         )}
                     </Card>
 
+                    <div className="hidden md:block">
+                        <button
+                            type="button"
+                            className="text-sm font-medium text-gray-600 underline transition-colors hover:text-gray-400"
+                            onClick={() => setWithdrawModalOpen(true)}
+                        >
+                            회원탈퇴
+                        </button>
+                    </div>
+
                 </aside>
 
                 {/* 콘텐츠 */}
@@ -472,8 +508,25 @@ export default function My() {
                             </div>
                         </TabsContent>
                     </Tabs>
+
+                    <div className="md:hidden mt-6">
+                        <button
+                            type="button"
+                            className="text-sm font-medium text-gray-600 underline transition-colors hover:text-gray-400"
+                            onClick={() => setWithdrawModalOpen(true)}
+                        >
+                            회원탈퇴
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            <WithdrawModal
+                open={withdrawModalOpen}
+                onOpenChange={setWithdrawModalOpen}
+                onConfirm={handleWithdraw}
+                withdrawing={withdrawing}
+            />
         </>
     );
 }
