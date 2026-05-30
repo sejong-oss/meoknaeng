@@ -11,6 +11,7 @@ import {
 
 import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
 import { formatMinutes, formatServings } from "@/libs/utils.js";
+import { queryClient, queryKeys } from "@/libs/queryClient.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
 
@@ -179,6 +180,17 @@ export const useAppStore = create((set) => ({
                 recommendationStatus: "success",
                 recommendationStartedAt: null,
             });
+
+            const { user } = useAppStore.getState();
+            if (user) {
+                queryClient.invalidateQueries({ queryKey: queryKeys.myIngredients(user.id) });
+                getMyIngredients()
+                    .then((data) => {
+                        const updated = (data?.ingredients ?? []).map((item) => item.name);
+                        set({ pantryIngredients: updated });
+                    })
+                    .catch(() => {});
+            }
 
         } catch (error) {
             set({
