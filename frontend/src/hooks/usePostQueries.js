@@ -96,10 +96,7 @@ export function useMyPostsQuery(userId) {
         queryKey: queryKeys.myPosts(userId),
         queryFn: async ({ signal }) => {
             const data = await getMyPosts({ signal });
-            return (data?.posts ?? []).map((post) => ({
-                ...postToFeedItem(post),
-                likes: undefined,
-            }));
+            return (data?.posts ?? []).map(postToFeedItem);
         },
         enabled: Boolean(userId),
     });
