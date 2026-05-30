@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Checkmark, ChevronDown, Close, Edit, Logout, UserAvatar } from "@carbon/icons-react";
+import { Bookmark, Checkmark, ChevronDown, Close, Document, Edit, FavoriteFilled, Logout, UserAvatar } from "@carbon/icons-react";
 import {
     Avatar, Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard, WithdrawModal,
@@ -459,53 +459,83 @@ export default function My() {
                         </TabsList>
 
                         <TabsContent value="saved">
-                            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {savedRecipes.map((recipe) => (
-                                    <RecipeCard
-                                        key={recipe.id}
-                                        title={recipe.title}
-                                        time={recipe.time}
-                                        difficulty={recipe.difficulty}
-                                        servings={recipe.servings}
-                                        description={recipe.description}
-                                        onClick={() => navigate(`/recipes/${recipe.id}`)}
-                                    />
-                                ))}
-                            </div>
+                            {savedRecipes.length === 0 ? (
+                                <EmptyState
+                                    icon={<Bookmark size={28} />}
+                                    title="저장한 레시피가 없어요"
+                                    description="추천 레시피에서 마음에 드는 레시피를 저장해보세요"
+                                    action="레시피 추천 받기"
+                                    onAction={() => navigate("/home")}
+                                />
+                            ) : (
+                                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {savedRecipes.map((recipe) => (
+                                        <RecipeCard
+                                            key={recipe.id}
+                                            title={recipe.title}
+                                            time={recipe.time}
+                                            difficulty={recipe.difficulty}
+                                            servings={recipe.servings}
+                                            description={recipe.description}
+                                            onClick={() => navigate(`/recipes/${recipe.id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="mine">
-                            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {myPosts.map((item) => (
-                                    <FeedCard
-                                        key={item.id}
-                                        title={item.title}
-                                        time={item.time}
-                                        category={item.category}
-                                        difficulty={item.difficulty}
-                                        likes={item.likes}
-                                        onClick={() => navigate(`/feed/${item.id}`)}
-                                    />
-                                ))}
-                            </div>
+                            {myPosts.length === 0 ? (
+                                <EmptyState
+                                    icon={<Document size={28} />}
+                                    title="아직 작성한 글이 없어요"
+                                    description="레시피 경험을 피드에 공유해보세요"
+                                    action="글 작성하기"
+                                    onAction={() => navigate("/feed", { replace: true, state: { openRecipeSelect: true } })}
+                                />
+                            ) : (
+                                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {myPosts.map((item) => (
+                                        <FeedCard
+                                            key={item.id}
+                                            title={item.title}
+                                            time={item.time}
+                                            category={item.category}
+                                            difficulty={item.difficulty}
+                                            likes={item.likes}
+                                            onClick={() => navigate(`/feed/${item.id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="likes">
-                            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {likedPosts.map((item) => (
-                                    <FeedCard
-                                        key={item.id}
-                                        title={item.title}
-                                        time={item.time}
-                                        category={item.category}
-                                        difficulty={item.difficulty}
-                                        author={item.author}
-                                        likes={item.likes}
-                                        defaultLiked
-                                        onClick={() => navigate(`/feed/${item.id}`)}
-                                    />
-                                ))}
-                            </div>
+                            {likedPosts.length === 0 ? (
+                                <EmptyState
+                                    icon={<FavoriteFilled size={28} />}
+                                    title="좋아요한 게시글이 없어요"
+                                    description="피드에서 마음에 드는 게시글에 좋아요를 눌러보세요"
+                                    action="피드 보러 가기"
+                                    onAction={() => navigate("/feed")}
+                                />
+                            ) : (
+                                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {likedPosts.map((item) => (
+                                        <FeedCard
+                                            key={item.id}
+                                            title={item.title}
+                                            time={item.time}
+                                            category={item.category}
+                                            difficulty={item.difficulty}
+                                            author={item.author}
+                                            likes={item.likes}
+                                            defaultLiked
+                                            onClick={() => navigate(`/feed/${item.id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </TabsContent>
                     </Tabs>
 
