@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+    getMyIngredients,
     getMyProfile,
     login as loginRequest,
     logout as logoutRequest,
@@ -54,12 +55,13 @@ export const useAppStore = create((set) => ({
         set({ authStatus: "checking" });
 
         try {
-            const user = await getMyProfile();
+            const [user, ingredientsData] = await Promise.all([getMyProfile(), getMyIngredients()]);
             const nextUser = authUserToView(user);
+            const ingredients = (ingredientsData?.ingredients ?? []).map((item) => item.name);
 
             set({
                 user: nextUser,
-                pantryIngredients: nextUser.ingredients,
+                pantryIngredients: ingredients,
                 authStatus: "success",
                 authInitialized: true,
             });
@@ -78,10 +80,12 @@ export const useAppStore = create((set) => ({
         try {
             const user = await loginRequest(credentials);
             const nextUser = authUserToView(user);
+            const ingredientsData = await getMyIngredients();
+            const ingredients = (ingredientsData?.ingredients ?? []).map((item) => item.name);
 
             set({
                 user: nextUser,
-                pantryIngredients: nextUser.ingredients,
+                pantryIngredients: ingredients,
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -104,7 +108,7 @@ export const useAppStore = create((set) => ({
 
             set({
                 user: nextUser,
-                pantryIngredients: nextUser.ingredients,
+                pantryIngredients: [],
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -147,12 +151,7 @@ export const useAppStore = create((set) => ({
             throw error;
         }
     },
-    addPantryIngredient: (ingredient) => set((state) => ({
-        pantryIngredients: uniqueItems([...state.pantryIngredients, ingredient]),
-    })),
-    removePantryIngredient: (ingredient) => set((state) => ({
-        pantryIngredients: state.pantryIngredients.filter((item) => item !== ingredient),
-    })),
+    setPantryIngredients: (ingredients) => set({ pantryIngredients: ingredients }),
     recommendRecipes: async (ingredients) => {
         const nextIngredients = uniqueItems(ingredients);
 

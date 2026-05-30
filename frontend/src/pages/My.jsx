@@ -13,6 +13,7 @@ import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useLikedPostsQuery, useMyPostsQuery } from "@/hooks/usePostQueries.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
+import { useMyIngredientsQuery, useUpdateMyIngredientsMutation } from "@/hooks/useMyIngredientsQuery.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
 
@@ -91,19 +92,20 @@ export default function My() {
     const user = useAppStore((state) => state.user);
     const authStatus = useAppStore((state) => state.authStatus);
     const authInitialized = useAppStore((state) => state.authInitialized);
-    const ingredients = useAppStore((state) => state.pantryIngredients);
     const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const likedPostsQuery = useLikedPostsQuery(user?.id);
     const myPostsQuery = useMyPostsQuery(user?.id);
+    const myIngredientsQuery = useMyIngredientsQuery(user?.id);
+    const updateMyIngredientsMutation = useUpdateMyIngredientsMutation(user?.id);
     const savedRecipes = savedRecipesQuery.data?.recipes ?? [];
     const likedPosts = likedPostsQuery.data ?? [];
     const myPosts = myPostsQuery.data ?? [];
-    const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
     const updateNickname = useAppStore((state) => state.updateNickname);
     const logout = useAppStore((state) => state.logout);
+    const ingredients = myIngredientsQuery.data ?? [];
     const [editingIngredients, setEditingIngredients] = useState(false);
+    const [ingredientsDraft, setIngredientsDraft] = useState([]);
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
     const [editingNickname, setEditingNickname] = useState(false);
@@ -346,7 +348,12 @@ export default function My() {
                                     aria-label={editingIngredients ? "내 재료 편집 완료" : "내 재료 편집"}
                                     className="h-8 w-8 !px-0 !py-0"
                                     onClick={() => {
-                                        if (editingIngredients) setIngredientsExpanded(false);
+                                        if (editingIngredients) {
+                                            setIngredientsExpanded(false);
+                                            updateMyIngredientsMutation.mutate(ingredientsDraft);
+                                        } else {
+                                            setIngredientsDraft([...ingredients]);
+                                        }
                                         setEditingIngredients((v) => !v);
                                     }}
                                 >
@@ -356,9 +363,9 @@ export default function My() {
                         </div>
                         {editingIngredients ? (
                             <IngredientInput
-                                ingredients={ingredients}
-                                onAdd={addPantryIngredient}
-                                onRemove={removePantryIngredient}
+                                ingredients={ingredientsDraft}
+                                onAdd={(ing) => setIngredientsDraft((prev) => [...new Set([...prev, ing.trim()].filter(Boolean))])}
+                                onRemove={(ing) => setIngredientsDraft((prev) => prev.filter((item) => item !== ing))}
                                 loadSuggestions={loadIngredientSuggestions}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2"
                                 inputClassName="!py-1 !text-sm"
