@@ -262,7 +262,14 @@ export default function My() {
         );
     };
 
-    if (!user && !authInitialized) {
+    const isInitialLoading = user && (
+        myIngredientsQuery.isPending ||
+        savedRecipesQuery.isPending ||
+        myPostsQuery.isPending ||
+        likedPostsQuery.isPending
+    );
+
+    if (!authInitialized || isInitialLoading) {
         return <MySkeleton />;
     }
 

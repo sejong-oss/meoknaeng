@@ -237,7 +237,7 @@ export default function RecipeDetail() {
         };
     }, [id, navigate, recommendationIngredients]);
 
-    if (status === "loading") {
+    if (status === "loading" || (user && savedRecipesQuery.isPending)) {
         return <RecipeDetailSkeleton />;
     }
 

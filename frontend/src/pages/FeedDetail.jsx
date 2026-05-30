@@ -322,7 +322,7 @@ export default function FeedDetail() {
         navigate("/feed", { replace: true });
     }, [id, navigate, postQuery.error, postQuery.isError]);
 
-    if (postQuery.isLoading || !post) return <FeedDetailSkeleton />;
+    if (postQuery.isLoading || !post || (user && likedPostsQuery.isPending)) return <FeedDetailSkeleton />;
 
     const liked = likedPostIds.includes(post.id);
     const likeCount = post.likes ?? 0;

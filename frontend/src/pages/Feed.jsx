@@ -202,7 +202,7 @@ export default function Feed() {
                     </div>
                 )}
 
-                {postsQuery.isLoading ? (
+                {postsQuery.isLoading || (user && likedPostsQuery.isPending) ? (
                     <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <Card key={i} className="!p-4">

@@ -34,6 +34,7 @@ function getStoredRecentIngredients() {
 export default function Home() {
     const navigate = useNavigate();
     const user = useAppStore((state) => state.user);
+    const authInitialized = useAppStore((state) => state.authInitialized);
     const [ingredients, setIngredients] = useState([]);
     const [recentIngredients, setRecentIngredients] = useState(getStoredRecentIngredients);
     const pantryIngredients = useAppStore((state) => state.pantryIngredients);
@@ -167,7 +168,7 @@ export default function Home() {
                                 </button>
                             </div>
                             <div className="bg-gray-50 rounded-xl p-4 flex flex-wrap gap-2">
-                                {!user ? (
+                                {!authInitialized ? null : !user ? (
                                     <EmptyState
                                         title="내 재료를 저장해둘 수 있어요"
                                         description="로그인하면 내 재료를 불러와 바로 추천에 사용할 수 있어요"
