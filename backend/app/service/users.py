@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import delete, or_, select, update
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -33,9 +33,15 @@ async def delete_user_account(user: User, db: AsyncSession) -> None:
     await db.commit()
 
 
-async def get_liked_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, datetime]]:
+async def get_liked_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, datetime, int]]:
+    like_count_subq = (
+        select(func.count(PostLike.post_id))
+        .where(PostLike.post_id == Post.post_id)
+        .correlate(Post)
+        .scalar_subquery()
+    )
     result = await db.execute(
-        select(Post, PostLike.liked_at)
+        select(Post, PostLike.liked_at, like_count_subq.label("like_count"))
         .join(PostLike, PostLike.post_id == Post.post_id)
         .where(PostLike.user_id == user_id)
         .options(selectinload(Post.author))
@@ -44,9 +50,15 @@ async def get_liked_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, da
     return list(result.all())
 
 
-async def get_my_posts(user_id: str, db: AsyncSession) -> list[Post]:
-    result = await db.scalars(
-        select(Post)
+async def get_my_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, int]]:
+    like_count_subq = (
+        select(func.count(PostLike.post_id))
+        .where(PostLike.post_id == Post.post_id)
+        .correlate(Post)
+        .scalar_subquery()
+    )
+    result = await db.execute(
+        select(Post, like_count_subq.label("like_count"))
         .where(Post.author_id == user_id)
         .order_by(Post.created_at.desc())
     )
