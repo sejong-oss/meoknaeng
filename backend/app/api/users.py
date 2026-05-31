@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import delete, select
@@ -128,7 +128,7 @@ async def get_my_ingredients(
     result = await db.scalars(
         select(UserIngredient)
         .where(UserIngredient.user_id == user_id)
-        .order_by(UserIngredient.created_at.asc(), UserIngredient.ingredient_name.asc())
+        .order_by(UserIngredient.created_at.asc())
     )
     ingredients = [
         UserIngredientItem(name=ingredient.ingredient_name)
@@ -156,12 +156,12 @@ async def update_my_ingredients(
     await db.execute(delete(UserIngredient).where(UserIngredient.user_id == user_id))
 
     now = _utc_now()
-    for ingredient_name in payload.ingredients:
+    for i, ingredient_name in enumerate(payload.ingredients):
         db.add(
             UserIngredient(
                 user_id=user_id,
                 ingredient_name=ingredient_name,
-                created_at=now,
+                created_at=now + timedelta(microseconds=i),
             )
         )
 
