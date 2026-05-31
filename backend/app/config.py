@@ -10,7 +10,7 @@ GEMINI_TEMPERATURE = float(os.getenv("GEMINI_TEMPERATURE", "0.7"))
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 
-RECIPE_COUNT = int(os.getenv("RECIPE_COUNT", "3"))
+RECIPE_COUNT = int(os.getenv("RECIPE_COUNT", "5"))
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
