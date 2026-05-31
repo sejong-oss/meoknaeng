@@ -161,7 +161,7 @@ async def update_my_ingredients(
             UserIngredient(
                 user_id=user_id,
                 ingredient_name=ingredient_name,
-                created_at=now + timedelta(microseconds=i),
+                created_at=now + timedelta(seconds=i),
             )
         )
 
