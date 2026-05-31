@@ -234,11 +234,12 @@ async def get_my_posts(
             cook_time=post.cook_time,
             category=post.category,
             difficulty=post.difficulty,
+            like_count=like_count,
             created_at=post.created_at,
             updated_at=post.updated_at,
             source_recipe_id=post.source_recipe_id,
         )
-        for post in rows
+        for post, like_count in rows
     ]
 
     return ApiResponse(success=True, data=MyPostsResponse(posts=posts))
@@ -264,11 +265,12 @@ async def get_my_liked_posts(
             cook_time=post.cook_time,
             category=post.category,
             difficulty=post.difficulty,
+            like_count=like_count,
             author_nickname=post.author.nickname,
             created_at=post.created_at,
             liked_at=liked_at,
         )
-        for post, liked_at in rows
+        for post, liked_at, like_count in rows
     ]
 
     return ApiResponse(success=True, data=LikedPostsResponse(posts=posts))

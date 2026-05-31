@@ -70,6 +70,7 @@ class MyPostItem(UsersBaseModel):
     cook_time: int | None = Field(None, alias="cookTime", description="조리 시간")
     category: str | None = Field(None, description="카테고리")
     difficulty: str | None = Field(None, description="난이도")
+    like_count: int = Field(..., alias="likeCount", description="좋아요 수")
     created_at: datetime = Field(..., alias="createdAt", description="게시글 작성 일시")
     updated_at: datetime = Field(..., alias="updatedAt", description="게시글 수정 일시")
     source_recipe_id: str | None = Field(
@@ -88,6 +89,7 @@ class LikedPostItem(UsersBaseModel):
     cook_time: int | None = Field(None, alias="cookTime", description="조리 시간")
     category: str | None = Field(None, description="카테고리")
     difficulty: str | None = Field(None, description="난이도")
+    like_count: int = Field(..., alias="likeCount", description="좋아요 수")
     author_nickname: str = Field(..., alias="authorNickname", description="작성자 닉네임")
     created_at: datetime = Field(..., alias="createdAt", description="게시글 작성 일시")
     liked_at: datetime = Field(..., alias="likedAt", description="좋아요 누른 일시")
