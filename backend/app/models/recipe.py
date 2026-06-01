@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class Recipe(Base):
+    """AI가 추천한 레시피 기본 정보를 저장하는 테이블."""
+
     __tablename__ = "recipe"
 
     recipe_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -36,6 +38,8 @@ class Recipe(Base):
 
 
 class RecipeIngredient(Base):
+    """레시피에 필요한 재료와 분량을 저장하는 테이블."""
+
     __tablename__ = "recipe_ingredient"
 
     ingredient_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -47,6 +51,8 @@ class RecipeIngredient(Base):
 
 
 class RecipeStep(Base):
+    """레시피의 조리 단계별 설명을 저장하는 테이블."""
+
     __tablename__ = "recipe_step"
     __table_args__ = (UniqueConstraint("recipe_id", "order"),)
 
@@ -59,6 +65,8 @@ class RecipeStep(Base):
 
 
 class RecipeSave(Base):
+    """사용자가 저장한 레시피 관계를 저장하는 테이블."""
+
     __tablename__ = "recipe_save"
 
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("user.user_id"), primary_key=True)
@@ -70,6 +78,8 @@ class RecipeSave(Base):
 
 
 class RecipeVideo(Base):
+    """레시피 관련 YouTube 영상 정보를 캐싱하는 테이블."""
+
     __tablename__ = "recipe_video"
 
     recipe_id: Mapped[str] = mapped_column(String(36), ForeignKey("recipe.recipe_id"), primary_key=True)

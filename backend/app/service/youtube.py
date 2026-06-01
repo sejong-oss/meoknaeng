@@ -11,6 +11,8 @@ MAX_RESULTS = 3
 
 
 class YouTubeServiceError(Exception):
+    """YouTube API 호출 관련 서비스 에러. status_code와 메시지를 포함한다."""
+
     def __init__(self, status_code: int, detail: str) -> None:
         self.status_code = status_code
         self.detail = detail
@@ -53,6 +55,7 @@ async def get_recipe_videos(recipe_id: str, recipe_name: str, db: AsyncSession) 
 
 
 async def _fetch_from_youtube(recipe_name: str) -> YouTubeVideosResponse:
+    """YouTube Data API를 호출하여 레시피명 관련 영상 목록을 반환한다."""
     if not YOUTUBE_API_KEY:
         raise YouTubeServiceError(503, "YouTube API 키가 설정되지 않았습니다.")
 

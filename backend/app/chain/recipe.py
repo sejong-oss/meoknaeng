@@ -12,6 +12,7 @@ from app.prompts.recipe import recipe_prompt
 
 
 def build_recipe_chain() -> Runnable:
+    """Gemini LLM, 레시피 프롬프트, JSON 파서를 연결한 LangChain 파이프라인을 생성한다."""
     llm_kwargs = {
         "model": GEMINI_MODEL,
         "temperature": GEMINI_TEMPERATURE,

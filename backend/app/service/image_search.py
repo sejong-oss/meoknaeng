@@ -6,6 +6,7 @@ NAVER_IMAGE_SEARCH_URL = "https://openapi.naver.com/v1/search/image"
 
 
 async def fetch_recipe_image(recipe_name: str) -> str | None:
+    """레시피명으로 Naver 이미지 검색 API를 호출해 대표 이미지 URL을 반환한다. 실패 시 None."""
     if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
         return None
 

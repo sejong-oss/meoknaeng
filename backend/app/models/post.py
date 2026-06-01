@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class Post(Base):
+    """사용자가 작성한 레시피 공유 게시글을 저장하는 테이블."""
+
     __tablename__ = "post"
 
     post_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -36,6 +38,8 @@ class Post(Base):
 
 
 class Comment(Base):
+    """게시글에 달린 댓글을 저장하는 테이블."""
+
     __tablename__ = "comment"
 
     comment_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -49,6 +53,8 @@ class Comment(Base):
 
 
 class PostLike(Base):
+    """게시글 좋아요 관계를 저장하는 테이블."""
+
     __tablename__ = "post_like"
 
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("user.user_id"), primary_key=True)

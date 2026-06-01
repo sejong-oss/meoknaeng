@@ -17,12 +17,15 @@ from app.service.image_search import fetch_recipe_image
 
 
 class RecipeServiceError(Exception):
+    """레시피 추천 관련 서비스 에러. status_code와 메시지를 포함한다."""
+
     def __init__(self, status_code: int, detail: str) -> None:
         self.status_code = status_code
         self.detail = detail
 
 
 async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id: str | None = None) -> RecipeResponse:
+    """Gemini로 레시피를 생성하고, 이미지를 병렬 조회한 뒤 DB에 저장하여 반환한다. 로그인 사용자면 입력 재료를 내 재료에 자동 추가한다."""
     try:
         raw = await recipe_chain.ainvoke(
             {
