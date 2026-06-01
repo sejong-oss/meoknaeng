@@ -203,7 +203,6 @@ export default function My() {
             await deleteMyAccount();
             useAppStore.setState({
                 user: null,
-                pantryIngredients: [],
                 authStatus: "idle",
                 authInitialized: true,
             });

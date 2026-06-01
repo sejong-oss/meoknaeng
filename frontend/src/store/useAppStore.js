@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import {
-    getMyIngredients,
     getMyProfile,
     login as loginRequest,
     logout as logoutRequest,
@@ -42,7 +41,6 @@ export const useAppStore = create((set) => ({
     authStatus: "idle",
     authInitialized: false,
     loginModalOpen: false,
-    pantryIngredients: [],
     recommendationIngredients: [],
     recommendationHero: null,
     recommendationOthers: [],
@@ -56,20 +54,17 @@ export const useAppStore = create((set) => ({
         set({ authStatus: "checking" });
 
         try {
-            const [user, ingredientsData] = await Promise.all([getMyProfile(), getMyIngredients()]);
+            const user = await getMyProfile();
             const nextUser = authUserToView(user);
-            const ingredients = (ingredientsData?.ingredients ?? []).map((item) => item.name);
 
             set({
                 user: nextUser,
-                pantryIngredients: ingredients,
                 authStatus: "success",
                 authInitialized: true,
             });
         } catch {
             set({
                 user: null,
-                pantryIngredients: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -81,12 +76,9 @@ export const useAppStore = create((set) => ({
         try {
             const user = await loginRequest(credentials);
             const nextUser = authUserToView(user);
-            const ingredientsData = await getMyIngredients();
-            const ingredients = (ingredientsData?.ingredients ?? []).map((item) => item.name);
 
             set({
                 user: nextUser,
-                pantryIngredients: ingredients,
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -109,7 +101,6 @@ export const useAppStore = create((set) => ({
 
             set({
                 user: nextUser,
-                pantryIngredients: [],
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -127,7 +118,6 @@ export const useAppStore = create((set) => ({
         } finally {
             set({
                 user: null,
-                pantryIngredients: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -152,7 +142,6 @@ export const useAppStore = create((set) => ({
             throw error;
         }
     },
-    setPantryIngredients: (ingredients) => set({ pantryIngredients: ingredients }),
     recommendRecipes: async (ingredients) => {
         const nextIngredients = uniqueItems(ingredients);
 
@@ -184,12 +173,6 @@ export const useAppStore = create((set) => ({
             const { user } = useAppStore.getState();
             if (user) {
                 queryClient.invalidateQueries({ queryKey: queryKeys.myIngredients(user.id) });
-                getMyIngredients()
-                    .then((data) => {
-                        const updated = (data?.ingredients ?? []).map((item) => item.name);
-                        set({ pantryIngredients: updated });
-                    })
-                    .catch(() => {});
             }
 
         } catch (error) {

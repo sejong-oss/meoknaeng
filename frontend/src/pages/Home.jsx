@@ -5,6 +5,7 @@ import { ArrowRight, CheckmarkFilled, Renew } from "@carbon/icons-react";
 import { autocompleteIngredients } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { useAppStore } from "@/store/useAppStore.js";
+import { useMyIngredientsQuery } from "@/hooks/useMyIngredientsQuery.js";
 
 const RECENT_INGREDIENTS_STORAGE_KEY = "meoknaeng:recent-ingredients";
 const MAX_RECENT_INGREDIENTS = 8;
@@ -37,7 +38,8 @@ export default function Home() {
     const authInitialized = useAppStore((state) => state.authInitialized);
     const [ingredients, setIngredients] = useState([]);
     const [recentIngredients, setRecentIngredients] = useState(getStoredRecentIngredients);
-    const pantryIngredients = useAppStore((state) => state.pantryIngredients);
+    const myIngredientsQuery = useMyIngredientsQuery(user?.id);
+    const pantryIngredients = myIngredientsQuery.data ?? [];
     const recommendRecipes = useAppStore((state) => state.recommendRecipes);
     const recommendationStatus = useAppStore((state) => state.recommendationStatus);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
@@ -168,7 +170,7 @@ export default function Home() {
                                 </button>
                             </div>
                             <div className="bg-gray-50 rounded-xl p-4 flex flex-wrap gap-2">
-                                {!authInitialized ? null : !user ? (
+                                {!authInitialized || (user && myIngredientsQuery.isPending) ? null : !user ? (
                                     <EmptyState
                                         title="내 재료를 저장해둘 수 있어요"
                                         description="로그인하면 내 재료를 불러와 바로 추천에 사용할 수 있어요"
