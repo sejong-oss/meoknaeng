@@ -6,6 +6,7 @@ export { Chip } from "@/components/Chip.jsx";
 export { FormField, Input, Textarea } from "@/components/Input.jsx";
 export { Card, ContentCard, RecipeCard, FeedCard } from "@/components/Card.jsx";
 export { PhotoPlaceholder } from "@/components/PhotoPlaceholder.jsx";
+export { RecipeImage } from "@/components/RecipeImage.jsx";
 export { RecipeSectionTitle, RecipeStat, RecipeStepRow } from "@/components/RecipeDetailParts.jsx";
 export { Avatar } from "@/components/Avatar.jsx";
 export { Skeleton, CardSkeleton, FeedSkeleton } from "@/components/Skeleton.jsx";

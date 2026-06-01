@@ -17,6 +17,7 @@ export const postToFeedItem = (post) => ({
     difficulty: post.difficulty,
     author: post.authorNickname,
     likes: post.likeCount ?? 0,
+    image: post.sourceRecipeImageUrl,
 });
 
 const postDetailToView = (post) => ({
@@ -31,6 +32,7 @@ const postDetailToView = (post) => ({
     servings: formatServings(post.sourceRecipe?.servings),
     createdAt: formatRelativeTime(post.createdAt),
     likes: post.likeCount ?? 0,
+    image: post.sourceRecipe?.imageUrl,
     author: {
         name: post.authorNickname,
     },
@@ -100,4 +102,3 @@ export function useMyPostsQuery(userId) {
         enabled: Boolean(userId),
     });
 }
-

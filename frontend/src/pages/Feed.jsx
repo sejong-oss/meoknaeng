@@ -243,6 +243,7 @@ export default function Feed() {
                                 difficulty={item.difficulty}
                                 author={item.author}
                                 likes={item.likes}
+                                image={item.image}
                                 defaultLiked={likedPostIds.includes(item.id)}
                                 onLike={() => handleLike(item.id)}
                                 onClick={() => navigate(`/feed/${item.id}`)}

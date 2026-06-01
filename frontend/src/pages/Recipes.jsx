@@ -13,7 +13,7 @@ import {
     UserMultiple,
     WarningAlt,
 } from "@carbon/icons-react";
-import { Breadcrumb, Button, Card, Chip, EmptyState, PhotoPlaceholder, ProgressBar, RecipeCard } from "@/components/index.js";
+import { Breadcrumb, Button, Card, Chip, EmptyState, ProgressBar, RecipeCard, RecipeImage } from "@/components/index.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
@@ -175,8 +175,9 @@ export default function Recipes() {
 
                 <Card className="overflow-hidden p-3.5 shadow-xl md:p-5">
                     <div className="flex flex-col gap-4 md:grid md:grid-cols-[23.75rem_1fr] md:gap-6">
-                        <PhotoPlaceholder
-                            label={hero.title}
+                        <RecipeImage
+                            src={hero.image}
+                            alt={hero.title}
                             tone="deep"
                             className="h-[11.25rem] w-full rounded-card md:h-[18.125rem]"
                         />
@@ -266,6 +267,7 @@ export default function Recipes() {
                                 difficulty={recipe.difficulty}
                                 servings={recipe.servings}
                                 description={recipe.description}
+                                image={recipe.image}
                                 onClick={() => navigate(`/recipes/${recipe.id}`)}
                             />
                         ))}
