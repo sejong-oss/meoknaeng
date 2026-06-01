@@ -13,7 +13,8 @@ import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useLikedPostsQuery, useMyPostsQuery } from "@/hooks/usePostQueries.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
-import { useMyIngredientsQuery, useUpdateMyIngredientsMutation } from "@/hooks/useMyIngredientsQuery.js";
+import { useMyIngredientsQuery } from "@/hooks/useMyIngredientsQuery.js";
+import { useUpdateMyIngredientsMutation } from "@/hooks/useMyIngredientsMutation.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
 
