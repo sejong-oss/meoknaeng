@@ -9,6 +9,7 @@ export function useTogglePostLikeMutation(userId) {
         mutationFn: ({ postId, isLiked }) => isLiked ? unlikePost(postId) : likePost(postId),
         onSuccess: (_data, { postId }) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.likedPosts(userId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.myPosts(userId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
             queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
         },
