@@ -91,7 +91,7 @@ _CHOSEONG_SET = set(_CHOSEONG)
 
 
 def decompose_hangul(value: str) -> str:
-    """한글 문자열을 자모 단위로 분해한다. (예: '김치' → 'ㄱㅣㅁㅊㅣ')
+    """한글 문자열을 자모 단위로 분해한다. (예: '김치' → 'ㄱㅣㅁㅊㅣ')"""
     decomposed = []
     for char in value:
         code = ord(char)
@@ -110,7 +110,7 @@ def decompose_hangul(value: str) -> str:
 
 
 def extract_initials(value: str) -> str:
-    """한글 문자열에서 초성만 추출한다. (예: '김치찌개' → 'ㄱㅊㅉㄱ')
+    """한글 문자열에서 초성만 추출한다. (예: '김치찌개' → 'ㄱㅊㅉㄱ')"""
     initials = []
     for char in value:
         code = ord(char)
