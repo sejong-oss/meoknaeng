@@ -34,9 +34,19 @@
 - [Backend](./backend/README.md)
 - [Contributing](./CONTRIBUTING.md)
 
+## 사전 준비 사항
+
+- Node.js 20.19 이상 또는 22.12 이상
+- npm
+- Python 3.11 이상 권장
+- MySQL 서버
+- Gemini API 키, YouTube Data API 키, Naver Search API 키
+
 ## 빠른 시작
 
 백엔드의 `backend/.env`, 프론트엔드의 `frontend/.env`를 먼저 설정합니다. 자세한 환경변수는 각 파트별 README를 참고합니다.
+
+백엔드 실행 예시는 macOS/Linux 기준입니다. Windows 실행 명령은 [Backend README](./backend/README.md)를 참고합니다.
 
 ```bash
 cd backend

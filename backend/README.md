@@ -21,6 +21,14 @@
 - YouTube Data API
 - Naver Image Search API
 
+## 사전 준비 사항
+
+- Python 3.11 이상
+- MySQL 서버
+- Gemini API 키
+- YouTube Data API 키
+- Naver Search API 키
+
 ## 환경변수
 
 `backend/.env` 파일을 생성하고 필요한 값을 설정합니다.
@@ -57,9 +65,21 @@ HTTPS_ONLY=false
 
 ## 실행 방법
 
+macOS/Linux:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+Windows PowerShell:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 alembic upgrade head
 uvicorn app.main:app --reload
