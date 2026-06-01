@@ -28,6 +28,7 @@ export function LoginModal({
     };
 
     const handleOpenChange = (nextOpen) => {
+        // 모달을 닫은 뒤 다시 열 때 로그인 모드와 빈 입력값으로 시작
         if (!nextOpen) resetForm();
         onOpenChange?.(nextOpen);
     };
@@ -47,6 +48,7 @@ export function LoginModal({
     };
 
     const handleModeChange = () => {
+        // 로그인과 회원가입 입력값이 섞이지 않도록 모드 전환 시 폼 초기화
         setMode((currentMode) => currentMode === "login" ? "signup" : "login");
         setEmail("");
         setPassword("");

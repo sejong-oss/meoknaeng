@@ -15,6 +15,7 @@ import My from "@/pages/My.jsx";
 
 const router = createBrowserRouter([
     {
+        // 첫 방문 온보딩 전용 레이아웃
         path: "/",
         element: <OnboardingLayout />,
         children: [
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
         ],
     },
     {
+        // 로그인 모달과 공통 내비게이션을 공유하는 앱 화면
         element: <AppLayout />,
         children: [
             { path: "/home", element: <Home /> },
@@ -33,6 +35,7 @@ const router = createBrowserRouter([
             { path: "/my", element: <My /> },
         ],
     },
+    // 404의 경우 온보딩 화면으로 리디렉션
     { path: "*", element: <Navigate to="/" replace /> },
 ]);
 
