@@ -42,6 +42,14 @@ npm run dev
 
 개발 서버는 기본적으로 http://localhost:5173 에서 실행됩니다.
 
+Storybook은 개발 서버와 별도로 실행합니다.
+
+```bash
+npm run storybook
+```
+
+Storybook은 기본적으로 http://localhost:6006 에서 실행됩니다.
+
 ## 확인 명령
 
 ```bash

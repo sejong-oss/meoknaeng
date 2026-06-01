@@ -53,6 +53,13 @@ npm install
 npm run dev
 ```
 
+Storybook은 프론트엔드 개발 서버와 별도로 실행합니다.
+
+```bash
+cd frontend
+npm run storybook
+```
+
 - 프론트엔드: http://localhost:5173
 - Storybook: http://localhost:6006
 - 백엔드 API 문서: http://localhost:8000/docs
