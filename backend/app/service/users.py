@@ -44,7 +44,10 @@ async def get_liked_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, da
         select(Post, PostLike.liked_at, like_count_subq.label("like_count"))
         .join(PostLike, PostLike.post_id == Post.post_id)
         .where(PostLike.user_id == user_id)
-        .options(selectinload(Post.author))
+        .options(
+            selectinload(Post.author),
+            selectinload(Post.source_recipe),
+        )
         .order_by(PostLike.liked_at.desc())
     )
     return list(result.all())
@@ -60,6 +63,7 @@ async def get_my_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, int]]
     result = await db.execute(
         select(Post, like_count_subq.label("like_count"))
         .where(Post.author_id == user_id)
+        .options(selectinload(Post.source_recipe))
         .order_by(Post.created_at.desc())
     )
     return list(result.all())

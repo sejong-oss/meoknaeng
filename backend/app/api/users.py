@@ -203,6 +203,7 @@ async def get_my_saved_recipes(
             cook_time=recipe.cook_time,
             difficulty=recipe.difficulty,
             servings=recipe.servings,
+            image_url=recipe.image_url,
             saved_at=saved_at,
         )
         for recipe, saved_at in result.all()
@@ -238,6 +239,7 @@ async def get_my_posts(
             created_at=post.created_at,
             updated_at=post.updated_at,
             source_recipe_id=post.source_recipe_id,
+            source_recipe_image_url=post.source_recipe.image_url if post.source_recipe else None,
         )
         for post, like_count in rows
     ]
@@ -269,6 +271,7 @@ async def get_my_liked_posts(
             author_nickname=post.author.nickname,
             created_at=post.created_at,
             liked_at=liked_at,
+            source_recipe_image_url=post.source_recipe.image_url if post.source_recipe else None,
         )
         for post, liked_at, like_count in rows
     ]
