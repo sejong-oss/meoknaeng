@@ -189,10 +189,10 @@ export default function My() {
     const handleLogout = async () => {
         try {
             await logout();
-            toast.success("로그아웃했어요.");
+            toast.success("로그아웃했어요");
             navigate("/home", { replace: true });
         } catch (error) {
-            toast.error(error.message ?? "로그아웃하지 못했어요.");
+            toast.error(error.message ?? "로그아웃하지 못했어요");
         }
     };
 
@@ -383,11 +383,19 @@ export default function My() {
                                     onClick={() => {
                                         if (editingIngredients) {
                                             setIngredientsExpanded(false);
-                                            updateMyIngredientsMutation.mutate(ingredientsDraft);
+                                            updateMyIngredientsMutation.mutate(ingredientsDraft, {
+                                                onSuccess: () => {
+                                                    setEditingIngredients(false);
+                                                    toast.success("내 재료 목록을 업데이트했어요");
+                                                },
+                                                onError: () => {
+                                                    toast.error("내 재료 목록을 업데이트하지 못했어요");
+                                                },
+                                            });
                                         } else {
                                             setIngredientsDraft([...ingredients]);
+                                            setEditingIngredients(true);
                                         }
-                                        setEditingIngredients((v) => !v);
                                     }}
                                 >
                                     {editingIngredients ? <Checkmark size={16} /> : <Edit size={16} />}
