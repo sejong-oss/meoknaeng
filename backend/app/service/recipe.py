@@ -12,6 +12,7 @@ from app.models.recipe import RecipeIngredient as RecipeIngredientORM
 from app.models.recipe import RecipeStep as RecipeStepORM
 from app.models.schemas import RecipeRequest, RecipeResponse
 from app.models.user import UserIngredient
+from app.service.image_search import fetch_recipe_image
 
 
 class RecipeServiceError(Exception):
@@ -43,6 +44,7 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id:
 
     now = datetime.now(timezone.utc)
     for recipe in response.recipes:
+        image_url = await fetch_recipe_image(recipe.name)
         orm_recipe = RecipeORM(
             recipe_id=str(uuid.uuid4()),
             name=recipe.name,
@@ -51,6 +53,7 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id:
             cook_time=recipe.cook_time_minutes,
             difficulty=recipe.difficulty.value,
             servings=recipe.servings,
+            image_url=image_url,
             created_at=now,
         )
         db.add(orm_recipe)
@@ -70,6 +73,7 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id:
             ))
 
         recipe.recipe_id = orm_recipe.recipe_id
+        recipe.image_url = image_url
 
     if user_id:
         existing = set(

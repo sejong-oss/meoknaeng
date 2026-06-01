@@ -63,6 +63,7 @@ def _to_list_item(post, like_count: int) -> PostListItem:
         author_nickname=post.author.nickname,
         like_count=like_count,
         created_at=post.created_at.isoformat(),
+        source_recipe_image_url=post.source_recipe.image_url if post.source_recipe else None,
     )
 
 
@@ -78,6 +79,7 @@ def _to_detail(post, like_count: int) -> PostDetailResponse:
             cook_time=r.cook_time,
             difficulty=r.difficulty,
             servings=r.servings,
+            image_url=r.image_url,
             ingredients=[RecipeDetailIngredient(name=i.name, amount=i.amount) for i in r.ingredients],
             steps=[
                 RecipeDetailStep(order=s.step_order, description=s.description)

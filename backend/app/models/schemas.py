@@ -70,6 +70,7 @@ class Recipe(ApiBaseModel):
     servings: int = Field(..., ge=1, description="인분")
     ingredients: list[RecipeIngredient] = Field(..., description="재료 목록")
     steps: list[RecipeStep] = Field(..., description="조리 절차")
+    image_url: str | None = Field(None, description="레시피 대표 이미지 URL")
 
 
 class RecipeRequest(BaseModel):
@@ -101,6 +102,7 @@ class RecipeDetail(ApiBaseModel):
     servings: int | None
     ingredients: list[RecipeDetailIngredient]
     steps: list[RecipeDetailStep]
+    image_url: str | None = None
     videos: list[YouTubeVideoItem] = Field(default_factory=list)
 
 
@@ -155,6 +157,7 @@ class PostListItem(ApiBaseModel):
     author_nickname: str
     like_count: int
     created_at: str
+    source_recipe_image_url: str | None = None
 
 
 class PostListResponse(ApiBaseModel):

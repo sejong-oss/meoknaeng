@@ -24,6 +24,7 @@ class Recipe(Base):
     cook_time: Mapped[int | None] = mapped_column(Integer)
     difficulty: Mapped[str | None] = mapped_column(String(20))
     servings: Mapped[int | None] = mapped_column(Integer)
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), ForeignKey("user.user_id"))
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
 

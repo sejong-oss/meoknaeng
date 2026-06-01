@@ -10,6 +10,9 @@ GEMINI_TEMPERATURE = float(os.getenv("GEMINI_TEMPERATURE", "0.7"))
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 
+GOOGLE_CSE_API_KEY = os.getenv("GOOGLE_CSE_API_KEY", "")
+GOOGLE_CSE_CX = os.getenv("GOOGLE_CSE_CX", "")
+
 RECIPE_COUNT = int(os.getenv("RECIPE_COUNT", "5"))
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")

@@ -226,7 +226,10 @@ async def get_post_list(
     stmt = (
         select(Post, like_count_subq.label("like_count"))
         .filter(*filters)
-        .options(selectinload(Post.author))
+        .options(
+            selectinload(Post.author),
+            selectinload(Post.source_recipe),
+        )
         .order_by(Post.created_at.desc())
         .offset((page - 1) * size)
         .limit(size)
