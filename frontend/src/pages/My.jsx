@@ -1,18 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Checkmark, ChevronDown, Close, Edit, Logout, UserAvatar } from "@carbon/icons-react";
+import { Bookmark, Checkmark, ChevronDown, Close, Document, Edit, FavoriteFilled, Logout, UserAvatar } from "@carbon/icons-react";
 import {
     Avatar, Button, Card, Chip, EmptyState,
-    FeedCard, IngredientInput, RecipeCard,
+    FeedCard, IngredientInput, RecipeCard, WithdrawModal,
     Skeleton, Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/index.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
-import { autocompleteIngredients } from "@/libs/api.js";
+import { autocompleteIngredients, deleteMyAccount } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useLikedPostsQuery, useMyPostsQuery } from "@/hooks/usePostQueries.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
+import { useMyIngredientsQuery } from "@/hooks/useMyIngredientsQuery.js";
+import { useUpdateMyIngredientsMutation } from "@/hooks/useMyIngredientsMutation.js";
+import { useTogglePostLikeMutation } from "@/hooks/usePostInteractionMutations.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
 
@@ -91,24 +94,30 @@ export default function My() {
     const user = useAppStore((state) => state.user);
     const authStatus = useAppStore((state) => state.authStatus);
     const authInitialized = useAppStore((state) => state.authInitialized);
-    const ingredients = useAppStore((state) => state.pantryIngredients);
     const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const likedPostsQuery = useLikedPostsQuery(user?.id);
     const myPostsQuery = useMyPostsQuery(user?.id);
+    const myIngredientsQuery = useMyIngredientsQuery(user?.id);
+    const updateMyIngredientsMutation = useUpdateMyIngredientsMutation(user?.id);
+    const togglePostLike = useTogglePostLikeMutation(user?.id);
     const savedRecipes = savedRecipesQuery.data?.recipes ?? [];
     const likedPosts = likedPostsQuery.data ?? [];
+    const likedPostIds = likedPosts.map((post) => post.id);
     const myPosts = myPostsQuery.data ?? [];
-    const addPantryIngredient = useAppStore((state) => state.addPantryIngredient);
     const openLoginModal = useAppStore((state) => state.openLoginModal);
-    const removePantryIngredient = useAppStore((state) => state.removePantryIngredient);
     const updateNickname = useAppStore((state) => state.updateNickname);
     const logout = useAppStore((state) => state.logout);
+    const ingredients = myIngredientsQuery.data ?? [];
     const [editingIngredients, setEditingIngredients] = useState(false);
+    const [ingredientsDraft, setIngredientsDraft] = useState([]);
     const [ingredientsExpanded, setIngredientsExpanded] = useState(false);
     const [hasOverflow, setHasOverflow] = useState(false);
     const [editingNickname, setEditingNickname] = useState(false);
     const [nicknameDraft, setNicknameDraft] = useState(user?.name ?? "");
     const [savingNickname, setSavingNickname] = useState(false);
+    const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+    const [withdrawing, setWithdrawing] = useState(false);
+    const isWithdrawingRef = useRef(false);
     const ingredientsRef = useRef(null);
     const collapsedIngredientsHeightRef = useRef(null);
     const hasIngredients = ingredients.length > 0;
@@ -137,6 +146,7 @@ export default function My() {
     useEffect(() => {
         if (user || !authInitialized) return;
         if (isMobile) return;
+        if (isWithdrawingRef.current) return;
 
         toast.info("로그인이 필요해요");
         openLoginModal();
@@ -179,13 +189,41 @@ export default function My() {
         }
     };
 
+    const handleLike = (id) => {
+        const isLiked = likedPostIds.includes(id);
+        togglePostLike.mutate({ postId: id, isLiked }, {
+            onSuccess: () => myPostsQuery.refetch(),
+        });
+    };
+
     const handleLogout = async () => {
         try {
             await logout();
-            toast.success("로그아웃했어요.");
+            toast.success("로그아웃했어요");
             navigate("/home", { replace: true });
         } catch (error) {
-            toast.error(error.message ?? "로그아웃하지 못했어요.");
+            toast.error(error.message ?? "로그아웃하지 못했어요");
+        }
+    };
+
+    const handleWithdraw = async () => {
+        isWithdrawingRef.current = true;
+        setWithdrawing(true);
+        try {
+            await deleteMyAccount();
+            useAppStore.setState({
+                user: null,
+                authStatus: "idle",
+                authInitialized: true,
+            });
+            toast.success("회원탈퇴가 완료되었어요");
+            navigate("/home", { replace: true });
+        } catch (error) {
+            isWithdrawingRef.current = false;
+            toast.error(error.message ?? "회원탈퇴에 실패했어요");
+            setWithdrawModalOpen(false);
+        } finally {
+            setWithdrawing(false);
         }
     };
 
@@ -260,7 +298,14 @@ export default function My() {
         );
     };
 
-    if (!user && !authInitialized) {
+    const isInitialLoading = user && (
+        myIngredientsQuery.isPending ||
+        savedRecipesQuery.isPending ||
+        myPostsQuery.isPending ||
+        likedPostsQuery.isPending
+    );
+
+    if (!authInitialized || isInitialLoading) {
         return <MySkeleton />;
     }
 
@@ -346,8 +391,21 @@ export default function My() {
                                     aria-label={editingIngredients ? "내 재료 편집 완료" : "내 재료 편집"}
                                     className="h-8 w-8 !px-0 !py-0"
                                     onClick={() => {
-                                        if (editingIngredients) setIngredientsExpanded(false);
-                                        setEditingIngredients((v) => !v);
+                                        if (editingIngredients) {
+                                            setIngredientsExpanded(false);
+                                            updateMyIngredientsMutation.mutate(ingredientsDraft, {
+                                                onSuccess: () => {
+                                                    setEditingIngredients(false);
+                                                    toast.success("내 재료 목록을 업데이트했어요");
+                                                },
+                                                onError: () => {
+                                                    toast.error("내 재료 목록을 업데이트하지 못했어요");
+                                                },
+                                            });
+                                        } else {
+                                            setIngredientsDraft([...ingredients]);
+                                            setEditingIngredients(true);
+                                        }
                                     }}
                                 >
                                     {editingIngredients ? <Checkmark size={16} /> : <Edit size={16} />}
@@ -356,9 +414,9 @@ export default function My() {
                         </div>
                         {editingIngredients ? (
                             <IngredientInput
-                                ingredients={ingredients}
-                                onAdd={addPantryIngredient}
-                                onRemove={removePantryIngredient}
+                                ingredients={ingredientsDraft}
+                                onAdd={(ing) => setIngredientsDraft((prev) => [...new Set([...prev, ing.trim()].filter(Boolean))])}
+                                onRemove={(ing) => setIngredientsDraft((prev) => prev.filter((item) => item !== ing))}
                                 loadSuggestions={loadIngredientSuggestions}
                                 className="mt-2 rounded-card border border-gray-200 bg-white px-3 py-2"
                                 inputClassName="!py-1 !text-sm"
@@ -391,6 +449,16 @@ export default function My() {
                         )}
                     </Card>
 
+                    <div className="hidden md:block">
+                        <button
+                            type="button"
+                            className="text-sm font-medium text-gray-600 underline hover:text-gray-500"
+                            onClick={() => setWithdrawModalOpen(true)}
+                        >
+                            회원탈퇴
+                        </button>
+                    </div>
+
                 </aside>
 
                 {/* 콘텐츠 */}
@@ -409,59 +477,107 @@ export default function My() {
                         </TabsList>
 
                         <TabsContent value="saved">
-                            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {savedRecipes.map((recipe) => (
-                                    <RecipeCard
-                                        key={recipe.id}
-                                        title={recipe.title}
-                                        time={recipe.time}
-                                        difficulty={recipe.difficulty}
-                                        servings={recipe.servings}
-                                        description={recipe.description}
-                                        onClick={() => navigate(`/recipes/${recipe.id}`)}
-                                    />
-                                ))}
-                            </div>
+                            {savedRecipes.length === 0 ? (
+                                <EmptyState
+                                    icon={<Bookmark size={28} />}
+                                    title="저장한 레시피가 없어요"
+                                    description="추천 레시피에서 마음에 드는 레시피를 저장해보세요"
+                                    action="레시피 추천 받기"
+                                    onAction={() => navigate("/home")}
+                                />
+                            ) : (
+                                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {savedRecipes.map((recipe) => (
+                                        <RecipeCard
+                                            key={recipe.id}
+                                            title={recipe.title}
+                                            time={recipe.time}
+                                            difficulty={recipe.difficulty}
+                                            servings={recipe.servings}
+                                            description={recipe.description}
+                                            onClick={() => navigate(`/recipes/${recipe.id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="mine">
-                            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {myPosts.map((item) => (
-                                    <FeedCard
-                                        key={item.id}
-                                        title={item.title}
-                                        time={item.time}
-                                        category={item.category}
-                                        difficulty={item.difficulty}
-                                        likes={item.likes}
-                                        description={item.description}
-                                        onClick={() => navigate(`/feed/${item.id}`)}
-                                    />
-                                ))}
-                            </div>
+                            {myPosts.length === 0 ? (
+                                <EmptyState
+                                    icon={<Document size={28} />}
+                                    title="아직 작성한 글이 없어요"
+                                    description="레시피 경험을 피드에 공유해보세요"
+                                    action="글 작성하기"
+                                    onAction={() => navigate("/feed", { replace: true, state: { openRecipeSelect: true } })}
+                                />
+                            ) : (
+                                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {myPosts.map((item) => (
+                                        <FeedCard
+                                            key={item.id}
+                                            title={item.title}
+                                            time={item.time}
+                                            category={item.category}
+                                            difficulty={item.difficulty}
+                                            likes={item.likes}
+                                            defaultLiked={likedPostIds.includes(item.id)}
+                                            onLike={() => handleLike(item.id)}
+                                            onClick={() => navigate(`/feed/${item.id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </TabsContent>
 
                         <TabsContent value="likes">
-                            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                {likedPosts.map((item) => (
-                                    <FeedCard
-                                        key={item.id}
-                                        title={item.title}
-                                        time={item.time}
-                                        category={item.category}
-                                        difficulty={item.difficulty}
-                                        author={item.author}
-                                        likes={item.likes}
-                                        description={item.description}
-                                        defaultLiked
-                                        onClick={() => navigate(`/feed/${item.id}`)}
-                                    />
-                                ))}
-                            </div>
+                            {likedPosts.length === 0 ? (
+                                <EmptyState
+                                    icon={<FavoriteFilled size={28} />}
+                                    title="좋아요한 게시글이 없어요"
+                                    description="피드에서 마음에 드는 게시글에 좋아요를 눌러보세요"
+                                    action="피드 보러 가기"
+                                    onAction={() => navigate("/feed")}
+                                />
+                            ) : (
+                                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {likedPosts.map((item) => (
+                                        <FeedCard
+                                            key={item.id}
+                                            title={item.title}
+                                            time={item.time}
+                                            category={item.category}
+                                            difficulty={item.difficulty}
+                                            author={item.author}
+                                            likes={item.likes}
+                                            defaultLiked
+                                            onLike={() => handleLike(item.id)}
+                                            onClick={() => navigate(`/feed/${item.id}`)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </TabsContent>
                     </Tabs>
+
+                    <div className="md:hidden mt-6">
+                        <button
+                            type="button"
+                            className="text-sm font-medium text-gray-600 underline hover:text-gray-500"
+                            onClick={() => setWithdrawModalOpen(true)}
+                        >
+                            회원탈퇴
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            <WithdrawModal
+                open={withdrawModalOpen}
+                onOpenChange={setWithdrawModalOpen}
+                onConfirm={handleWithdraw}
+                withdrawing={withdrawing}
+            />
         </>
     );
 }

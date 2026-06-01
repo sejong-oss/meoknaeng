@@ -10,6 +10,7 @@ import {
 
 import { countOwnedRecipeIngredients } from "@/libs/recipeIngredients.js";
 import { formatMinutes, formatServings } from "@/libs/utils.js";
+import { queryClient, queryKeys } from "@/libs/queryClient.js";
 
 const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filter(Boolean))];
 
@@ -40,7 +41,6 @@ export const useAppStore = create((set) => ({
     authStatus: "idle",
     authInitialized: false,
     loginModalOpen: false,
-    pantryIngredients: [],
     recommendationIngredients: [],
     recommendationHero: null,
     recommendationOthers: [],
@@ -59,14 +59,12 @@ export const useAppStore = create((set) => ({
 
             set({
                 user: nextUser,
-                pantryIngredients: nextUser.ingredients,
                 authStatus: "success",
                 authInitialized: true,
             });
         } catch {
             set({
                 user: null,
-                pantryIngredients: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -81,7 +79,6 @@ export const useAppStore = create((set) => ({
 
             set({
                 user: nextUser,
-                pantryIngredients: nextUser.ingredients,
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -104,7 +101,6 @@ export const useAppStore = create((set) => ({
 
             set({
                 user: nextUser,
-                pantryIngredients: nextUser.ingredients,
                 loginModalOpen: false,
                 authStatus: "success",
                 authInitialized: true,
@@ -122,7 +118,6 @@ export const useAppStore = create((set) => ({
         } finally {
             set({
                 user: null,
-                pantryIngredients: [],
                 authStatus: "idle",
                 authInitialized: true,
             });
@@ -147,12 +142,6 @@ export const useAppStore = create((set) => ({
             throw error;
         }
     },
-    addPantryIngredient: (ingredient) => set((state) => ({
-        pantryIngredients: uniqueItems([...state.pantryIngredients, ingredient]),
-    })),
-    removePantryIngredient: (ingredient) => set((state) => ({
-        pantryIngredients: state.pantryIngredients.filter((item) => item !== ingredient),
-    })),
     recommendRecipes: async (ingredients) => {
         const nextIngredients = uniqueItems(ingredients);
 
@@ -180,6 +169,11 @@ export const useAppStore = create((set) => ({
                 recommendationStatus: "success",
                 recommendationStartedAt: null,
             });
+
+            const { user } = useAppStore.getState();
+            if (user) {
+                queryClient.invalidateQueries({ queryKey: queryKeys.myIngredients(user.id) });
+            }
 
         } catch (error) {
             set({

@@ -83,6 +83,18 @@ export function logout() {
     });
 }
 
+export function getMyIngredients(options = {}) {
+    return request("/users/me/ingredients", options);
+}
+
+export function updateMyIngredients(ingredients, options = {}) {
+    return request("/users/me/ingredients", {
+        method: "PATCH",
+        data: { ingredients },
+        ...options,
+    });
+}
+
 export function autocompleteIngredients({ query, limit = 10 }) {
     return request("/ingredients/autocomplete", {
         params: {
@@ -207,4 +219,10 @@ export function likePost(postId, options = {}) {
 
 export function unlikePost(postId, options = {}) {
     return request(`/posts/${postId}/likes`, { method: "DELETE", ...options });
+}
+
+export function deleteMyAccount() {
+    return request("/users/me", {
+        method: "DELETE",
+    });
 }
