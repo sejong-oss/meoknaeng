@@ -495,6 +495,7 @@ export default function My() {
                                             difficulty={recipe.difficulty}
                                             servings={recipe.servings}
                                             description={recipe.description}
+                                            image={recipe.image}
                                             onClick={() => navigate(`/recipes/${recipe.id}`)}
                                         />
                                     ))}
@@ -520,6 +521,7 @@ export default function My() {
                                             time={item.time}
                                             category={item.category}
                                             difficulty={item.difficulty}
+                                            image={item.image}
                                             likes={item.likes}
                                             defaultLiked={likedPostIds.includes(item.id)}
                                             onLike={() => handleLike(item.id)}
@@ -549,6 +551,7 @@ export default function My() {
                                             category={item.category}
                                             difficulty={item.difficulty}
                                             author={item.author}
+                                            image={item.image}
                                             likes={item.likes}
                                             defaultLiked
                                             onLike={() => handleLike(item.id)}

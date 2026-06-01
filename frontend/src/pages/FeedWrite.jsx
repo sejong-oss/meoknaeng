@@ -24,6 +24,7 @@ import {
     FormField,
     Input,
     LeaveWriteModal,
+    RecipeImage,
     RecipeStepRow,
     Tabs,
     TabsContent,
@@ -48,6 +49,7 @@ const recipeToSourceRecipe = (recipe) => ({
     time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
+    image: recipe.imageUrl,
     ingredients: recipe.ingredients ?? [],
     steps: (recipe.steps ?? [])
         .slice()
@@ -104,31 +106,39 @@ function SourceRecipeTabs({ recipe, variant = "pill" }) {
 
 function SourceRecipeHeader({ recipe, label }) {
     return (
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <div className="min-w-0">
-                <p className="text-xs font-bold text-gray-500">{label}</p>
-                <h2 className="mt-0.5 truncate text-lg font-extrabold leading-tight text-gray-900">
-                    {recipe.title}
-                </h2>
-            </div>
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+            <RecipeImage
+                src={recipe.image}
+                alt={recipe.title}
+                showLabel={false}
+                className="size-16 shrink-0 rounded-btn"
+            />
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+                <div className="min-w-0">
+                    <p className="text-xs font-bold text-gray-500">{label}</p>
+                    <h2 className="mt-0.5 truncate text-lg font-extrabold leading-tight text-gray-900">
+                        {recipe.title}
+                    </h2>
+                </div>
 
-            <div className="flex flex-wrap gap-1.5">
-                <Chip variant="neutral">
-                    <Restaurant size={11} />
-                    {recipe.category}
-                </Chip>
-                <Chip variant="neutral">
-                    <Time size={11} />
-                    {recipe.time}
-                </Chip>
-                <Chip variant="neutral">
-                    <Growth size={11} />
-                    {recipe.difficulty}
-                </Chip>
-                <Chip variant="neutral">
-                    <UserMultiple size={11} />
-                    {recipe.servings}
-                </Chip>
+                <div className="flex flex-wrap gap-1.5">
+                    <Chip variant="neutral">
+                        <Restaurant size={11} />
+                        {recipe.category}
+                    </Chip>
+                    <Chip variant="neutral">
+                        <Time size={11} />
+                        {recipe.time}
+                    </Chip>
+                    <Chip variant="neutral">
+                        <Growth size={11} />
+                        {recipe.difficulty}
+                    </Chip>
+                    <Chip variant="neutral">
+                        <UserMultiple size={11} />
+                        {recipe.servings}
+                    </Chip>
+                </div>
             </div>
         </div>
     );

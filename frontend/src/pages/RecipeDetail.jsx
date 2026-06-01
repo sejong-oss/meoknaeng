@@ -25,7 +25,7 @@ import {
     Button,
     Card,
     EmptyState,
-    PhotoPlaceholder,
+    RecipeImage,
     RecipeSectionTitle,
     RecipeStat,
     RecipeStepRow,
@@ -67,6 +67,7 @@ const recipeToDetailView = (recipe, ownedIngredients) => ({
     time: formatMinutes(recipe.cookTime),
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
+    image: recipe.imageUrl,
     ingredients: addRecipeIngredientStatuses(recipe.ingredients, ownedIngredients),
     steps: (recipe.steps ?? [])
         .slice()
@@ -265,7 +266,7 @@ export default function RecipeDetail() {
                 />
 
                 <div className="relative md:hidden">
-                    <PhotoPlaceholder label={recipe.title} tone="deep" className="h-60 w-full" />
+                    <RecipeImage src={recipe.image} alt={recipe.title} tone="deep" className="h-60 w-full" />
                     <Button
                         variant="outline"
                         size="sm"
@@ -295,8 +296,9 @@ export default function RecipeDetail() {
                                 <RecipeStat label="인분" value={recipe.servings} />
                             </div>
 
-                            <PhotoPlaceholder
-                                label={`${recipe.title} / main`}
+                            <RecipeImage
+                                src={recipe.image}
+                                alt={`${recipe.title} / main`}
                                 tone="deep"
                                 className="hidden h-[23.75rem] w-full rounded-card md:flex"
                             />

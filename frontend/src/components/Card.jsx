@@ -1,7 +1,7 @@
 import { Favorite, FavoriteFilled, Growth, Time, Restaurant, UserMultiple } from "@carbon/icons-react";
 import { Chip } from "@/components/Chip.jsx";
 import { Avatar } from "@/components/Avatar.jsx";
-import { PhotoPlaceholder } from "@/components/PhotoPlaceholder.jsx";
+import { RecipeImage } from "@/components/RecipeImage.jsx";
 
 const cardVariants = {
     default: "bg-white border-gray-200",
@@ -87,10 +87,7 @@ export function ContentCard({
             ].join(" ")}
         >
             <div className="relative w-full h-28 lg:h-40">
-                {image
-                    ? <img src={image} alt={title} className="w-full h-full object-cover" />
-                    : <PhotoPlaceholder showLabel={false} className="w-full h-full rounded-none" />
-                }
+                <RecipeImage src={image} alt={title} showLabel={false} className="h-full w-full rounded-none" />
                 {hasLikes && (
                     <button
                         type="button"

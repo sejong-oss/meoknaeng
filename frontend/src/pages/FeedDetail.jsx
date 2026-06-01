@@ -43,7 +43,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
     Input,
-    PhotoPlaceholder,
+    RecipeImage,
     RecipeSectionTitle,
     RecipeStat,
     RecipeStepRow,
@@ -212,8 +212,9 @@ const RelatedRecipeRow = ({ recipe, onClick }) => {
             onClick={onClick}
             className="group grid w-full cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-stretch gap-3 border-b border-gray-200 p-3 text-left transition-colors last:border-b-0 hover:bg-gray-50"
         >
-            <PhotoPlaceholder
-                label={recipe.title}
+            <RecipeImage
+                src={recipe.image}
+                alt={recipe.title}
                 tone="soft"
                 showLabel={false}
                 className="aspect-square h-full rounded-btn"
@@ -403,7 +404,7 @@ export default function FeedDetail() {
                 />
 
                 <div className="relative md:hidden">
-                    <PhotoPlaceholder label={post.title} tone="deep" className="h-60 w-full" />
+                    <RecipeImage src={post.image} alt={post.title} tone="deep" className="h-60 w-full" />
                     <Button
                         variant="outline"
                         size="sm"
@@ -451,7 +452,7 @@ export default function FeedDetail() {
                                 <StatChip Icon={UserMultiple}>{post.servings}</StatChip>
                             </div>
 
-                            <PhotoPlaceholder label={`${post.title} / main`} tone="deep" className="hidden h-[23.75rem] w-full rounded-card md:flex" />
+                            <RecipeImage src={post.image} alt={`${post.title} / main`} tone="deep" className="hidden h-[23.75rem] w-full rounded-card md:flex" />
                         </section>
 
                         {post.ingredients.length > 0 && (

@@ -32,6 +32,7 @@ const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     description: recipe.summary ?? recipe.description,
+    image: recipe.imageUrl,
     ingredientCount: recipe.ingredients?.length ?? 0,
     ownedIngredientCount: countOwnedRecipeIngredients(recipe.ingredients, ownedIngredients),
 });

@@ -11,6 +11,7 @@ const savedRecipeToView = (recipe) => ({
     difficulty: recipe.difficulty,
     servings: formatServings(recipe.servings),
     description: recipe.description,
+    image: recipe.imageUrl,
 });
 
 const savedRecipesToView = (data) => {
