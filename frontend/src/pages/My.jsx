@@ -191,7 +191,9 @@ export default function My() {
 
     const handleLike = (id) => {
         const isLiked = likedPostIds.includes(id);
-        togglePostLike.mutate({ postId: id, isLiked });
+        togglePostLike.mutate({ postId: id, isLiked }, {
+            onSuccess: () => myPostsQuery.refetch(),
+        });
     };
 
     const handleLogout = async () => {
