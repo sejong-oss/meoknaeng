@@ -30,6 +30,7 @@ const stepRowSizes = {
 };
 
 export const RecipeStepRow = ({ index, children, size = "default" }) => {
+    // 상세 화면과 공유 작성 화면에 맞는 조리 순서 크기 선택
     const styles = stepRowSizes[size] ?? stepRowSizes.default;
 
     return (

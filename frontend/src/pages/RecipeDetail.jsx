@@ -60,6 +60,7 @@ const ingredientStatusOrder = {
 };
 
 
+// 추천에 사용한 재료를 반영한 상세 화면 모델 변환
 const recipeToDetailView = (recipe, ownedIngredients) => ({
     id: recipe.recipeId,
     title: recipe.name,
@@ -71,6 +72,7 @@ const recipeToDetailView = (recipe, ownedIngredients) => ({
     ingredients: addRecipeIngredientStatuses(recipe.ingredients, ownedIngredients),
     steps: (recipe.steps ?? [])
         .slice()
+        // 조리 순서 번호 기준 정렬
         .sort((a, b) => a.order - b.order)
         .map((step) => step.description)
         .filter(Boolean),
@@ -208,6 +210,7 @@ export default function RecipeDetail() {
         Promise.resolve().then(() => {
             if (ignore) return;
 
+            // 레시피 변경 시 이전 상세 내용 대신 로딩 표시
             setRecipe(null);
             setStatus("loading");
         });
@@ -244,6 +247,7 @@ export default function RecipeDetail() {
 
     const sortedIngredients = recipe.ingredients
         .slice()
+        // 보유 재료와 필요한 재료를 먼저 확인하기 위한 정렬
         .sort((a, b) => ingredientStatusOrder[a.status] - ingredientStatusOrder[b.status]);
     const ownedIngredients = recipe.ingredients.filter((ingredient) => ingredient.status === "owned").length;
     const ingredientsMeta = `${ownedIngredients}/${recipe.ingredients.length} 보유`;

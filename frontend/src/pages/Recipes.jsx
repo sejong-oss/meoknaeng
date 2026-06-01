@@ -61,11 +61,13 @@ export default function Recipes() {
     const handleRecommendAgain = () => {
         if (ingredients.length === 0) return;
 
+        // 기존 재료로 다시 추천받기 위한 로딩 초기화
         resetLoading();
         recommendRecipes(ingredients).catch(() => {});
     };
     const handleShareHero = () => shareRecipe(hero);
 
+    // 추천 완료 직후 100% 상태까지 보여주는 로딩 화면 분기
     if (showLoading) {
         return (
             <>
@@ -102,6 +104,7 @@ export default function Recipes() {
         );
     }
 
+    // 추천 실패 후 같은 재료로 다시 시도하는 화면 분기
     if (isError) {
         return (
             <>
@@ -119,6 +122,7 @@ export default function Recipes() {
         );
     }
 
+    // 추천 결과가 없을 때 재료 입력으로 돌아가는 화면 분기
     if (!hasResults) {
         return (
             <>

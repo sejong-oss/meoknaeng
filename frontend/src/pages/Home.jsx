@@ -24,6 +24,7 @@ function getStoredRecentIngredients() {
     if (typeof window === "undefined") return [];
 
     try {
+        // 저장된 최근 재료를 문자열 목록으로 복원
         const stored = window.localStorage.getItem(RECENT_INGREDIENTS_STORAGE_KEY);
         const parsed = stored ? JSON.parse(stored) : [];
         return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
@@ -73,6 +74,7 @@ export default function Home() {
     function saveRecentIngredients(items) {
         if (items.length === 0) return;
 
+        // 방금 입력한 재료를 앞에 둔 최근 재료 목록 저장
         const nextRecentIngredients = [...new Set([...items, ...recentIngredients])]
             .filter(Boolean)
             .slice(0, MAX_RECENT_INGREDIENTS);
@@ -84,6 +86,7 @@ export default function Home() {
     function handleRecommend() {
         if (isRecommending) return;
 
+        // 추천 결과 화면에서 로딩을 보여주기 위한 요청 시작 후 이동
         recommendRecipes(ingredients).catch(() => {});
         navigate("/recipes");
     }

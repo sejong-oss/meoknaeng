@@ -53,6 +53,7 @@ const recipeToSourceRecipe = (recipe) => ({
     ingredients: recipe.ingredients ?? [],
     steps: (recipe.steps ?? [])
         .slice()
+        // 조리 순서 번호 기준 정렬
         .sort((a, b) => a.order - b.order)
         .map((step) => step.description),
 });
@@ -201,6 +202,7 @@ export default function FeedWrite() {
     useBeforeUnload((event) => {
         if (!shouldConfirmLeave()) return;
 
+        // 새로고침 또는 탭 닫기 시 작성 중 이탈 확인
         event.preventDefault();
         event.returnValue = "";
     });
@@ -208,6 +210,7 @@ export default function FeedWrite() {
     useEffect(() => {
         if (recipeId || postId) return;
 
+        // 공유할 레시피 없이 진입한 경우 레시피 선택 모달 열기
         navigate("/feed", { replace: true, state: { openRecipeSelect: true } });
     }, [navigate, recipeId, postId]);
 
@@ -230,6 +233,7 @@ export default function FeedWrite() {
 
         const recipe = recipeQuery.data;
         Promise.resolve().then(() => {
+            // 사용자가 입력한 값을 유지한 추천 레시피 기본값 채우기
             setForm((prev) => ({
                 ...prev,
                 title: prev.title || recipe.title,
@@ -269,6 +273,7 @@ export default function FeedWrite() {
         submittingRef.current = true;
         try {
             if (isEditMode) {
+                // 수정 모드에서 원본 레시피 연결은 유지하고 게시글 내용만 갱신
                 await updatePostMutation.mutateAsync({
                     postId,
                     title: form.title.trim(),
@@ -278,6 +283,7 @@ export default function FeedWrite() {
                 toast.success("게시글을 수정했어요");
                 navigate(`/feed/${postId}`, { replace: true });
             } else {
+                // 작성 모드에서 피드 카드에 필요한 원본 레시피 정보 저장
                 const created = await createPostMutation.mutateAsync({
                     title: form.title.trim(),
                     description: form.description.trim() || null,

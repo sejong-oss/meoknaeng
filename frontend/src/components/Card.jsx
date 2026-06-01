@@ -72,6 +72,7 @@ export function ContentCard({
     const hasLikes = Number.isFinite(likes);
     const liked = defaultLiked;
     const handleLikeClick = (event) => {
+        // 카드 이동과 좋아요 클릭 동작 분리
         event.stopPropagation();
         onLike?.();
     };

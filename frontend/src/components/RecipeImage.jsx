@@ -13,6 +13,7 @@ export function RecipeImage({
     const hasImage = Boolean(src) && !failed;
 
     if (!hasImage) {
+        // 이미지가 없을 때도 레시피 카드 비율 유지
         return (
             <PhotoPlaceholder
                 label={alt}
