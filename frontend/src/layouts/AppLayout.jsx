@@ -55,6 +55,7 @@ export default function AppLayout() {
 
     return (
         <div className="flex flex-col h-dvh">
+            {/* 데스크탑 상단 내비게이션 */}
             <TopNav
                 className="hidden md:block"
                 user={user}
@@ -62,11 +63,13 @@ export default function AppLayout() {
                 onLogoutClick={handleLogout}
                 authPending={authStatus === "checking"}
             />
+            {/* 페이지 본문 스크롤 영역 */}
             <main className="flex-1 overflow-y-auto">
                 <Container className="py-6">
                     <Outlet />
                 </Container>
             </main>
+            {/* 모바일 하단 탭 내비게이션 */}
             <BottomTabBar className="flex md:hidden" />
             <LoginModal
                 open={loginModalOpen}

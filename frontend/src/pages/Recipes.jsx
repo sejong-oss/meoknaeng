@@ -177,6 +177,7 @@ export default function Recipes() {
                     </div>
                 </div>
 
+                {/* 최상위 추천 레시피를 강조하는 히어로 카드 */}
                 <Card className="overflow-hidden p-3.5 shadow-xl md:p-5">
                     <div className="flex flex-col gap-4 md:grid md:grid-cols-[23.75rem_1fr] md:gap-6">
                         <RecipeImage
@@ -255,6 +256,7 @@ export default function Recipes() {
                     </div>
                 </Card>
 
+                {/* 보조 추천 레시피 카드 그리드 */}
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between">
                         <h3 className="flex items-center gap-2 text-lg md:text-2xl font-bold tracking-tight text-gray-900">

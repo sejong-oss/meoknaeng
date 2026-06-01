@@ -114,6 +114,7 @@ export default function Feed() {
         <>
             <title>{`피드 | ${SITE_NAME}`}</title>
             <div className="flex flex-col gap-6 py-4 md:py-6">
+                {/* 피드 제목과 데스크탑 작성 버튼 영역 */}
                 <div className="flex items-center justify-between">
                     <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
                         오늘의 <span className="text-primary-500">한 그릇</span>
@@ -130,6 +131,7 @@ export default function Feed() {
                     </div>
                 </div>
 
+                {/* 검색창과 필터 드롭다운을 한 줄로 묶은 탐색 영역 */}
                 <div className="flex gap-2 items-center">
                     <Input
                         className="flex-1 [&>div]:h-11"
@@ -185,6 +187,7 @@ export default function Feed() {
                     </DropdownMenu>
                 </div>
 
+                {/* 선택된 필터를 바로 해제할 수 있는 칩 목록 */}
                 {activeFilters.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-medium text-gray-400 shrink-0">적용된 필터:</span>
@@ -234,6 +237,7 @@ export default function Feed() {
                     />
                 ) : (
                     <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {/* 화면 폭에 맞춰 열 수가 바뀌는 피드 그리드 */}
                         {feedItems.map((item) => (
                             <FeedCard
                                 key={item.id}

@@ -355,8 +355,10 @@ export default function FeedWrite() {
                         </div>
                     </div>
 
+                    {/* 모바일에서 접어서 확인하는 공유 레시피 요약 */}
                     <SourceRecipeSummary recipe={sourceRecipe} />
 
+                    {/* 작성 폼과 데스크탑 고정 레시피 패널의 2열 레이아웃 */}
                     <div className="grid gap-7 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
                         <section className="flex flex-col gap-5">
                             <FormField label="제목" required error={errors.title}>
@@ -395,6 +397,7 @@ export default function FeedWrite() {
                     </div>
                 </div>
 
+                {/* 모바일 작성 완료 플로팅 버튼 */}
                 <FloatingActionButton type="submit" disabled={isPending}>
                     <Checkmark size={16} />
                     {submitLabel}

@@ -43,6 +43,7 @@ export function TopNav({
                 <NavLink to={logoTo} className="flex items-center self-stretch shrink-0 text-xl font-black tracking-tight text-gray-900 leading-none">
                     {SITE_NAME}<span className="text-primary-500">.</span>
                 </NavLink>
+                {/* 데스크탑 주요 페이지 이동 탭 */}
                 {showItems && (
                     <nav className="flex self-stretch gap-6 flex-1">
                         {NAV_ITEMS.map(({ key, label, to }) => (
@@ -62,6 +63,7 @@ export function TopNav({
                     </nav>
                 )}
                 {!showItems && <div className="flex-1" />}
+                {/* 인증 상태에 따른 로그인 버튼 또는 사용자 메뉴 표시 */}
                 {showAuth && authPending ? (
                     null
                 ) : showAuth && user ? (
@@ -104,6 +106,7 @@ export function BottomTabBar({ className = "" }) {
     return (
         <div className={`bg-white border-t border-gray-200 pb-5 ${className}`}>
             <Container className="flex">
+                {/* 모바일 하단 주요 화면 탭 */}
                 {TAB_ITEMS.map(({ key, label, Icon, to }) => (
                     <NavLink
                         key={key}

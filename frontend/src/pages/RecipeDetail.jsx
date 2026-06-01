@@ -269,6 +269,7 @@ export default function RecipeDetail() {
                     ]}
                 />
 
+                {/* 모바일 상단 이미지와 뒤로 가기 버튼 */}
                 <div className="relative md:hidden">
                     <RecipeImage src={recipe.image} alt={recipe.title} tone="deep" className="h-60 w-full" />
                     <Button
@@ -282,6 +283,7 @@ export default function RecipeDetail() {
                     </Button>
                 </div>
 
+                {/* 본문과 데스크탑 요리 정보 패널의 상세 화면 레이아웃 */}
                 <div className="relative z-10 -mt-8 grid gap-7 md:mt-0 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
                     <article className="flex flex-col gap-6 rounded-t-[2rem] bg-white px-5 pb-28 pt-8 shadow-xl md:rounded-none md:px-0 md:pb-0 md:pt-0 md:shadow-none">
                         <section className="flex flex-col gap-4 md:gap-5">
@@ -384,6 +386,7 @@ export default function RecipeDetail() {
                     </aside>
                 </div>
 
+                {/* 모바일 하단 고정 요리 시작 액션 */}
                 <div className="sticky bottom-0 z-20 -mx-0 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-xl md:hidden">
                     <Button variant="primary" size="lg" className="flex-1" onClick={handleStartCooking}>
                         요리 시작

@@ -118,6 +118,7 @@ export default function Home() {
                                 재료를 입력하면 AI가 가능한 요리 조합을 찾아드려요
                             </p>
                         </div>
+                        {/* 입력 영역 전체를 클릭 가능한 재료 입력 패널로 구성 */}
                         <div
                             ref={inputPanelRef}
                             className={[
@@ -160,6 +161,7 @@ export default function Home() {
                         </div>
                     </div>
 
+                    {/* 내 재료와 최근 입력 재료 보조 선택 영역 */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-16 mt-2">
                         <div className="flex flex-col gap-4">
                             <div className="flex items-baseline justify-between gap-2">
@@ -225,6 +227,7 @@ export default function Home() {
                     </div>
 
                 </div>
+                {/* 모바일 하단 고정 추천 버튼 */}
                 <div className="md:hidden sticky bottom-0 z-20 flex items-center gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 shadow-xl">
                     <Button
                         variant="primary"
