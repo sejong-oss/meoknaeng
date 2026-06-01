@@ -1,25 +1,27 @@
 import httpx
 
-from app.config import GOOGLE_CSE_API_KEY, GOOGLE_CSE_CX
+from app.config import NAVER_CLIENT_ID, NAVER_CLIENT_SECRET
 
-GOOGLE_CSE_URL = "https://www.googleapis.com/customsearch/v1"
+NAVER_IMAGE_SEARCH_URL = "https://openapi.naver.com/v1/search/image"
 
 
 async def fetch_recipe_image(recipe_name: str) -> str | None:
-    if not GOOGLE_CSE_API_KEY or not GOOGLE_CSE_CX:
+    if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
         return None
 
+    headers = {
+        "X-Naver-Client-Id": NAVER_CLIENT_ID,
+        "X-Naver-Client-Secret": NAVER_CLIENT_SECRET,
+    }
     params = {
-        "key": GOOGLE_CSE_API_KEY,
-        "cx": GOOGLE_CSE_CX,
-        "q": recipe_name,
-        "searchType": "image",
-        "num": 1,
+        "query": recipe_name,
+        "display": 1,
+        "sort": "sim",
     }
 
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(GOOGLE_CSE_URL, params=params)
+            response = await client.get(NAVER_IMAGE_SEARCH_URL, headers=headers, params=params)
             response.raise_for_status()
         items = response.json().get("items", [])
     except (httpx.TimeoutException, httpx.HTTPStatusError, httpx.RequestError, ValueError):
