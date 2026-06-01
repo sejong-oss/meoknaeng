@@ -10,6 +10,7 @@ const toastIcons = {
 
 const toastOptions = {
     unstyled: true,
+    // sonner 기본 스타일 대신 앱 디자인 토큰으로 토스트 외형 통일
     classNames: {
         toast: "flex w-[var(--width)] items-center gap-3 px-4 py-3 rounded-card text-sm font-medium shadow-lg",
         default: "bg-gray-900 text-white",

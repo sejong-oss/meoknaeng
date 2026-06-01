@@ -28,6 +28,7 @@ export function Select({ value, onValueChange, placeholder = "선택", disabled,
                 </RadixSelect.Icon>
             </RadixSelect.Trigger>
 
+            {/* 긴 선택지 목록도 화면 안에 들어오도록 Radix가 위치와 높이를 계산 */}
             <RadixSelect.Portal>
                 <RadixSelect.Content
                     position="popper"

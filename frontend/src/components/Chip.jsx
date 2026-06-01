@@ -22,6 +22,7 @@ export function Chip({ children, variant = "neutral", onRemove, onClick, classNa
         >
             {children}
             {onRemove && (
+                // 칩 선택 동작과 삭제 버튼 동작 분리
                 <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onRemove(); }}
