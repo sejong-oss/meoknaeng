@@ -442,7 +442,7 @@ export default function My() {
                     <div className="hidden md:block">
                         <button
                             type="button"
-                            className="text-sm font-medium text-gray-600 underline transition-colors hover:text-gray-400"
+                            className="text-sm font-medium text-gray-600 underline hover:text-gray-500"
                             onClick={() => setWithdrawModalOpen(true)}
                         >
                             회원탈퇴
@@ -550,7 +550,7 @@ export default function My() {
                     <div className="md:hidden mt-6">
                         <button
                             type="button"
-                            className="text-sm font-medium text-gray-600 underline transition-colors hover:text-gray-400"
+                            className="text-sm font-medium text-gray-600 underline hover:text-gray-500"
                             onClick={() => setWithdrawModalOpen(true)}
                         >
                             회원탈퇴
