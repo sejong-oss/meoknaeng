@@ -18,6 +18,7 @@ const savedRecipesToView = (data) => {
     const recipes = data?.recipes ?? [];
 
     return {
+        // 저장 여부 확인용 id 목록과 카드 렌더링용 목록 분리
         ids: recipes.map((recipe) => recipe.recipeId),
         recipes: recipes.map(savedRecipeToView),
     };
@@ -37,6 +38,7 @@ export function useToggleSavedRecipeMutation(userId) {
     return useMutation({
         mutationFn: ({ recipeId, isSaved }) => isSaved ? unsaveRecipe(recipeId) : saveRecipe(recipeId),
         onSuccess: () => {
+            // 저장 버튼 상태와 마이페이지 저장 목록 동시 갱신
             queryClient.invalidateQueries({ queryKey: queryKeys.savedRecipes(userId) });
         },
     });
