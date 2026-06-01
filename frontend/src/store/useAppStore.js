@@ -16,6 +16,7 @@ const uniqueItems = (items) => [...new Set(items.map((item) => item.trim()).filt
 
 const DEFAULT_RECIPE_QUERY = "냉장고 재료로 만들 수 있는 레시피를 추천해줘.";
 
+// API 응답 필드명을 화면 공통 사용자 모델로 변환
 const authUserToView = (user) => ({
     id: user.userId,
     name: user.nickname,
@@ -25,6 +26,7 @@ const authUserToView = (user) => ({
 
 const recipeId = (recipe) => recipe.recipeId ?? recipe.name;
 
+// 추천 결과와 저장 레시피 카드를 같은 형태로 렌더링하기 위한 요약 뷰 모델 변환
 const recipeToSummaryView = (recipe, ownedIngredients = []) => ({
     id: recipeId(recipe),
     title: recipe.name,
@@ -55,6 +57,7 @@ export const useAppStore = create((set) => ({
         set({ authStatus: "checking" });
 
         try {
+            // 쿠키 기반 세션의 로그인 상태 복원
             const user = await getMyProfile();
             const nextUser = authUserToView(user);
 
@@ -94,6 +97,7 @@ export const useAppStore = create((set) => ({
 
         try {
             await signupRequest(credentials);
+            // 회원가입 직후 세션 생성을 위한 로그인 처리
             const user = await loginRequest({
                 email: credentials.email,
                 password: credentials.password,
@@ -173,6 +177,7 @@ export const useAppStore = create((set) => ({
 
             const { user } = useAppStore.getState();
             if (user) {
+                // 추천 요청 후 서버에 저장될 수 있는 내 냉장고 목록 갱신
                 queryClient.invalidateQueries({ queryKey: queryKeys.myIngredients(user.id) });
             }
 

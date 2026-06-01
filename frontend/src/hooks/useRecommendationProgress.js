@@ -13,6 +13,7 @@ const RECOMMENDATION_LOADING_TIPS = [
 function getRecommendationProgress(startedAt) {
     const elapsed = Date.now() - startedAt;
 
+    // 실제 응답 전 완료 애니메이션을 위한 100% 진행률 보류
     return Math.min(
         99,
         Math.floor((elapsed / RECOMMENDATION_PROGRESS_DURATION_MS) * 99)
@@ -38,6 +39,7 @@ export function useRecommendationProgress(recommendationStatus, recommendationSt
     useEffect(() => {
         if (recommendationStatus !== "success" || !holdResult || completionStartedRef.current) return;
 
+        // 성공 직후 로딩 화면 마무리를 위한 100% 상태 유지
         completionStartedRef.current = true;
         setProgress(100);
         setIsCompleting(true);
@@ -58,6 +60,7 @@ export function useRecommendationProgress(recommendationStatus, recommendationSt
 
         const startedAt = recommendationStartedAt ?? Date.now();
         Promise.resolve().then(() => {
+            // 새 추천 요청의 로딩 상태 초기화
             completionStartedRef.current = false;
             setHoldResult(true);
             setProgress(getRecommendationProgress(startedAt));

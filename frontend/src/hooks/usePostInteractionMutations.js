@@ -8,6 +8,7 @@ export function useTogglePostLikeMutation(userId) {
     return useMutation({
         mutationFn: ({ postId, isLiked }) => isLiked ? unlikePost(postId) : likePost(postId),
         onSuccess: (_data, { postId }) => {
+            // 좋아요 수와 내 좋아요 여부가 노출되는 관련 캐시 무효화
             queryClient.invalidateQueries({ queryKey: queryKeys.likedPosts(userId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.myPosts(userId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
@@ -22,6 +23,7 @@ export function useCreateCommentMutation() {
     return useMutation({
         mutationFn: ({ postId, content }) => createComment(postId, content),
         onSuccess: (_comment, { postId }) => {
+            // 댓글 변경 후 해당 게시글 댓글 캐시 갱신
             queryClient.invalidateQueries({ queryKey: queryKeys.posts.comments(postId) });
         },
     });
