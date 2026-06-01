@@ -70,6 +70,7 @@ async def get_recipe_handler(
             cook_time=recipe.cook_time,
             difficulty=recipe.difficulty,
             servings=recipe.servings,
+            image_url=recipe.image_url,
             ingredients=[
                 RecipeDetailIngredient(name=i.name, amount=i.amount)
                 for i in recipe.ingredients

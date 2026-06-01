@@ -10,6 +10,9 @@ GEMINI_TEMPERATURE = float(os.getenv("GEMINI_TEMPERATURE", "0.7"))
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 
+NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "")
+NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
+
 RECIPE_COUNT = int(os.getenv("RECIPE_COUNT", "5"))
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
