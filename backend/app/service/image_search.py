@@ -18,13 +18,13 @@ async def fetch_recipe_image(recipe_name: str) -> str | None:
     }
 
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.get(GOOGLE_CSE_URL, params=params)
             response.raise_for_status()
-    except (httpx.TimeoutException, httpx.HTTPStatusError, httpx.RequestError):
+        items = response.json().get("items", [])
+    except (httpx.TimeoutException, httpx.HTTPStatusError, httpx.RequestError, ValueError):
         return None
 
-    items = response.json().get("items", [])
     if not items:
         return None
 

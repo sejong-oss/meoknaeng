@@ -1,3 +1,4 @@
+import asyncio
 import json
 import uuid
 from datetime import datetime, timezone
@@ -43,8 +44,10 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id:
         raise RecipeServiceError(502, "레시피 생성에 실패했습니다.") from exc
 
     now = datetime.now(timezone.utc)
-    for recipe in response.recipes:
-        image_url = await fetch_recipe_image(recipe.name)
+    image_urls = await asyncio.gather(
+        *[fetch_recipe_image(recipe.name) for recipe in response.recipes]
+    )
+    for recipe, image_url in zip(response.recipes, image_urls):
         orm_recipe = RecipeORM(
             recipe_id=str(uuid.uuid4()),
             name=recipe.name,
