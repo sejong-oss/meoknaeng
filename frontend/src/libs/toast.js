@@ -1,5 +1,6 @@
 import { toast as sonner } from "sonner";
 
+// sonner 호출 방식을 앱 전역 toast API로 고정
 export const toast = Object.assign(
     (msg, opts) => sonner(msg, opts),
     {

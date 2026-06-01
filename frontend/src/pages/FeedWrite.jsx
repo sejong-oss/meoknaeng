@@ -53,6 +53,7 @@ const recipeToSourceRecipe = (recipe) => ({
     ingredients: recipe.ingredients ?? [],
     steps: (recipe.steps ?? [])
         .slice()
+        // 조리 순서 번호 기준 정렬
         .sort((a, b) => a.order - b.order)
         .map((step) => step.description),
 });
@@ -201,6 +202,7 @@ export default function FeedWrite() {
     useBeforeUnload((event) => {
         if (!shouldConfirmLeave()) return;
 
+        // 새로고침 또는 탭 닫기 시 작성 중 이탈 확인
         event.preventDefault();
         event.returnValue = "";
     });
@@ -208,6 +210,7 @@ export default function FeedWrite() {
     useEffect(() => {
         if (recipeId || postId) return;
 
+        // 공유할 레시피 없이 진입한 경우 레시피 선택 모달 열기
         navigate("/feed", { replace: true, state: { openRecipeSelect: true } });
     }, [navigate, recipeId, postId]);
 
@@ -230,6 +233,7 @@ export default function FeedWrite() {
 
         const recipe = recipeQuery.data;
         Promise.resolve().then(() => {
+            // 사용자가 입력한 값을 유지한 추천 레시피 기본값 채우기
             setForm((prev) => ({
                 ...prev,
                 title: prev.title || recipe.title,
@@ -269,6 +273,7 @@ export default function FeedWrite() {
         submittingRef.current = true;
         try {
             if (isEditMode) {
+                // 수정 모드에서 원본 레시피 연결은 유지하고 게시글 내용만 갱신
                 await updatePostMutation.mutateAsync({
                     postId,
                     title: form.title.trim(),
@@ -278,6 +283,7 @@ export default function FeedWrite() {
                 toast.success("게시글을 수정했어요");
                 navigate(`/feed/${postId}`, { replace: true });
             } else {
+                // 작성 모드에서 피드 카드에 필요한 원본 레시피 정보 저장
                 const created = await createPostMutation.mutateAsync({
                     title: form.title.trim(),
                     description: form.description.trim() || null,
@@ -349,8 +355,10 @@ export default function FeedWrite() {
                         </div>
                     </div>
 
+                    {/* 모바일에서 접어서 확인하는 공유 레시피 요약 */}
                     <SourceRecipeSummary recipe={sourceRecipe} />
 
+                    {/* 작성 폼과 데스크탑 고정 레시피 패널의 2열 레이아웃 */}
                     <div className="grid gap-7 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
                         <section className="flex flex-col gap-5">
                             <FormField label="제목" required error={errors.title}>
@@ -389,6 +397,7 @@ export default function FeedWrite() {
                     </div>
                 </div>
 
+                {/* 모바일 작성 완료 플로팅 버튼 */}
                 <FloatingActionButton type="submit" disabled={isPending}>
                     <Checkmark size={16} />
                     {submitLabel}

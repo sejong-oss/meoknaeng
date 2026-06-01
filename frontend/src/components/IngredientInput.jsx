@@ -45,6 +45,7 @@ function findSuggestionMatchRange(item, query) {
         return null;
     }
 
+    // 초성 입력 자동완성을 위한 비교 문자열 생성
     const choseongText = [...item].map(getChoseong).join("");
     const choseongMatchIndex = choseongText.indexOf(trimmed);
 
@@ -106,6 +107,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
             try {
                 const items = await loadSuggestions(trimmed);
                 if (!ignore) {
+                    // 이전 자동완성 요청 결과의 최신 입력 덮어쓰기 방지
                     setRemoteSuggestions({
                         query: trimmed,
                         items: normalizeSuggestions(items),
@@ -136,6 +138,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
             remoteSuggestions.query === trimmed && remoteSuggestions.items
                 ? remoteSuggestions.items
                 : null;
+        // 서버 추천 부재 또는 실패 시 로컬 자동완성 유지
         const source = remoteItems ?? localSuggestions;
 
         return [...new Set(source)]
@@ -162,6 +165,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
         } else if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
             if (!query.trim() || e.nativeEvent.isComposing || e.key === "Process") return;
             e.preventDefault();
+            // 키보드 입력 시 재료 추가 대상 우선순위 결정
             const target =
                 activeIdx >= 0 && suggestions[activeIdx]
                     ? suggestions[activeIdx]

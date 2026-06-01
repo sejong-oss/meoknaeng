@@ -4,6 +4,7 @@ export const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             retry: (failureCount, error) => {
+                // 4xx 응답의 불필요한 재시도 생략
                 if (error?.status && error.status < 500) return false;
                 return failureCount < 2;
             },

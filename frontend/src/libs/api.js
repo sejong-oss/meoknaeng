@@ -25,6 +25,7 @@ export async function request(path, options = {}) {
     }
 
     try {
+        // API 공통 응답 포맷의 data 필드 반환
         const response = await api.request({
             url: path,
             ...options,
@@ -42,6 +43,7 @@ export async function request(path, options = {}) {
     } catch (error) {
         if (error instanceof ApiError) throw error;
 
+        // axios 관련 오류를 다루기 쉬운 ApiError로 변환
         throw new ApiError(
             error.response?.data?.message ?? error.response?.data?.detail ?? "요청을 처리하지 못했어요",
             {
@@ -119,14 +121,14 @@ export function getRecipe(recipeId, options = {}) {
 }
 
 export function saveRecipe(recipeId, options = {}) {
-    return request(`/recipes/${recipeId}`, { 
+    return request(`/recipes/${recipeId}`, {
         method: "POST",
         ...options,
     });
 }
 
 export function unsaveRecipe(recipeId, options = {}) {
-    return request(`/recipes/${recipeId}`, { 
+    return request(`/recipes/${recipeId}`, {
         method: "DELETE",
         ...options,
     });

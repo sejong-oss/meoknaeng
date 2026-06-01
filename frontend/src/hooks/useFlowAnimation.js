@@ -17,6 +17,7 @@ export function useFlowAnimation() {
     useEffect(() => {
         alive.current = true;
         let timer;
+        // 언마운트 시 진행 중인 단계 대기 타이머 정리
         const sleep = (ms) => new Promise((res) => { timer = setTimeout(res, ms); });
 
         const run = async () => {

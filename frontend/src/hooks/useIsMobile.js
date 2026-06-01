@@ -19,5 +19,6 @@ function subscribe(callback) {
 }
 
 export function useIsMobile() {
+    // matchMedia 변경을 React 렌더 사이클에 맞춰 구독
     return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }

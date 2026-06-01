@@ -18,11 +18,13 @@ export function DropdownMenu({ children, open, onOpenChange }) {
 }
 
 export function DropdownMenuTrigger({ children, asChild = true }) {
+    // 호출부 버튼 스타일을 유지하는 Radix 트리거
     return <Radix.Trigger asChild={asChild}>{children}</Radix.Trigger>;
 }
 
 export function DropdownMenuContent({ children, align = "end", sideOffset = 6, className = "" }) {
     return (
+        // 부모 overflow 영향 없이 메뉴를 띄우기 위한 포털 렌더링
         <Radix.Portal>
             <Radix.Content
                 align={align}
@@ -93,6 +95,7 @@ export function DropdownMenuSubTrigger({ children, icon }) {
 
 export function DropdownMenuSubContent({ children }) {
     return (
+        // 중첩 메뉴도 최상위 레이어에서 위치 계산
         <Radix.Portal>
             <Radix.SubContent
                 sideOffset={4}

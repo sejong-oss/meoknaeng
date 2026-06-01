@@ -25,6 +25,7 @@ export function useShare() {
                 return;
             }
 
+            // Web Share API를 사용할 수 없는 환경의 경우 링크 복사로 대체
             await copyText(shareUrl);
         } catch (error) {
             if (error?.name === "AbortError") return;

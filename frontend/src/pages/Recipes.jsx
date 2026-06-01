@@ -18,7 +18,8 @@ import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useRecommendationProgress } from "@/hooks/useRecommendationProgress.js";
-import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
+import { useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesMutation.js";
 import { useRecipeShare } from "@/hooks/useShare.js";
 
 export default function Recipes() {
@@ -61,11 +62,13 @@ export default function Recipes() {
     const handleRecommendAgain = () => {
         if (ingredients.length === 0) return;
 
+        // 기존 재료로 다시 추천받기 위한 로딩 초기화
         resetLoading();
         recommendRecipes(ingredients).catch(() => {});
     };
     const handleShareHero = () => shareRecipe(hero);
 
+    // 추천 완료 직후 100% 상태까지 보여주는 로딩 화면 분기
     if (showLoading) {
         return (
             <>
@@ -102,6 +105,7 @@ export default function Recipes() {
         );
     }
 
+    // 추천 실패 후 같은 재료로 다시 시도하는 화면 분기
     if (isError) {
         return (
             <>
@@ -119,6 +123,7 @@ export default function Recipes() {
         );
     }
 
+    // 추천 결과가 없을 때 재료 입력으로 돌아가는 화면 분기
     if (!hasResults) {
         return (
             <>
@@ -173,6 +178,7 @@ export default function Recipes() {
                     </div>
                 </div>
 
+                {/* 최상위 추천 레시피를 강조하는 히어로 카드 */}
                 <Card className="overflow-hidden p-3.5 shadow-xl md:p-5">
                     <div className="flex flex-col gap-4 md:grid md:grid-cols-[23.75rem_1fr] md:gap-6">
                         <RecipeImage
@@ -251,6 +257,7 @@ export default function Recipes() {
                     </div>
                 </Card>
 
+                {/* 보조 추천 레시피 카드 그리드 */}
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between">
                         <h3 className="flex items-center gap-2 text-lg md:text-2xl font-bold tracking-tight text-gray-900">

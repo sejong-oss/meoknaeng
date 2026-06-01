@@ -11,6 +11,7 @@ export function Modal({ open, onOpenChange, children }) {
 }
 
 export function ModalTrigger({ children }) {
+    // 호출부 버튼 스타일을 유지하는 Radix 트리거
     return <Dialog.Trigger asChild>{children}</Dialog.Trigger>;
 }
 
@@ -22,6 +23,7 @@ export function ModalContent({ title, description, children, size = "md" }) {
     };
 
     return (
+        // 오버레이와 콘텐츠를 앱 루트 바깥 레이어에 렌더링
         <Dialog.Portal>
             <Dialog.Overlay className={["fixed inset-0 bg-overlay z-50", popoverAnim].join(" ")} />
             <Dialog.Content

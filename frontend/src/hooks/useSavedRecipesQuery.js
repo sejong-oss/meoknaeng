@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSavedRecipes, saveRecipe, unsaveRecipe } from "@/libs/api.js";
+import { useQuery } from "@tanstack/react-query";
+import { getSavedRecipes } from "@/libs/api.js";
 import { queryKeys } from "@/libs/queryClient.js";
 import { formatMinutes, formatServings } from "@/libs/utils.js";
 
@@ -18,6 +18,7 @@ const savedRecipesToView = (data) => {
     const recipes = data?.recipes ?? [];
 
     return {
+        // 저장 여부 확인용 id 목록과 카드 렌더링용 목록 분리
         ids: recipes.map((recipe) => recipe.recipeId),
         recipes: recipes.map(savedRecipeToView),
     };
@@ -28,16 +29,5 @@ export function useSavedRecipesQuery(userId) {
         queryKey: queryKeys.savedRecipes(userId),
         queryFn: async ({ signal }) => savedRecipesToView(await getSavedRecipes({ signal })),
         enabled: Boolean(userId),
-    });
-}
-
-export function useToggleSavedRecipeMutation(userId) {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ recipeId, isSaved }) => isSaved ? unsaveRecipe(recipeId) : saveRecipe(recipeId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.savedRecipes(userId) });
-        },
     });
 }

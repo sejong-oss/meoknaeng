@@ -9,6 +9,7 @@ import {
 import { queryKeys } from "@/libs/queryClient.js";
 import { formatMinutes, formatRelativeTime, formatServings } from "@/libs/utils.js";
 
+// 피드 카드에서 필요한 최소 필드만 추린 목록 화면 모델 변환
 export const postToFeedItem = (post) => ({
     id: post.postId,
     title: post.title,
@@ -39,11 +40,13 @@ const postDetailToView = (post) => ({
     ingredients: post.sourceRecipe?.ingredients ?? [],
     steps: (post.sourceRecipe?.steps ?? [])
         .slice()
+        // 원본 레시피의 조리 순서 번호 기준 정렬
         .sort((a, b) => a.order - b.order)
         .map((step) => step.description),
     related: [],
 });
 
+// 댓글 목록 렌더링에 맞춘 작성자와 시간 표시 모델 변환
 const commentToView = (comment) => ({
     id: comment.commentId,
     authorId: comment.authorId,

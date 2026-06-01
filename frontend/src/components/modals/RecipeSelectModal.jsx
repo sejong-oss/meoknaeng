@@ -16,6 +16,7 @@ export function RecipeSelectModal({
     const isEmpty = !loading && recipes.length === 0;
 
     const handleOpenChange = (nextOpen) => {
+        // 모달을 다시 열 때 이전 선택값이 남지 않도록 초기화
         if (!nextOpen) setSelectedRecipeId("");
         onOpenChange(nextOpen);
     };
