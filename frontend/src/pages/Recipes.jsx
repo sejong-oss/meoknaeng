@@ -18,7 +18,8 @@ import { SITE_NAME } from "@/libs/constants.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useRecommendationProgress } from "@/hooks/useRecommendationProgress.js";
-import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
+import { useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesMutation.js";
 import { useRecipeShare } from "@/hooks/useShare.js";
 
 export default function Recipes() {

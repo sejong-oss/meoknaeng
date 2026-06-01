@@ -6,7 +6,8 @@ import { getRecipe } from "@/libs/api.js";
 import { addRecipeIngredientStatuses } from "@/libs/recipeIngredients.js";
 import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
-import { useSavedRecipesQuery, useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesQuery.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
+import { useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesMutation.js";
 import { useRecipeShare } from "@/hooks/useShare.js";
 import {
     ArrowLeft,
