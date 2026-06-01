@@ -15,6 +15,7 @@ import { useLikedPostsQuery, useMyPostsQuery } from "@/hooks/usePostQueries.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 import { useMyIngredientsQuery } from "@/hooks/useMyIngredientsQuery.js";
 import { useUpdateMyIngredientsMutation } from "@/hooks/useMyIngredientsMutation.js";
+import { useTogglePostLikeMutation } from "@/hooks/usePostInteractionMutations.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
 
@@ -98,8 +99,10 @@ export default function My() {
     const myPostsQuery = useMyPostsQuery(user?.id);
     const myIngredientsQuery = useMyIngredientsQuery(user?.id);
     const updateMyIngredientsMutation = useUpdateMyIngredientsMutation(user?.id);
+    const togglePostLike = useTogglePostLikeMutation(user?.id);
     const savedRecipes = savedRecipesQuery.data?.recipes ?? [];
     const likedPosts = likedPostsQuery.data ?? [];
+    const likedPostIds = likedPosts.map((post) => post.id);
     const myPosts = myPostsQuery.data ?? [];
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const updateNickname = useAppStore((state) => state.updateNickname);
@@ -184,6 +187,11 @@ export default function My() {
         } finally {
             setSavingNickname(false);
         }
+    };
+
+    const handleLike = (id) => {
+        const isLiked = likedPostIds.includes(id);
+        togglePostLike.mutate({ postId: id, isLiked });
     };
 
     const handleLogout = async () => {
@@ -511,6 +519,8 @@ export default function My() {
                                             category={item.category}
                                             difficulty={item.difficulty}
                                             likes={item.likes}
+                                            defaultLiked={likedPostIds.includes(item.id)}
+                                            onLike={() => handleLike(item.id)}
                                             onClick={() => navigate(`/feed/${item.id}`)}
                                         />
                                     ))}
@@ -539,6 +549,7 @@ export default function My() {
                                             author={item.author}
                                             likes={item.likes}
                                             defaultLiked
+                                            onLike={() => handleLike(item.id)}
                                             onClick={() => navigate(`/feed/${item.id}`)}
                                         />
                                     ))}
