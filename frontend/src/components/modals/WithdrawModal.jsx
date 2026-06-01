@@ -18,7 +18,7 @@ export function WithdrawModal({
                         <Button variant="ghost" disabled={withdrawing}>취소</Button>
                     </ModalClose>
                     <Button variant="danger" disabled={withdrawing} onClick={onConfirm}>
-                        {withdrawing ? "처리 중..." : "탈퇴하기"}
+                        {withdrawing ? "잠시만 기다려주세요..." : "탈퇴하기"}
                     </Button>
                 </ModalFooter>
             </ModalContent>
