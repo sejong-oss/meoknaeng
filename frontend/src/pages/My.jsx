@@ -206,11 +206,11 @@ export default function My() {
                 authStatus: "idle",
                 authInitialized: true,
             });
-            toast.success("회원탈퇴가 완료되었어요.");
+            toast.success("회원탈퇴가 완료되었어요");
             navigate("/home", { replace: true });
         } catch (error) {
             isWithdrawingRef.current = false;
-            toast.error(error.message ?? "회원탈퇴에 실패했어요.");
+            toast.error(error.message ?? "회원탈퇴에 실패했어요");
             setWithdrawModalOpen(false);
         } finally {
             setWithdrawing(false);
