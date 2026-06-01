@@ -56,6 +56,7 @@ class SavedRecipeItem(UsersBaseModel):
     cook_time: int | None = Field(None, alias="cookTime", description="조리 시간")
     difficulty: str | None = Field(None, description="난이도")
     servings: int | None = Field(None, description="인분")
+    image_url: str | None = Field(None, alias="imageUrl", description="레시피 대표 이미지 URL")
     saved_at: datetime = Field(..., alias="savedAt", description="저장 일시")
 
 
@@ -76,6 +77,9 @@ class MyPostItem(UsersBaseModel):
     source_recipe_id: str | None = Field(
         None, alias="sourceRecipeId", description="원본 레시피 ID"
     )
+    source_recipe_image_url: str | None = Field(
+        None, alias="sourceRecipeImageUrl", description="원본 레시피 대표 이미지 URL"
+    )
 
 
 class MyPostsResponse(UsersBaseModel):
@@ -93,6 +97,9 @@ class LikedPostItem(UsersBaseModel):
     author_nickname: str = Field(..., alias="authorNickname", description="작성자 닉네임")
     created_at: datetime = Field(..., alias="createdAt", description="게시글 작성 일시")
     liked_at: datetime = Field(..., alias="likedAt", description="좋아요 누른 일시")
+    source_recipe_image_url: str | None = Field(
+        None, alias="sourceRecipeImageUrl", description="원본 레시피 대표 이미지 URL"
+    )
 
 
 class LikedPostsResponse(UsersBaseModel):
