@@ -91,6 +91,7 @@ _CHOSEONG_SET = set(_CHOSEONG)
 
 
 def decompose_hangul(value: str) -> str:
+    """한글 문자열을 자모 단위로 분해한다. (예: '김치' → 'ㄱㅣㅁㅊㅣ')
     decomposed = []
     for char in value:
         code = ord(char)
@@ -109,6 +110,7 @@ def decompose_hangul(value: str) -> str:
 
 
 def extract_initials(value: str) -> str:
+    """한글 문자열에서 초성만 추출한다. (예: '김치찌개' → 'ㄱㅊㅉㄱ')
     initials = []
     for char in value:
         code = ord(char)
@@ -125,6 +127,7 @@ def search_ingredients(
     query: str,
     limit: int,
 ) -> list[IngredientSeed]:
+    """쿼리로 재료 목록을 검색하여 관련도 순으로 최대 limit개 반환한다. 초성/자모/완전일치를 모두 지원한다."""
     normalized_query = query.casefold()
     query_jamo = decompose_hangul(normalized_query)
     query_initials = extract_initials(normalized_query)

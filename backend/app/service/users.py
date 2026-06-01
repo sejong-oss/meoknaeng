@@ -10,6 +10,7 @@ from app.models.user import User, UserIngredient
 
 
 async def delete_user_account(user: User, db: AsyncSession) -> None:
+    """사용자 계정과 연관된 댓글·좋아요·게시글·저장 레시피·재료를 모두 삭제한다."""
     user_id = user.user_id
     user_post_ids = select(Post.post_id).where(Post.author_id == user_id)
 
@@ -34,6 +35,7 @@ async def delete_user_account(user: User, db: AsyncSession) -> None:
 
 
 async def get_liked_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, datetime, int]]:
+    """사용자가 좋아요한 게시글 목록을 좋아요 일시 내림차순으로 반환한다."""
     like_count_subq = (
         select(func.count(PostLike.post_id))
         .where(PostLike.post_id == Post.post_id)
@@ -54,6 +56,7 @@ async def get_liked_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, da
 
 
 async def get_my_posts(user_id: str, db: AsyncSession) -> list[tuple[Post, int]]:
+    """사용자가 작성한 게시글 목록을 작성일 내림차순으로 반환한다."""
     like_count_subq = (
         select(func.count(PostLike.post_id))
         .where(PostLike.post_id == Post.post_id)

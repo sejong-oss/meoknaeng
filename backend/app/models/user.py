@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class User(Base):
+    """사용자 계정 정보를 저장하는 테이블."""
+
     __tablename__ = "user"
 
     user_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -31,6 +33,8 @@ class User(Base):
 
 
 class UserIngredient(Base):
+    """사용자가 보유한 재료 목록을 저장하는 테이블."""
+
     __tablename__ = "user_ingredient"
 
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("user.user_id"), primary_key=True)

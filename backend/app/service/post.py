@@ -15,6 +15,8 @@ from app.models.schemas import (
 
 
 class PostError(Exception):
+    """게시글/댓글 관련 서비스 에러. status_code와 메시지를 포함한다."""
+
     def __init__(self, status_code: int, detail: str) -> None:
         self.status_code = status_code
         self.detail = detail
@@ -25,6 +27,7 @@ def _utc_now() -> datetime:
 
 
 async def create_post(user_id: str, payload: PostCreateRequest, db: AsyncSession) -> Post:
+    """새 게시글을 생성하고 저장한다."""
     post = Post(
         author_id=user_id,
         source_recipe_id=payload.source_recipe_id,
@@ -44,6 +47,7 @@ async def create_post(user_id: str, payload: PostCreateRequest, db: AsyncSession
 
 
 async def update_post(post_id: str, user_id: str, payload: PostUpdateRequest, db: AsyncSession) -> Post:
+    """게시글을 수정한다. 작성자 본인만 수정 가능하다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -70,6 +74,7 @@ async def update_post(post_id: str, user_id: str, payload: PostUpdateRequest, db
 
 
 async def delete_post(post_id: str, user_id: str, db: AsyncSession) -> None:
+    """게시글과 연관 좋아요를 삭제한다. 작성자 본인만 삭제 가능하다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -82,6 +87,7 @@ async def delete_post(post_id: str, user_id: str, db: AsyncSession) -> None:
 
 
 async def like_post(post_id: str, user_id: str, db: AsyncSession) -> None:
+    """게시글에 좋아요를 추가한다. 이미 좋아요한 경우 에러."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -95,6 +101,7 @@ async def like_post(post_id: str, user_id: str, db: AsyncSession) -> None:
 
 
 async def unlike_post(post_id: str, user_id: str, db: AsyncSession) -> None:
+    """게시글 좋아요를 취소한다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -108,6 +115,7 @@ async def unlike_post(post_id: str, user_id: str, db: AsyncSession) -> None:
 
 
 async def get_comments(post_id: str, db: AsyncSession) -> list[Comment]:
+    """게시글의 댓글 목록을 작성일 오름차순으로 반환한다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -127,6 +135,7 @@ async def create_comment(
     payload: CommentCreateRequest,
     db: AsyncSession,
 ) -> Comment:
+    """게시글에 댓글을 작성한다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -150,6 +159,7 @@ async def update_comment(
     payload: CommentUpdateRequest,
     db: AsyncSession,
 ) -> Comment:
+    """댓글을 수정한다. 작성자 본인만 수정 가능하다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -169,6 +179,7 @@ async def delete_comment(
     user_id: str,
     db: AsyncSession,
 ) -> None:
+    """댓글을 삭제한다. 작성자 본인만 삭제 가능하다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -182,6 +193,7 @@ async def delete_comment(
 
 
 async def get_comment(post_id: str, comment_id: str, db: AsyncSession) -> Comment:
+    """댓글 단건을 조회한다. 없으면 에러."""
     result = await db.execute(
         select(Comment)
         .where(Comment.comment_id == comment_id, Comment.post_id == post_id)
@@ -202,6 +214,7 @@ async def get_post_list(
     difficulty: str | None,
     cook_time_max: int | None,
 ) -> tuple[list[tuple[Post, int]], int]:
+    """검색·필터 조건으로 게시글 목록과 전체 개수를 페이지네이션하여 반환한다."""
     filters = []
     if q:
         filters.append(Post.title.ilike(f"%{q}%"))
@@ -239,6 +252,7 @@ async def get_post_list(
 
 
 async def get_post_detail(post_id: str, db: AsyncSession) -> tuple[Post, int]:
+    """게시글 상세를 작성자·원본 레시피(재료·단계 포함)와 함께 조회한다. 없으면 에러."""
     like_count_subq = (
         select(func.count(PostLike.post_id))
         .where(PostLike.post_id == Post.post_id)
