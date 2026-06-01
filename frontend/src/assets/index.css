@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  /* Primary (Orange) */
+  --color-primary-50: #fef7f2;
+  --color-primary-100: #fceddf;
+  --color-primary-200: #f9d9be;
+  --color-primary-300: #f4b88a;
+  --color-primary-400: #ed8f56;
+  --color-primary-500: #e0682e;
+  --color-primary-600: #c7531d;
+  --color-primary-700: #a8400f;
+  --color-primary-800: #7a2e0f;
+  --color-primary-900: #5c1f08;
+
+  /* White */
+  --color-white: #ffffff;
+
+  /* Gray (warm neutral) */
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f4f2ee;
+  --color-gray-200: #eae6dd;
+  --color-gray-300: #e9e5de;
+  --color-gray-400: #d4cebf;
+  --color-gray-500: #8c8170;
+  --color-gray-600: #5a5145;
+  --color-gray-700: #3d362b;
+  --color-gray-800: #2a2318;
+  --color-gray-900: #1f1a12;
+
+  /* Green (success) */
+  --color-green-100: #e6eddc;
+  --color-green-600: #5c7a3f;
+
+  /* Red (error / danger) */
+  --color-red-50: #fff1f0;
+  --color-red-100: #ffe0de;
+  --color-red-200: #ffc2bd;
+  --color-red-500: #e84040;
+  --color-red-600: #cc2c2c;
+  --color-red-800: #7a1515;
+
+  /* Overlay */
+  --color-overlay: rgba(31, 26, 18, 0.48);
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(31, 26, 18, 0.04);
+  --shadow-md: 0 3px 10px -3px rgba(31, 26, 18, 0.08), 0 1px 2px rgba(31, 26, 18, 0.04);
+  --shadow-lg: 0 10px 24px -12px rgba(31, 26, 18, 0.12), 0 2px 4px rgba(31, 26, 18, 0.04);
+  --shadow-xl: 0 18px 36px -20px rgba(31, 26, 18, 0.16), 0 3px 8px rgba(31, 26, 18, 0.05);
+
+  /* Typography */
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* Border radius */
+  --radius-chip: 62.4375rem;
+  --radius-btn: 0.625rem;
+  --radius-card: 0.875rem;
+  --radius-input: 0.625rem;
+  --radius-modal: 1.125rem;
+}
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-white);
+    color: var(--color-gray-900);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

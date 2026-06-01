@@ -1,0 +1,10 @@
+# LLM-Agents
+.claude
+AGENTS.md
+CLAUDE.md
+
+# Design files
+design/
+
+# Ignore macOS system files
+.DS_Store
