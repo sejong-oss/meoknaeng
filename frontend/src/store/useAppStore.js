@@ -177,7 +177,7 @@ export const useAppStore = create((set) => ({
 
             const { user } = useAppStore.getState();
             if (user) {
-                // 추천 요청 후 서버에 저장될 수 있는 내 냉장고 목록 갱신
+                // 추천 요청 후 서버에 저장될 수 있는 내 재료 목록 갱신
                 queryClient.invalidateQueries({ queryKey: queryKeys.myIngredients(user.id) });
             }
 
