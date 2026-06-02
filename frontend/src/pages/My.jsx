@@ -455,7 +455,7 @@ export default function My() {
                     <div className="hidden md:block">
                         <button
                             type="button"
-                            className="text-sm font-medium text-gray-600 underline hover:text-gray-500"
+                            className="cursor-pointer text-sm font-medium text-gray-600 underline hover:text-gray-500"
                             onClick={() => setWithdrawModalOpen(true)}
                         >
                             회원탈퇴
@@ -491,20 +491,16 @@ export default function My() {
                             ) : (
                                 <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                                     {savedRecipes.map((recipe) => (
-                                        <div key={recipe.id} className="relative">
-                                            <RecipeCard
-                                                title={recipe.title}
-                                                time={recipe.time}
-                                                difficulty={recipe.difficulty}
-                                                servings={recipe.servings}
-                                                description={recipe.description}
-                                                image={recipe.image}
-                                                onClick={() => navigate(`/recipes/${recipe.id}`)}
-                                            />
-                                            <div
-                                                className="absolute top-2 right-2 z-10"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
+                                        <RecipeCard
+                                            key={recipe.id}
+                                            title={recipe.title}
+                                            time={recipe.time}
+                                            difficulty={recipe.difficulty}
+                                            servings={recipe.servings}
+                                            description={recipe.description}
+                                            image={recipe.image}
+                                            onClick={() => navigate(`/recipes/${recipe.id}`)}
+                                            overlayAction={
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger>
                                                         <button
@@ -529,8 +525,8 @@ export default function My() {
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
-                                            </div>
-                                        </div>
+                                            }
+                                        />
                                     ))}
                                 </div>
                             )}
@@ -599,7 +595,7 @@ export default function My() {
                     <div className="md:hidden mt-6">
                         <button
                             type="button"
-                            className="text-sm font-medium text-gray-600 underline hover:text-gray-500"
+                            className="cursor-pointer text-sm font-medium text-gray-600 underline hover:text-gray-500"
                             onClick={() => setWithdrawModalOpen(true)}
                         >
                             회원탈퇴

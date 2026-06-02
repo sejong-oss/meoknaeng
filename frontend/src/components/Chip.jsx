@@ -14,7 +14,7 @@ export function Chip({ children, variant = "neutral", onRemove, onClick, classNa
         <span
             onClick={onClick}
             className={[
-                "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold",
+                "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold select-none",
                 onClick ? "cursor-pointer" : "",
                 variants[variant],
                 className,
