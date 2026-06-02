@@ -1,5 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+# LLM 응답을 바로 Pydantic 검증에 넣기 위해 JSON 외 텍스트를 금지하고 필드 규칙을 명시한다.
 RECIPE_SYSTEM_PROMPT = """당신은 한국어 요리 추천 도우미입니다.
 사용자가 보유한 재료와 요청을 바탕으로 추천 요리 정확히 {recipe_count}개를 JSON 한 객체로만 반환하세요.
 
@@ -44,6 +45,7 @@ RECIPE_USER_TEMPLATE = """[보유 재료]
 {query}"""
 
 
+# system 메시지는 출력 계약을, user 메시지는 사용자 입력 재료와 추가 요구사항을 담당한다.
 recipe_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", RECIPE_SYSTEM_PROMPT),

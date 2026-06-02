@@ -15,12 +15,15 @@ from app.models.schemas import ErrorResponse
 
 app = FastAPI(title="Recipe Recommender API")
 
+# 세션 쿠키는 로그인 상태를 서버 세션에 저장하기 위해 사용한다.
+# HTTPS 배포에서는 SameSite=None과 secure cookie를 함께 적용한다.
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET_KEY,
     same_site="none" if HTTPS_ONLY else "lax",
     https_only=HTTPS_ONLY,
 )
+# 프론트엔드가 쿠키 기반 세션을 함께 보낼 수 있도록 credentials를 허용한다.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -39,6 +42,7 @@ app.include_router(users_router)
 
 
 def _error_response(status_code: int, message: str) -> JSONResponse:
+    """모든 실패 응답을 ErrorResponse 형식으로 감싸서 프론트 처리 방식을 통일한다."""
     return JSONResponse(
         status_code=status_code,
         content=ErrorResponse(message=message).model_dump(),
@@ -46,6 +50,7 @@ def _error_response(status_code: int, message: str) -> JSONResponse:
 
 
 def _validation_error_message(exc: RequestValidationError) -> str:
+    """Pydantic validation error에서 프론트에 보여줄 첫 번째 메시지를 추출한다."""
     errors = exc.errors()
     if not errors:
         return "입력값이 올바르지 않습니다."
@@ -61,6 +66,7 @@ async def http_exception_handler(
     request: Request,
     exc: HTTPException,
 ) -> JSONResponse:
+    """라우터/service에서 발생한 HTTPException을 공통 실패 응답으로 변환한다."""
     message = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
     return _error_response(status_code=exc.status_code, message=message)
 
@@ -70,6 +76,7 @@ async def request_validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ) -> JSONResponse:
+    """요청 스키마 검증 실패도 공통 실패 응답 형식으로 반환한다."""
     return _error_response(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         message=_validation_error_message(exc),
@@ -81,6 +88,7 @@ async def unhandled_exception_handler(
     request: Request,
     exc: Exception,
 ) -> JSONResponse:
+    """예상하지 못한 예외가 FastAPI 기본 HTML/JSON 응답으로 노출되지 않도록 막는다."""
     return _error_response(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         message="서버 오류가 발생했습니다.",

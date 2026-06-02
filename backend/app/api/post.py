@@ -38,6 +38,7 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 
 def _to_response(post) -> PostResponse:
+    """Post ORM 객체를 작성/수정 API의 응답 DTO로 변환한다."""
     return PostResponse(
         post_id=post.post_id,
         author_id=post.author_id,
@@ -54,6 +55,7 @@ def _to_response(post) -> PostResponse:
 
 
 def _to_list_item(post, like_count: int) -> PostListItem:
+    """피드 목록 카드에 필요한 필드만 추려 PostListItem으로 변환한다."""
     return PostListItem(
         post_id=post.post_id,
         title=post.title,
@@ -68,6 +70,7 @@ def _to_list_item(post, like_count: int) -> PostListItem:
 
 
 def _to_detail(post, like_count: int) -> PostDetailResponse:
+    """게시글 상세 응답을 구성하고, 원본 레시피가 있으면 상세 DTO로 함께 포함한다."""
     recipe = None
     if post.source_recipe:
         r = post.source_recipe
@@ -101,6 +104,7 @@ def _to_detail(post, like_count: int) -> PostDetailResponse:
 
 
 def _to_comment_response(comment) -> CommentResponse:
+    """Comment ORM 객체를 프론트 댓글 응답 DTO로 변환한다."""
     return CommentResponse(
         comment_id=comment.comment_id,
         post_id=comment.post_id,
@@ -121,6 +125,7 @@ async def get_post_list_handler(
     cook_time_max: int | None = Query(None, ge=1, alias="cookTimeMax"),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostListResponse]:
+    """검색/필터/페이지네이션 조건에 맞는 공유 피드 목록을 반환한다."""
     posts_with_counts, total = await get_post_list(db, page, size, q, category, difficulty, cook_time_max)
     return ApiResponse(
         success=True,
@@ -138,6 +143,7 @@ async def get_post_detail_handler(
     post_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostDetailResponse]:
+    """공유 게시글 상세 정보를 원본 레시피와 좋아요 수까지 포함해 반환한다."""
     try:
         post, like_count = await get_post_detail(post_id, db)
         return ApiResponse(success=True, data=_to_detail(post, like_count))
@@ -150,6 +156,7 @@ async def get_comments_handler(
     post_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[CommentListResponse]:
+    """게시글에 달린 댓글 목록을 조회한다."""
     try:
         comments = await get_comments(post_id, db)
         return ApiResponse(
@@ -173,6 +180,7 @@ async def create_comment_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[CommentResponse]:
+    """로그인 사용자가 게시글에 댓글을 작성한다."""
     try:
         comment = await create_comment(post_id, user_id, payload, db)
         return ApiResponse(success=True, data=_to_comment_response(comment))
@@ -191,6 +199,7 @@ async def update_comment_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[CommentResponse]:
+    """댓글 작성자 본인이 댓글 내용을 수정한다."""
     try:
         comment = await update_comment(post_id, comment_id, user_id, payload, db)
         return ApiResponse(success=True, data=_to_comment_response(comment))
@@ -205,6 +214,7 @@ async def delete_comment_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[None]:
+    """댓글 작성자 본인이 댓글을 삭제한다."""
     try:
         await delete_comment(post_id, comment_id, user_id, db)
         return ApiResponse(success=True, data=None)
@@ -218,6 +228,7 @@ async def create_post_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostResponse]:
+    """로그인 사용자가 공유 게시글을 새로 작성한다."""
     try:
         post = await create_post(user_id, payload, db)
         return ApiResponse(success=True, data=_to_response(post))
@@ -232,6 +243,7 @@ async def update_post_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PostResponse]:
+    """게시글 작성자 본인이 공유 게시글을 수정한다."""
     try:
         post = await update_post(post_id, user_id, payload, db)
         return ApiResponse(success=True, data=_to_response(post))
@@ -245,6 +257,7 @@ async def delete_post_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[None]:
+    """게시글 작성자 본인이 공유 게시글을 삭제한다."""
     try:
         await delete_post(post_id, user_id, db)
         return ApiResponse(success=True, data=None)
@@ -262,6 +275,7 @@ async def like_post_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[None]:
+    """로그인 사용자가 공유 게시글에 좋아요를 추가한다."""
     try:
         await like_post(post_id, user_id, db)
         return ApiResponse(success=True, data=None)
@@ -275,6 +289,7 @@ async def unlike_post_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[None]:
+    """로그인 사용자가 공유 게시글 좋아요를 취소한다."""
     try:
         await unlike_post(post_id, user_id, db)
         return ApiResponse(success=True, data=None)

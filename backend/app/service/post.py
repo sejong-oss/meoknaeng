@@ -23,11 +23,12 @@ class PostError(Exception):
 
 
 def _utc_now() -> datetime:
+    """DB에 저장할 naive UTC 시간을 생성한다."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 async def create_post(user_id: str, payload: PostCreateRequest, db: AsyncSession) -> Post:
-    """새 게시글을 생성하고 저장한다."""
+    """로그인 사용자가 원본 레시피를 바탕으로 공유 게시글을 생성한다."""
     post = Post(
         author_id=user_id,
         source_recipe_id=payload.source_recipe_id,
@@ -81,6 +82,7 @@ async def delete_post(post_id: str, user_id: str, db: AsyncSession) -> None:
     if post.author_id != user_id:
         raise PostError(403, "권한이 없습니다.")
 
+    # post_like는 복합 PK 관계 테이블이라 게시글 삭제 전에 명시적으로 먼저 정리한다.
     await db.execute(delete(PostLike).where(PostLike.post_id == post_id))
     await db.delete(post)
     await db.commit()
@@ -92,6 +94,7 @@ async def like_post(post_id: str, user_id: str, db: AsyncSession) -> None:
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
 
+    # post_like의 복합 PK를 그대로 조회해 중복 좋아요를 빠르게 판별한다.
     existing_like = await db.get(PostLike, {"user_id": user_id, "post_id": post_id})
     if existing_like:
         raise PostError(409, "이미 좋아요한 게시글입니다.")
@@ -135,7 +138,7 @@ async def create_comment(
     payload: CommentCreateRequest,
     db: AsyncSession,
 ) -> Comment:
-    """게시글에 댓글을 작성한다."""
+    """게시글에 댓글을 작성하고 작성자 정보를 포함한 최신 댓글 row를 반환한다."""
     post = await db.get(Post, post_id)
     if not post:
         raise PostError(404, "게시글을 찾을 수 없습니다.")
@@ -149,6 +152,7 @@ async def create_comment(
     db.add(comment)
     await db.commit()
 
+    # commit 후 author 관계를 포함한 응답 매핑을 위해 단건 조회 함수로 다시 읽는다.
     return await get_comment(post_id, comment.comment_id, db)
 
 
@@ -170,6 +174,7 @@ async def update_comment(
 
     comment.content = payload.content
     await db.commit()
+    # 수정 후에도 목록/단건 응답과 같은 형태가 되도록 author를 eager load한 row를 반환한다.
     return await get_comment(post_id, comment.comment_id, db)
 
 
@@ -225,10 +230,12 @@ async def get_post_list(
     if cook_time_max is not None:
         filters.append(Post.cook_time <= cook_time_max)
 
+    # 페이지네이션 UI가 전체 개수를 알 수 있도록 같은 필터 조건으로 count를 먼저 계산한다.
     total = (await db.execute(
         select(func.count(Post.post_id)).filter(*filters)
     )).scalar_one()
 
+    # 좋아요 수는 post_like row 수를 correlated subquery로 계산해 목록 응답에 함께 싣는다.
     like_count_subq = (
         select(func.count(PostLike.post_id))
         .where(PostLike.post_id == Post.post_id)
@@ -240,6 +247,7 @@ async def get_post_list(
         select(Post, like_count_subq.label("like_count"))
         .filter(*filters)
         .options(
+            # async lazy loading을 피하기 위해 카드에 필요한 작성자와 대표 이미지를 미리 로드한다.
             selectinload(Post.author),
             selectinload(Post.source_recipe),
         )
@@ -253,6 +261,7 @@ async def get_post_list(
 
 async def get_post_detail(post_id: str, db: AsyncSession) -> tuple[Post, int]:
     """게시글 상세를 작성자·원본 레시피(재료·단계 포함)와 함께 조회한다. 없으면 에러."""
+    # 상세 화면에서도 목록과 동일한 기준의 좋아요 수를 보여주기 위해 같은 집계 방식을 사용한다.
     like_count_subq = (
         select(func.count(PostLike.post_id))
         .where(PostLike.post_id == Post.post_id)
@@ -263,6 +272,7 @@ async def get_post_detail(post_id: str, db: AsyncSession) -> tuple[Post, int]:
     stmt = (
         select(Post, like_count_subq.label("like_count"))
         .options(
+            # 상세 화면은 원본 레시피의 재료/조리 단계까지 보여주므로 관계를 한 번에 로드한다.
             selectinload(Post.author),
             selectinload(Post.source_recipe).selectinload(Recipe.ingredients),
             selectinload(Post.source_recipe).selectinload(Recipe.steps),

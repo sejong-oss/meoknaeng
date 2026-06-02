@@ -220,13 +220,16 @@ async def autocomplete_ingredients(
     q: str = Query("", description="검색 키워드"),
     limit: int = Query(10, ge=1, le=20, description="반환 제한 개수"),
 ) -> ApiResponse[IngredientAutocompleteResponse]:
+    """재료 검색어를 받아 자동완성 후보를 공통 응답 형식으로 반환한다."""
     query = q.strip()
     if not query:
+        # 빈 검색어는 오류가 아니라 후보 없음으로 처리해 프론트 입력 초기 상태를 단순하게 만든다.
         return ApiResponse(
             success=True,
             data=IngredientAutocompleteResponse(query=query, limit=limit, items=[]),
         )
 
+    # 실제 매칭/정렬 책임은 service에 두어 라우터는 요청·응답 계약만 담당한다.
     matched_items = [
         IngredientAutocompleteItem(**ingredient)
         for ingredient in search_ingredients(_INGREDIENT_SEEDS, query, limit)

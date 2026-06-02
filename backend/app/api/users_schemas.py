@@ -29,11 +29,14 @@ class UserIngredientsResponse(UsersBaseModel):
 
 
 class UserIngredientsUpdateRequest(UsersBaseModel):
+    """내 재료 전체 교체 요청 DTO."""
+
     ingredients: list[str] = Field(..., description="최종 저장할 내 재료 이름 목록")
 
     @field_validator("ingredients")
     @classmethod
     def normalize_ingredients(cls, ingredients: list[str]) -> list[str]:
+        """공백 재료를 거부하고 중복 입력은 최초 한 번만 유지한다."""
         normalized: list[str] = []
         seen: set[str] = set()
 
