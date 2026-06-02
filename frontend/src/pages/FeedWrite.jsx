@@ -258,7 +258,6 @@ export default function FeedWrite() {
 
     const validate = () => {
         const nextErrors = {};
-        if (!form.title.trim()) nextErrors.title = "게시물 제목을 입력해주세요";
         setErrors(nextErrors);
         return Object.keys(nextErrors).length === 0;
     };
@@ -361,14 +360,8 @@ export default function FeedWrite() {
                     {/* 작성 폼과 데스크탑 고정 레시피 패널의 2열 레이아웃 */}
                     <div className="grid gap-7 md:grid-cols-[minmax(0,1fr)_21.25rem] md:items-start md:gap-10">
                         <section className="flex flex-col gap-5">
-                            <FormField label="제목" required error={errors.title}>
-                                <Input
-                                    value={form.title}
-                                    onChange={(event) => updateField("title", event.target.value)}
-                                    placeholder="게시물 제목을 입력해주세요"
-                                    maxLength={200}
-                                    error={Boolean(errors.title)}
-                                />
+                            <FormField label="제목">
+                                <Input value={form.title} disabled />
                             </FormField>
 
                             <FormField label="레시피 소개">
