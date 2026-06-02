@@ -3,7 +3,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Chip } from "@/components/Chip.jsx";
 
 const MAX_SUGGESTIONS = 4;
-const SUGGESTION_DEBOUNCE_MS = 160;
+const SUGGESTION_DEBOUNCE_MS = 50;
 const HANGUL_START_CODE = 0xac00;
 const HANGUL_END_CODE = 0xd7a3;
 const HANGUL_SYLLABLE_INTERVAL = 588;
