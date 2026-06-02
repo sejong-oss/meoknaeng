@@ -206,6 +206,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={ingredients.length === 0 ? "재료를 입력하세요" : ""}
+                    maxLength={16}
                     className={`min-w-[2rem] flex-1 bg-transparent px-1 py-1 text-base text-gray-900 outline-none placeholder:text-gray-400 ${inputClassName}`}
                 />
             </div>
