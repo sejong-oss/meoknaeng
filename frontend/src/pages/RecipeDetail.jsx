@@ -260,6 +260,9 @@ export default function RecipeDetail() {
             openLoginModal();
             return;
         }
+        if (!isSaved) {
+            toggleSavedRecipe.mutateAsync({ recipeId: recipe.id, isSaved: false }).catch(() => {});
+        }
         navigate("/feed/write", { state: { recipeId: recipe.id } });
     };
 

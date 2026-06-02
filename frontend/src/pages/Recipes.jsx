@@ -70,6 +70,9 @@ export default function Recipes() {
             openLoginModal();
             return;
         }
+        if (!isHeroSaved) {
+            toggleSavedRecipe.mutateAsync({ recipeId: hero.id, isSaved: false }).catch(() => {});
+        }
         navigate("/feed/write", { state: { recipeId: hero.id } });
     };
 
