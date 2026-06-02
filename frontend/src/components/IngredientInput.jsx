@@ -3,7 +3,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Chip } from "@/components/Chip.jsx";
 
 const MAX_SUGGESTIONS = 4;
-const SUGGESTION_DEBOUNCE_MS = 160;
+const SUGGESTION_DEBOUNCE_MS = 50;
 const HANGUL_START_CODE = 0xac00;
 const HANGUL_END_CODE = 0xd7a3;
 const HANGUL_SYLLABLE_INTERVAL = 588;
@@ -247,7 +247,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
                                 }}
                                 onMouseEnter={() => setActiveIdx(i)}
                                 className={[
-                                    "w-full text-left px-3.5 py-2.5 text-sm flex items-center justify-between transition-colors",
+                                    "w-full cursor-pointer text-left px-3.5 py-2.5 text-sm flex items-center justify-between transition-colors",
                                     i > 0 ? "border-t border-gray-100" : "",
                                     isHighlighted ? "bg-primary-100 text-primary-800" : "hover:bg-gray-50 text-gray-900",
                                 ].join(" ")}

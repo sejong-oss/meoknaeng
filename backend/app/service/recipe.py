@@ -25,7 +25,12 @@ class RecipeServiceError(Exception):
 
 
 async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id: str | None = None) -> RecipeResponse:
-    """Gemini로 레시피를 생성하고, 이미지를 병렬 조회한 뒤 DB에 저장하여 반환한다. 로그인 사용자면 입력 재료를 내 재료에 자동 추가한다."""
+    """Gemini로 레시피를 생성하고 DB에 저장한 뒤 추천 응답을 반환한다.
+
+    AI 응답은 외부 모델 출력이므로 JSON 파싱과 Pydantic 검증을 거친 뒤에만
+    DB에 저장한다. 로그인 사용자가 보낸 재료는 이후 재사용할 수 있도록
+    내 재료 목록에도 자동 추가한다.
+    """
     try:
         raw = await recipe_chain.ainvoke(
             {
@@ -47,10 +52,12 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id:
         raise RecipeServiceError(502, "레시피 생성에 실패했습니다.") from exc
 
     now = datetime.now(timezone.utc)
+    # 대표 이미지 조회는 부가 정보라서 레시피 개수만큼 병렬 요청해 응답 지연을 줄인다.
     image_urls = await asyncio.gather(
         *[fetch_recipe_image(recipe.name) for recipe in response.recipes]
     )
     for recipe, image_url in zip(response.recipes, image_urls):
+        # 프론트가 추천 직후 상세/저장을 요청할 수 있도록 추천 결과를 즉시 DB에 영속화한다.
         orm_recipe = RecipeORM(
             recipe_id=str(uuid.uuid4()),
             name=recipe.name,
@@ -82,6 +89,7 @@ async def recommend_recipe(payload: RecipeRequest, db: AsyncSession, *, user_id:
         recipe.image_url = image_url
 
     if user_id:
+        # 추천에 사용한 새 재료만 내 재료에 추가해 중복 저장을 방지한다.
         existing = set(
             (await db.scalars(
                 select(UserIngredient.ingredient_name).where(UserIngredient.user_id == user_id)

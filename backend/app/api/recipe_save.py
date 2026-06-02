@@ -16,6 +16,7 @@ async def save_recipe_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[None]:
+    """로그인 사용자의 레시피 저장 요청을 처리한다."""
     try:
         await save_recipe(user_id, recipe_id, db)
         return ApiResponse(success=True, data=None)
@@ -29,6 +30,7 @@ async def unsave_recipe_handler(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[None]:
+    """로그인 사용자의 레시피 저장 취소 요청을 처리한다."""
     try:
         await unsave_recipe(user_id, recipe_id, db)
         return ApiResponse(success=True, data=None)
@@ -41,6 +43,7 @@ async def get_recipe_handler(
     recipe_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[RecipeDetail]:
+    """저장된 레시피 상세와 관련 YouTube 영상을 함께 반환한다."""
     try:
         recipe = await get_recipe(recipe_id, db)
     except RecipeSaveError as exc:
@@ -58,6 +61,7 @@ async def get_recipe_handler(
             for v in videos_response.videos
         ]
     except YouTubeServiceError:
+        # 영상 API는 보조 정보라 실패해도 레시피 상세 조회 자체는 성공시키고 빈 목록을 내려준다.
         videos = []
 
     return ApiResponse(

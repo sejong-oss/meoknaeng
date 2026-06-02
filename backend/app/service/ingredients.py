@@ -3,10 +3,14 @@ from typing import TypedDict
 
 
 class IngredientSeed(TypedDict):
+    """자동완성 seed 데이터의 최소 필드 구조."""
+
     id: str
     name: str
 
 
+# 한글 음절은 초성 19개, 중성 21개, 종성 28개 조합으로 배치된다.
+# 이 상수를 사용해 완성형 한글을 자모 단위로 분해한다.
 _HANGUL_BASE = ord("가")
 _HANGUL_END = ord("힣")
 _JUNGSEONG_COUNT = 21
@@ -127,10 +131,15 @@ def search_ingredients(
     query: str,
     limit: int,
 ) -> list[IngredientSeed]:
-    """쿼리로 재료 목록을 검색하여 관련도 순으로 최대 limit개 반환한다. 초성/자모/완전일치를 모두 지원한다."""
+    """쿼리로 재료 목록을 검색하여 관련도 순으로 최대 limit개 반환한다.
+
+    완성형 한글 검색뿐 아니라 입력 중간 상태인 초성/자모 검색도 지원해
+    프론트 자동완성 UI가 키 입력 단계에서도 후보를 보여줄 수 있게 한다.
+    """
     normalized_query = query.casefold()
     query_jamo = decompose_hangul(normalized_query)
     query_initials = extract_initials(normalized_query)
+    # 초성만 입력된 경우에는 이름의 초성 문자열을 우선 비교한다.
     use_initials = bool(query_initials) and all(
         char in _CHOSEONG_SET for char in query_jamo
     )
@@ -168,6 +177,11 @@ def _match_score(
     name_jamo: str,
     name_initials: str,
 ) -> int | None:
+    """재료명과 검색어의 매칭 우선순위를 숫자 점수로 계산한다.
+
+    점수가 낮을수록 상단에 노출된다. 정확한 이름 일치, prefix 일치,
+    부분 일치, 초성/자모 일치 순서로 자동완성 후보를 정렬한다.
+    """
     if name == normalized_query:
         return 0
     if name.startswith(normalized_query):

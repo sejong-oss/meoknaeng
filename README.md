@@ -73,3 +73,7 @@ npm run storybook
 - 프론트엔드: http://localhost:5173
 - Storybook: http://localhost:6006
 - 백엔드 API 문서: http://localhost:8000/docs
+
+## 라이선스
+
+이 프로젝트는 MIT License를 따릅니다. 자세한 내용은 [LICENSE](./LICENSE)를 참고해주세요.

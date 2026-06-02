@@ -19,13 +19,14 @@ class YouTubeServiceError(Exception):
 
 
 async def get_recipe_videos(recipe_id: str, recipe_name: str, db: AsyncSession) -> YouTubeVideosResponse:
-    """단건 조회용 — DB 캐시 확인 후 없으면 YouTube API 호출 및 저장"""
+    """레시피 관련 영상 캐시를 우선 사용하고, 없을 때만 YouTube API를 호출한다."""
     result = await db.execute(
         select(RecipeVideo).where(RecipeVideo.recipe_id == recipe_id)
     )
     cached = result.scalars().all()
 
     if cached:
+        # 외부 API 사용량과 응답 지연을 줄이기 위해 한 번 조회한 영상은 DB에서 재사용한다.
         return YouTubeVideosResponse(
             videos=[
                 YouTubeVideoItem(
@@ -40,6 +41,7 @@ async def get_recipe_videos(recipe_id: str, recipe_name: str, db: AsyncSession) 
 
     videos = await _fetch_from_youtube(recipe_name)
 
+    # 상세 화면 재방문 시 같은 검색을 반복하지 않도록 조회 결과를 레시피 단위로 저장한다.
     for video in videos.videos:
         db.add(RecipeVideo(
             recipe_id=recipe_id,
@@ -55,7 +57,7 @@ async def get_recipe_videos(recipe_id: str, recipe_name: str, db: AsyncSession) 
 
 
 async def _fetch_from_youtube(recipe_name: str) -> YouTubeVideosResponse:
-    """YouTube Data API를 호출하여 레시피명 관련 영상 목록을 반환한다."""
+    """YouTube Data API를 호출해 한국어 레시피 영상 후보를 정규화된 DTO로 반환한다."""
     if not YOUTUBE_API_KEY:
         raise YouTubeServiceError(503, "YouTube API 키가 설정되지 않았습니다.")
 
@@ -82,6 +84,7 @@ async def _fetch_from_youtube(recipe_name: str) -> YouTubeVideosResponse:
     data = response.json()
     items = data.get("items", [])
 
+    # YouTube 원본 응답에서 프론트가 바로 사용할 수 있는 필드만 추려 API 응답 형식으로 맞춘다.
     videos = [
         YouTubeVideoItem(
             video_id=item["id"]["videoId"],

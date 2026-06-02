@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class User(Base):
-    """사용자 계정 정보를 저장하는 테이블."""
+    """사용자 계정 정보를 저장하고 인증·마이페이지 데이터의 기준이 되는 테이블."""
 
     __tablename__ = "user"
 
@@ -25,6 +25,7 @@ class User(Base):
     nickname: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
 
+    # 내 재료와 저장 레시피는 사용자 개인 데이터라 계정 삭제 시 함께 제거한다.
     ingredients: Mapped[list[UserIngredient]] = relationship(back_populates="user", cascade="all, delete-orphan")
     recipe_saves: Mapped[list[RecipeSave]] = relationship(back_populates="user", cascade="all, delete-orphan")
     posts: Mapped[list[Post]] = relationship(back_populates="author")
@@ -37,6 +38,7 @@ class UserIngredient(Base):
 
     __tablename__ = "user_ingredient"
 
+    # user_id와 ingredient_name을 복합 PK로 사용해 같은 재료가 중복 저장되지 않도록 한다.
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("user.user_id"), primary_key=True)
     ingredient_name: Mapped[str] = mapped_column(String(50), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)

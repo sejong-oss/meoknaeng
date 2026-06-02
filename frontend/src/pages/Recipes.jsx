@@ -3,11 +3,11 @@ import {
     ArrowRight,
     Bookmark,
     BookmarkFilled,
+    Edit,
     FruitBowl,
     Growth,
     Renew,
     Restaurant,
-    Share,
     Star,
     Time,
     UserMultiple,
@@ -20,7 +20,6 @@ import { useAppStore } from "@/store/useAppStore.js";
 import { useRecommendationProgress } from "@/hooks/useRecommendationProgress.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 import { useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesMutation.js";
-import { useRecipeShare } from "@/hooks/useShare.js";
 
 export default function Recipes() {
     const navigate = useNavigate();
@@ -35,7 +34,6 @@ export default function Recipes() {
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
-    const shareRecipe = useRecipeShare();
     const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
     const { progress, loadingTip, showLoading, resetLoading } = useRecommendationProgress(
         recommendationStatus,
@@ -66,7 +64,17 @@ export default function Recipes() {
         resetLoading();
         recommendRecipes(ingredients).catch(() => {});
     };
-    const handleShareHero = () => shareRecipe(hero);
+    const handleWriteHero = () => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+        if (!isHeroSaved) {
+            toggleSavedRecipe.mutateAsync({ recipeId: hero.id, isSaved: false }).catch(() => {});
+        }
+        navigate("/feed/write", { state: { recipeId: hero.id } });
+    };
 
     // 추천 완료 직후 100% 상태까지 보여주는 로딩 화면 분기
     if (showLoading) {
@@ -246,9 +254,9 @@ export default function Recipes() {
                                         size="lg"
                                         className="flex-1 px-4 md:px-5 lg:flex-none"
                                         aria-label="공유"
-                                        onClick={handleShareHero}
+                                        onClick={handleWriteHero}
                                     >
-                                        <Share size={18} />
+                                        <Edit size={18} />
                                         <span className="hidden md:inline">공유</span>
                                     </Button>
                                 </div>
