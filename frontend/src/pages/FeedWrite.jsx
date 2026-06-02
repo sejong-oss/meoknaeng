@@ -175,6 +175,8 @@ export default function FeedWrite() {
     const navigate = useNavigate();
     const location = useLocation();
     const user = useAppStore((state) => state.user);
+    const authInitialized = useAppStore((state) => state.authInitialized);
+    const openLoginModal = useAppStore((state) => state.openLoginModal);
     const recipeId = location.state?.recipeId;
     const postId = location.state?.postId;
     const isEditMode = Boolean(postId);
@@ -211,6 +213,13 @@ export default function FeedWrite() {
         event.preventDefault();
         event.returnValue = "";
     });
+
+    useEffect(() => {
+        if (!authInitialized || user) return;
+        toast.info("로그인이 필요해요");
+        openLoginModal();
+        navigate("/feed", { replace: true });
+    }, [authInitialized, user, openLoginModal, navigate]);
 
     useEffect(() => {
         if (recipeId || postId) return;
