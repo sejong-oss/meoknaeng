@@ -509,7 +509,7 @@ export default function My() {
                                                     <DropdownMenuTrigger>
                                                         <button
                                                             type="button"
-                                                            className="flex items-center justify-center w-7 h-7 rounded-full bg-white/75 backdrop-blur-sm text-gray-600 hover:bg-white transition-colors"
+                                                            className="flex cursor-pointer items-center justify-center w-7 h-7 rounded-full bg-white/75 backdrop-blur-sm text-gray-600 hover:bg-white transition-colors"
                                                         >
                                                             <OverflowMenuVertical size={16} />
                                                         </button>

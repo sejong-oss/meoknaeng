@@ -26,7 +26,7 @@ export function Chip({ children, variant = "neutral", onRemove, onClick, classNa
                 <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                    className="opacity-50 hover:opacity-100 ml-0.5 leading-none"
+                    className="ml-0.5 cursor-pointer leading-none opacity-50 hover:opacity-100"
                 >
                     ×
                 </button>

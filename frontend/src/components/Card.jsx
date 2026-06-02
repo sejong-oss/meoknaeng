@@ -93,7 +93,7 @@ export function ContentCard({
                     <button
                         type="button"
                         onClick={handleLikeClick}
-                        className={["absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-white/75 backdrop-blur-sm text-xs transition-colors", liked ? "text-primary-500" : "text-gray-500"].join(" ")}
+                        className={["absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-white/75 backdrop-blur-sm text-xs transition-colors cursor-pointer", liked ? "text-primary-500" : "text-gray-500"].join(" ")}
                     >
                         {liked ? <FavoriteFilled size={12} /> : <Favorite size={12} />}
                         <span className={liked ? "font-semibold" : ""}>{likes}</span>

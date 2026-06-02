@@ -47,7 +47,7 @@ export function ModalContent({ title, description, children, size = "md" }) {
                             </Dialog.Description>
                         )}
                     </div>
-                    <Dialog.Close className="shrink-0 p-1 rounded-btn text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+                    <Dialog.Close className="shrink-0 cursor-pointer p-1 rounded-btn text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
                         <Close size={18} />
                     </Dialog.Close>
                 </div>
