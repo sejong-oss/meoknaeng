@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+INGREDIENT_NAME_MAX_LENGTH = 50
+
 
 class UsersBaseModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -43,7 +45,9 @@ class UserIngredientsUpdateRequest(UsersBaseModel):
         for ingredient in ingredients:
             name = ingredient.strip()
             if not name:
-                raise ValueError("Ingredient name must not be blank")
+                raise ValueError("재료명을 입력해주세요.")
+            if len(name) > INGREDIENT_NAME_MAX_LENGTH:
+                raise ValueError(f"재료명은 {INGREDIENT_NAME_MAX_LENGTH}자 이하여야 합니다.")
             if name not in seen:
                 normalized.append(name)
                 seen.add(name)
