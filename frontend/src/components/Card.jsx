@@ -34,6 +34,7 @@ export function RecipeCard({
     variant = "default",
     image,
     onClick,
+    overlayAction,
     className = "",
 }) {
     return (
@@ -47,6 +48,7 @@ export function RecipeCard({
             image={image}
             badge={variant === "hero" ? "최선 조합" : null}
             onClick={onClick}
+            overlayAction={overlayAction}
             className={className}
         />
     );
@@ -67,6 +69,7 @@ export function ContentCard({
     onLike,
     badge,
     onClick,
+    overlayAction,
     className = "",
 }) {
     const hasLikes = Number.isFinite(likes);
@@ -93,11 +96,16 @@ export function ContentCard({
                     <button
                         type="button"
                         onClick={handleLikeClick}
-                        className={["absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-white/75 backdrop-blur-sm text-xs transition-colors", liked ? "text-primary-500" : "text-gray-500"].join(" ")}
+                        className={["absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-white/75 backdrop-blur-sm text-xs transition-colors cursor-pointer", liked ? "text-primary-500" : "text-gray-500"].join(" ")}
                     >
                         {liked ? <FavoriteFilled size={12} /> : <Favorite size={12} />}
                         <span className={liked ? "font-semibold" : ""}>{likes}</span>
                     </button>
+                )}
+                {overlayAction && (
+                    <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+                        {overlayAction}
+                    </div>
                 )}
             </div>
             <div className="flex flex-col gap-2.5 p-2.5 lg:p-4 flex-1">

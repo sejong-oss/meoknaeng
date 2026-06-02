@@ -247,7 +247,7 @@ export const IngredientInput = forwardRef(function IngredientInput({
                                 }}
                                 onMouseEnter={() => setActiveIdx(i)}
                                 className={[
-                                    "w-full text-left px-3.5 py-2.5 text-sm flex items-center justify-between transition-colors",
+                                    "w-full cursor-pointer text-left px-3.5 py-2.5 text-sm flex items-center justify-between transition-colors",
                                     i > 0 ? "border-t border-gray-100" : "",
                                     isHighlighted ? "bg-primary-100 text-primary-800" : "hover:bg-gray-50 text-gray-900",
                                 ].join(" ")}

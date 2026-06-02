@@ -14,7 +14,7 @@ export function Chip({ children, variant = "neutral", onRemove, onClick, classNa
         <span
             onClick={onClick}
             className={[
-                "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold",
+                "inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold select-none",
                 onClick ? "cursor-pointer" : "",
                 variants[variant],
                 className,
@@ -26,7 +26,7 @@ export function Chip({ children, variant = "neutral", onRemove, onClick, classNa
                 <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                    className="opacity-50 hover:opacity-100 ml-0.5 leading-none"
+                    className="ml-0.5 cursor-pointer leading-none opacity-50 hover:opacity-100"
                 >
                     ×
                 </button>
