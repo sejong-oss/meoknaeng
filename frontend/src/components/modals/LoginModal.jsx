@@ -18,12 +18,16 @@ export function LoginModal({
         : "로그인을 통해 레시피 저장과 공유 기능을 사용해보세요";
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [confirmPasswordError, setConfirmPasswordError] = useState(false);
     const [nickname, setNickname] = useState("");
 
     const resetForm = () => {
         setMode("login");
         setEmail("");
         setPassword("");
+        setConfirmPassword("");
+        setConfirmPasswordError(false);
         setNickname("");
     };
 
@@ -35,6 +39,10 @@ export function LoginModal({
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (isSignup && password !== confirmPassword) {
+            setConfirmPasswordError(true);
+            return;
+        }
         try {
             if (isSignup) {
                 await onSignupSubmit?.({ email, password, nickname });
@@ -52,6 +60,8 @@ export function LoginModal({
         setMode((currentMode) => currentMode === "login" ? "signup" : "login");
         setEmail("");
         setPassword("");
+        setConfirmPassword("");
+        setConfirmPasswordError(false);
         setNickname("");
     };
 
@@ -85,6 +95,26 @@ export function LoginModal({
                             required
                         />
                     </label>
+
+                    {isSignup && (
+                        <label className="flex flex-col gap-1.5">
+                            <span className="text-sm font-medium text-gray-700">비밀번호 확인</span>
+                            <Input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(event) => {
+                                    const value = event.target.value;
+                                    setConfirmPassword(value);
+                                    setConfirmPasswordError(value.length > 0 && value !== password);
+                                }}
+                                placeholder="비밀번호를 한 번 더 입력해주세요"
+                                autoComplete="new-password"
+                                error={confirmPasswordError}
+                                errorMessage="비밀번호가 일치하지 않아요"
+                                required
+                            />
+                        </label>
+                    )}
 
                     {isSignup && (
                         <label className="flex flex-col gap-1.5">
@@ -126,7 +156,7 @@ export function LoginModal({
                         </div>
                     )}
 
-                    <Button type="submit" variant="primary" fullWidth disabled={submitting}>
+                    <Button type="submit" variant="primary" fullWidth disabled={submitting || (isSignup && confirmPasswordError)}>
                         {submitting ? "잠시만 기다려주세요..." : title}
                     </Button>
                 </form>
