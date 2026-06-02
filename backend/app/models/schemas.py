@@ -8,18 +8,24 @@ T = TypeVar("T")
 
 
 class ApiResponse(BaseModel, Generic[T]):
+    """성공 응답을 감싸는 공통 포맷. 실제 payload는 data에 담긴다."""
+
     success: bool = True
     data: T
     message: str | None = None
 
 
 class ErrorResponse(BaseModel):
+    """전역 예외 핸들러가 사용하는 실패 응답 포맷."""
+
     success: bool = False
     data: None = None
     message: str
 
 
 class ApiBaseModel(BaseModel):
+    """내부 필드는 snake_case로 유지하고 외부 JSON 응답은 camelCase로 직렬화한다."""
+
     model_config = ConfigDict(
         populate_by_name=True,
         alias_generator=to_camel,

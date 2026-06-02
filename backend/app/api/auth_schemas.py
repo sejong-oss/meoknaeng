@@ -13,6 +13,8 @@ class AuthBaseModel(BaseModel):
 
 
 class SignupRequest(AuthBaseModel):
+    """회원가입 요청 DTO. 입력값 오류 메시지를 프론트에 바로 표시할 수 있게 구체화한다."""
+
     email: str = Field(..., description="사용자 이메일")
     password: str = Field(..., description="사용자 비밀번호")
     nickname: str = Field("", description="사용자 닉네임")
@@ -45,6 +47,7 @@ class SignupRequest(AuthBaseModel):
     @model_validator(mode="before")
     @classmethod
     def set_missing_nickname(cls, data: Any) -> Any:
+        """nickname 누락도 빈 문자열과 같은 검증 메시지로 처리한다."""
         if isinstance(data, dict) and "nickname" not in data:
             return {**data, "nickname": ""}
         return data

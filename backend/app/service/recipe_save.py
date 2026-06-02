@@ -30,6 +30,7 @@ async def save_recipe(user_id: str, recipe_id: str, db: AsyncSession) -> None:
     if existing.scalar_one_or_none():
         raise RecipeSaveError(409, "이미 저장된 레시피입니다.")
 
+    # recipe_save는 user_id/recipe_id 복합 PK로 한 사용자의 중복 저장을 막는다.
     db.add(RecipeSave(
         user_id=user_id,
         recipe_id=recipe_id,
@@ -57,6 +58,7 @@ async def get_recipe(recipe_id: str, db: AsyncSession) -> Recipe:
     result = await db.execute(
         select(Recipe)
         .options(
+            # 상세 화면에서 필요한 하위 목록을 async lazy loading 없이 한 번에 준비한다.
             selectinload(Recipe.ingredients),
             selectinload(Recipe.steps),
             selectinload(Recipe.videos),

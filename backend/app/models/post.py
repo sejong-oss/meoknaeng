@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class Post(Base):
-    """사용자가 작성한 레시피 공유 게시글을 저장하는 테이블."""
+    """사용자가 추천 레시피를 바탕으로 작성한 공유 피드 게시글 테이블."""
 
     __tablename__ = "post"
 
@@ -33,6 +33,7 @@ class Post(Base):
 
     author: Mapped[User] = relationship(back_populates="posts")
     source_recipe: Mapped[Recipe | None] = relationship(back_populates="posts")
+    # 댓글과 좋아요는 게시글에 종속된 상호작용 데이터라 게시글 삭제 시 함께 삭제한다.
     comments: Mapped[list[Comment]] = relationship(back_populates="post", cascade="all, delete-orphan")
     likes: Mapped[list[PostLike]] = relationship(back_populates="post", cascade="all, delete-orphan")
 
@@ -53,10 +54,11 @@ class Comment(Base):
 
 
 class PostLike(Base):
-    """게시글 좋아요 관계를 저장하는 테이블."""
+    """사용자와 게시글 사이의 좋아요 관계를 저장하는 테이블."""
 
     __tablename__ = "post_like"
 
+    # user_id/post_id 복합 PK로 한 사용자가 같은 게시글을 한 번만 좋아요할 수 있게 한다.
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("user.user_id"), primary_key=True)
     post_id: Mapped[str] = mapped_column(String(36), ForeignKey("post.post_id"), primary_key=True)
     liked_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)

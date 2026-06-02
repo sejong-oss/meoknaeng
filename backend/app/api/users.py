@@ -33,10 +33,12 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 def _utc_now() -> datetime:
+    """DB에 저장할 naive UTC 시간을 생성한다."""
     return datetime.now(UTC).replace(tzinfo=None)
 
 
 async def _get_current_user(user_id: str, db: AsyncSession) -> User:
+    """세션의 user_id가 실제 사용자 row와 연결되는지 확인한다."""
     user = await db.get(User, user_id)
     if user is None:
         raise HTTPException(
@@ -47,6 +49,7 @@ async def _get_current_user(user_id: str, db: AsyncSession) -> User:
 
 
 def _to_user_profile_response(user: User) -> UserProfileResponse:
+    """User ORM 객체를 마이페이지 프로필 응답 DTO로 변환한다."""
     return UserProfileResponse(
         user_id=user.user_id,
         email=user.email,
@@ -64,6 +67,7 @@ async def get_my_profile(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[UserProfileResponse]:
+    """현재 로그인 사용자의 프로필 정보를 반환한다."""
     user = await _get_current_user(user_id, db)
     return ApiResponse(success=True, data=_to_user_profile_response(user))
 
@@ -78,6 +82,7 @@ async def update_my_profile(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[UserProfileResponse]:
+    """현재 로그인 사용자의 수정 가능한 프로필 필드를 반영한다."""
     user = await _get_current_user(user_id, db)
 
     if payload.nickname is not None:
@@ -106,9 +111,11 @@ async def delete_my_account(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[None]:
+    """회원 탈퇴를 처리하고 현재 요청의 세션까지 함께 제거한다."""
     user = await _get_current_user(user_id, db)
     await delete_user_account(user, db)
 
+    # 계정 삭제 후 같은 쿠키로 인증 API를 다시 호출하지 못하도록 세션을 즉시 비운다.
     request.session.clear()
 
     return ApiResponse(success=True, data=None)
@@ -123,6 +130,7 @@ async def get_my_ingredients(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[UserIngredientsResponse]:
+    """검색창과 마이페이지에서 공통으로 사용하는 내 재료 목록을 반환한다."""
     await _get_current_user(user_id, db)
 
     result = await db.scalars(
@@ -151,8 +159,10 @@ async def update_my_ingredients(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[UserIngredientsResponse]:
+    """프론트가 보낸 최종 재료 목록을 기준으로 내 재료를 전체 교체한다."""
     await _get_current_user(user_id, db)
 
+    # 추가/삭제를 개별 API로 나누지 않고 최종 목록으로 동기화해 프론트 상태와 DB를 맞춘다.
     await db.execute(delete(UserIngredient).where(UserIngredient.user_id == user_id))
 
     now = _utc_now()
@@ -186,6 +196,7 @@ async def get_my_saved_recipes(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[SavedRecipesResponse]:
+    """현재 사용자가 추천 상세 화면에서 저장한 레시피 목록을 반환한다."""
     await _get_current_user(user_id, db)
 
     result = await db.execute(
@@ -224,6 +235,7 @@ async def get_my_posts(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[MyPostsResponse]:
+    """현재 사용자가 작성한 공유 게시글 목록을 반환한다."""
     await _get_current_user(user_id, db)
 
     rows = await get_my_posts_service(user_id, db)
@@ -256,6 +268,7 @@ async def get_my_liked_posts(
     user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[LikedPostsResponse]:
+    """현재 사용자가 좋아요한 공유 게시글 목록을 반환한다."""
     await _get_current_user(user_id, db)
 
     rows = await get_liked_posts_service(user_id, db)

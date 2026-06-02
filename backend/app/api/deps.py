@@ -2,7 +2,7 @@ from fastapi import HTTPException, Request, status
 
 
 def get_current_user_id(request: Request) -> str:
-    """세션에서 로그인된 user_id를 반환한다. 미로그인 시 401 에러."""
+    """인증이 필요한 라우터에서 세션 기반 로그인 여부를 확인한다."""
     user_id = request.session.get("user_id")
     if not user_id:
         raise HTTPException(
@@ -13,5 +13,5 @@ def get_current_user_id(request: Request) -> str:
 
 
 def get_optional_user_id(request: Request) -> str | None:
-    """세션에서 user_id를 반환한다. 미로그인이면 None을 반환한다."""
+    """로그인 여부가 선택 사항인 라우터에서 세션 user_id만 조용히 꺼낸다."""
     return request.session.get("user_id")

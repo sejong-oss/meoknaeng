@@ -15,7 +15,9 @@ async def recommend_recipe_handler(
     user_id: str | None = Depends(get_optional_user_id),
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[RecipeResponse]:
+    """보유 재료와 요구사항을 기반으로 AI 추천 레시피 목록을 생성한다."""
     try:
+        # 로그인 사용자는 추천 결과와 입력 재료를 DB에 저장하고, 비로그인은 추천 응답만 받는다.
         data = await recommend_recipe(payload, db, user_id=user_id)
     except RecipeServiceError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
