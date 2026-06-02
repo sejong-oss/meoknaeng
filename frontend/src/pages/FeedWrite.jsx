@@ -37,6 +37,8 @@ import { getPost, getRecipe } from "@/libs/api.js";
 import { SITE_NAME } from "@/libs/constants.js";
 import { queryKeys } from "@/libs/queryClient.js";
 import { useCreatePostMutation, useUpdatePostMutation } from "@/hooks/usePostMutations.js";
+import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
+import { useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesMutation.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { formatMinutes, formatServings } from "@/libs/utils.js";
 
@@ -191,6 +193,9 @@ export default function FeedWrite() {
 
     const createPostMutation = useCreatePostMutation(user?.id);
     const updatePostMutation = useUpdatePostMutation(user?.id);
+    const savedRecipesQuery = useSavedRecipesQuery(user?.id);
+    const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
+    const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
 
     const sourceRecipe = recipeQuery.data ?? (editPostQuery.data ? postToEditData(editPostQuery.data).sourceRecipe : null);
     const [form, setForm] = useState({ title: "", description: "", tip: "" });
@@ -292,6 +297,9 @@ export default function FeedWrite() {
                     category: sourceRecipe?.category,
                     difficulty: sourceRecipe?.difficulty,
                 });
+                if (sourceRecipe && !savedRecipeIds.includes(sourceRecipe.id)) {
+                    toggleSavedRecipe.mutateAsync({ recipeId: sourceRecipe.id, isSaved: false }).catch(() => {});
+                }
                 toast.success("게시글을 등록했어요");
                 navigate(`/feed/${created.postId}`, { replace: true });
             }

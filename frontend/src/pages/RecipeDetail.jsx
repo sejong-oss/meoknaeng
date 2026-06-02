@@ -8,15 +8,14 @@ import { toast } from "@/libs/toast.js";
 import { useAppStore } from "@/store/useAppStore.js";
 import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 import { useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesMutation.js";
-import { useRecipeShare } from "@/hooks/useShare.js";
 import {
     ArrowLeft,
     ArrowRight,
     Bookmark,
     BookmarkFilled,
+    Edit,
     Growth,
     PlayFilledAlt,
-    Share,
     Time,
     Video,
     UserMultiple,
@@ -179,7 +178,6 @@ export default function RecipeDetail() {
     const openLoginModal = useAppStore((state) => state.openLoginModal);
     const savedRecipesQuery = useSavedRecipesQuery(user?.id);
     const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
-    const shareRecipe = useRecipeShare();
     const savedRecipeIds = savedRecipesQuery.data?.ids ?? [];
     const recommendationIngredients = useAppStore((state) => state.recommendationIngredients);
     const [recipe, setRecipe] = useState(null);
@@ -256,7 +254,14 @@ export default function RecipeDetail() {
     const handleStartCooking = () => {
         stepsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    const handleShare = () => shareRecipe(recipe);
+    const handleWritePost = () => {
+        if (!user) {
+            toast.info("로그인이 필요해요");
+            openLoginModal();
+            return;
+        }
+        navigate("/feed/write", { state: { recipeId: recipe.id } });
+    };
 
     return (
         <>
@@ -378,8 +383,8 @@ export default function RecipeDetail() {
                                     {isSaved ? <BookmarkFilled size={14} /> : <Bookmark size={14} />}
                                     저장
                                 </Button>
-                                <Button variant="outline" size="sm" onClick={handleShare}>
-                                    <Share size={14} />
+                                <Button variant="outline" size="sm" onClick={handleWritePost}>
+                                    <Edit size={14} />
                                     공유
                                 </Button>
                             </div>
@@ -402,8 +407,8 @@ export default function RecipeDetail() {
                     >
                         {isSaved ? <BookmarkFilled size={18} /> : <Bookmark size={18} />}
                     </Button>
-                    <Button variant="outline" size="lg" className="px-4" aria-label="공유" onClick={handleShare}>
-                        <Share size={18} />
+                    <Button variant="outline" size="lg" className="px-4" aria-label="공유" onClick={handleWritePost}>
+                        <Edit size={18} />
                     </Button>
                 </div>
             </div>
