@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bookmark, Checkmark, ChevronDown, Close, Document, Edit, FavoriteFilled, Logout, UserAvatar } from "@carbon/icons-react";
+import { Bookmark, Checkmark, ChevronDown, Close, Document, Edit, FavoriteFilled, Logout, OverflowMenuVertical, UserAvatar } from "@carbon/icons-react";
 import {
     Avatar, Button, Card, Chip, EmptyState,
     FeedCard, IngredientInput, RecipeCard, WithdrawModal,
     Skeleton, Tabs, TabsContent, TabsList, TabsTrigger,
+    DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/index.js";
 import { useIsMobile } from "@/hooks/useIsMobile.js";
 import { autocompleteIngredients, deleteMyAccount } from "@/libs/api.js";
@@ -16,6 +17,7 @@ import { useSavedRecipesQuery } from "@/hooks/useSavedRecipesQuery.js";
 import { useMyIngredientsQuery } from "@/hooks/useMyIngredientsQuery.js";
 import { useUpdateMyIngredientsMutation } from "@/hooks/useMyIngredientsMutation.js";
 import { useTogglePostLikeMutation } from "@/hooks/usePostInteractionMutations.js";
+import { useToggleSavedRecipeMutation } from "@/hooks/useSavedRecipesMutation.js";
 
 const INGREDIENT_SUGGESTION_LIMIT = 8;
 
@@ -100,6 +102,7 @@ export default function My() {
     const myIngredientsQuery = useMyIngredientsQuery(user?.id);
     const updateMyIngredientsMutation = useUpdateMyIngredientsMutation(user?.id);
     const togglePostLike = useTogglePostLikeMutation(user?.id);
+    const toggleSavedRecipe = useToggleSavedRecipeMutation(user?.id);
     const savedRecipes = savedRecipesQuery.data?.recipes ?? [];
     const likedPosts = likedPostsQuery.data ?? [];
     const likedPostIds = likedPosts.map((post) => post.id);
@@ -488,16 +491,46 @@ export default function My() {
                             ) : (
                                 <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                                     {savedRecipes.map((recipe) => (
-                                        <RecipeCard
-                                            key={recipe.id}
-                                            title={recipe.title}
-                                            time={recipe.time}
-                                            difficulty={recipe.difficulty}
-                                            servings={recipe.servings}
-                                            description={recipe.description}
-                                            image={recipe.image}
-                                            onClick={() => navigate(`/recipes/${recipe.id}`)}
-                                        />
+                                        <div key={recipe.id} className="relative">
+                                            <RecipeCard
+                                                title={recipe.title}
+                                                time={recipe.time}
+                                                difficulty={recipe.difficulty}
+                                                servings={recipe.servings}
+                                                description={recipe.description}
+                                                image={recipe.image}
+                                                onClick={() => navigate(`/recipes/${recipe.id}`)}
+                                            />
+                                            <div
+                                                className="absolute top-2 right-2 z-10"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger>
+                                                        <button
+                                                            type="button"
+                                                            className="flex items-center justify-center w-7 h-7 rounded-full bg-white/75 backdrop-blur-sm text-gray-600 hover:bg-white transition-colors"
+                                                        >
+                                                            <OverflowMenuVertical size={16} />
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem
+                                                            onSelect={async () => {
+                                                                try {
+                                                                    await toggleSavedRecipe.mutateAsync({ recipeId: recipe.id, isSaved: true });
+                                                                    toast.success("저장한 레시피에서 삭제했어요");
+                                                                } catch {
+                                                                    toast.error("저장 취소에 실패했어요");
+                                                                }
+                                                            }}
+                                                        >
+                                                            저장 취소
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             )}
