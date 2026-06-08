@@ -40,7 +40,7 @@ cp .env.example .env
 ```env
 DATABASE_URL=mysql+asyncmy://user:password@localhost:3306/meoknaeng
 GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_TEMPERATURE=0.7
 YOUTUBE_API_KEY=your-youtube-api-key
 NAVER_CLIENT_ID=your-naver-client-id

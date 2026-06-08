@@ -7,7 +7,7 @@ load_dotenv()
 # 외부 API와 배포 환경별 설정값은 모두 환경변수에서 읽어온다.
 # 값이 비어 있으면 해당 부가 기능은 service 계층에서 안전하게 비활성화된다.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_TEMPERATURE = float(os.getenv("GEMINI_TEMPERATURE", "0.7"))
 
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
