@@ -12,7 +12,7 @@ dist
 dist-ssr
 .env
 .env.*
-!.env.sample
+!.env.example
 *.local
 
 # Editor directories and files

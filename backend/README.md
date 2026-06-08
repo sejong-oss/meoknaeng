@@ -31,7 +31,11 @@
 
 ## 환경변수
 
-`backend/.env` 파일을 생성하고 필요한 값을 설정합니다.
+`backend/.env.example` 파일을 복사해 `backend/.env` 파일을 생성하고 아래 값을 설정합니다.
+
+```bash
+cp .env.example .env
+```
 
 ```env
 DATABASE_URL=mysql+asyncmy://user:password@localhost:3306/meoknaeng
