@@ -14,7 +14,7 @@
 
 ## 기술 스택
 
-- Frontend: React, Vite, TailwindCSS, React Router, React Query, Zustand, Storybook
+- Frontend: React, Vite, TailwindCSS, React Router, TanStack React Query, Zustand, motion/react, Carbon Icons, Radix UI, Storybook
 - Backend: FastAPI, SQLAlchemy Async, Alembic, MySQL, LangChain Google GenAI, YouTube Data API, Naver Image Search API
 
 ## 모노레포 구조
@@ -25,7 +25,8 @@
 ├── backend/        # FastAPI API 서버
 ├── .github/        # 이슈/PR 템플릿
 ├── README.md       # 프로젝트 안내
-└── CONTRIBUTING.md # 협업 규칙
+├── CONTRIBUTING.md # 협업 규칙
+└── LICENSE         # MIT License
 ```
 
 ## 문서
@@ -42,11 +43,23 @@
 - MySQL 서버
 - Gemini API 키, YouTube Data API 키, Naver Search API 키
 
+## 환경변수 설정
+
+프론트엔드와 백엔드는 각각 별도의 `.env` 파일을 사용합니다. 로컬 실행 전 샘플 파일을 복사한 뒤 필요한 값을 채웁니다.
+
+```bash
+cp frontend/.env.example frontend/.env
+cp backend/.env.example backend/.env
+```
+
+각 환경변수의 의미와 로컬 기본값은 [Frontend README](./frontend/README.md)와 [Backend README](./backend/README.md)를 참고합니다.
+
 ## 빠른 시작
 
-백엔드의 `backend/.env`, 프론트엔드의 `frontend/.env`를 먼저 설정합니다. 자세한 환경변수는 각 파트별 README를 참고합니다.
+환경변수 설정을 마친 뒤 백엔드와 프론트엔드를 각각 실행합니다.
 
 백엔드 실행 예시는 macOS/Linux 기준입니다. Windows 실행 명령은 [Backend README](./backend/README.md)를 참고합니다.
+아래 명령은 레포 루트에서 각각 별도 터미널로 실행합니다.
 
 ```bash
 cd backend
