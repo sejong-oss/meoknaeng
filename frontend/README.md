@@ -20,6 +20,8 @@
 - React Router v7
 - TanStack React Query
 - Zustand
+- motion/react
+- Carbon Icons
 - Radix UI 기반 공통 컴포넌트
 - Storybook
 
@@ -31,13 +33,19 @@
 
 ## 환경변수
 
-`frontend/.env` 파일을 생성하고 아래 값을 설정합니다.
+`frontend/.env.example` 파일을 복사해 `frontend/.env` 파일을 생성하고 아래 값을 설정합니다.
+
+```bash
+cp .env.example .env
+```
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
-`VITE_API_BASE_URL`은 백엔드 API 서버 주소입니다.
+환경변수 설명:
+
+- `VITE_API_BASE_URL`: 백엔드 API 서버 주소
 
 ## 실행 방법
 
